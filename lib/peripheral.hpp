@@ -1,3 +1,6 @@
+#ifndef LLIB_PERIPHERAL_HPP
+#define LLIB_PERIPHERAL_HPP
+
 #define register
 
 #include <type_traits>
@@ -132,6 +135,4 @@ namespace llib {
     }
 }
 
-
-
-
+#endif //LLIB_PERIPHERAL_HPP
