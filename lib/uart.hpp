@@ -1,10 +1,14 @@
 #ifndef LLIB_UART_HPP
 #define LLIB_UART_HPP
 
-#include "sam.h"
+#include "peripheral.hpp"
 
 namespace llib {
     namespace uart {
+        struct uart {
+            constexpr static uint32_t instance_id = ID_UART;
+        };
+
         void init() {
             static bool initialised = false;
 
@@ -22,7 +26,7 @@ namespace llib {
             PIOA->PIO_ABSR &= ~PIO_PA9;
 
             // Enable UART clock
-            PMC->PMC_PCER0 = (0x01 << ID_UART);
+            enable_clock<uart>();
 
             // Reset and disable receiver and transmitter
             UART->UART_CR = UART_CR_RSTRX | UART_CR_RSTTX | UART_CR_RXDIS | UART_CR_TXDIS;
