@@ -38,5 +38,5 @@ set(CMAKE_EXE_LINKER_FLAGS "${LINKER_FLAGS}")
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(llib ${BOOT_SOURCES} main.cpp lib/peripheral.hpp lib/pins.hpp lib/pio.hpp)
+add_executable(llib ${BOOT_SOURCES} main.cpp lib/peripheral.hpp lib/pins.hpp lib/pio.hpp lib/uart.hpp)
 target_include_directories(llib PRIVATE C:/ti-software/bmptk/targets/cortex/atmel)
