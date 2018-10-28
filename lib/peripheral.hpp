@@ -54,6 +54,7 @@ namespace llib {
         using pin = Pin;
 
         constexpr static bool get() {
+            pins::port<Pin>->PIO_ODR = pins::mask<Pin>;
             return pin_in<Pin>::get();
         }
 
@@ -67,10 +68,12 @@ namespace llib {
 
         template<bool val>
         constexpr static void set() {
+            pins::port<Pin>->PIO_OER = pins::mask<Pin>;
             pin_out<Pin>::template set<val>();
         }
 
         constexpr static void set(const bool val) {
+            pins::port<Pin>->PIO_OER = pins::mask<Pin>;
             pin_out<Pin>::set(val);
         }
     };
