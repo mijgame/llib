@@ -38,6 +38,8 @@ namespace llib {
 
             // Enable the receiver and the transmitter
             UART->UART_CR = UART_CR_RXEN | UART_CR_TXEN;
+
+            initialised = true;
         }
 
         bool char_available() {
