@@ -1,8 +1,5 @@
 .idea/
-cmake-build-debug
-cmake-build-debug-arm
-cmake-build-release
-cmake-build-release-arm
+cmake*/
 main.cpp
 *.cbp
 llib
