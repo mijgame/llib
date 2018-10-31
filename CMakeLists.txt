@@ -5,20 +5,21 @@ set(CMAKE_SYSTEM_VERSION 1)
 set(CMAKE_SYSTEM_PROCESSOR cortex-m3)
 
 if (WIN32)
-    set(FIND_ROOT_PATH "C:/SysGCC/arm-eabi")
     set(OBJCOPY "C:/SysGCC/arm-eabi/bin/arm-eabi-objcopy")
     set(CMAKE_C_COMPILER C:/SysGCC/arm-eabi/bin/arm-eabi-gcc.exe)
     set(CMAKE_CXX_COMPILER C:/SysGCC/arm-eabi/bin/arm-eabi-g++.exe)
 else ()
-    set(FIND_ROOT_PATH "/usr/include")
-    set(OBJCOPY "arm-none-eabi-objcopy")
-    set(CMAKE_C_COMPILER arm-none-eabi-gcc)
-    set(CMAKE_CXX_COMPILER arm-none-eabi-g++)
+    set(OBJCOPY "$ENV{HOME}/opt/gcc-arm-none-eabi-7-2018-q2-update/bin/arm-none-eabi-objcopy")
+    set(CMAKE_C_COMPILER "$ENV{HOME}/opt/gcc-arm-none-eabi-7-2018-q2-update/bin/arm-none-eabi-gcc")
+    set(CMAKE_CXX_COMPILER "$ENV{HOME}/opt/gcc-arm-none-eabi-7-2018-q2-update/bin/arm-none-eabi-g++")
 endif ()
 
 # Cortex header files include directory
 set(CORTEX_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/targets/cortex/atmel")
 set(AS_GCC "${CORTEX_INCLUDE}/sam3xa/source/as_gcc")
+
+# Linkerscript for Arduino Due
+set(LINKERSCRIPT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/boot/linkerscript.ld")
 
 message(${CORTEX_INCLUDE})
 
@@ -42,7 +43,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 set(COMMON_FLAGS " -D__SAM3X8E__  -Os -mcpu=cortex-m3 -mthumb -Wall -Werror -fno-exceptions -fno-non-call-exceptions -fno-common -ffunction-sections -fdata-sections -fstack-protector-strong -fno-exceptions -fno-asynchronous-unwind-tables -fomit-frame-pointer -fdata-sections -ffunction-sections")
 set(CXX_FLAGS "-std=c++17 -fno-rtti -fno-threadsafe-statics -fno-use-cxa-get-exception-ptr")
 set(C_FLAGS "-std=c11")
-set(LINKER_FLAGS "-nostdlib -nodefaultlibs -I${AS_GCC} -DROM_START=${ROM_START} -DROM_SIZE=${ROM_SIZE} -DRAM_START=${RAM_START} -DRAM_SIZE=${RAM_SIZE} -T C:/ti-software/llib/boot/linkerscript.ld")
+set(LINKER_FLAGS "-nostdlib -nodefaultlibs -I${AS_GCC} -DROM_START=${ROM_START} -DROM_SIZE=${ROM_SIZE} -DRAM_START=${RAM_START} -DRAM_SIZE=${RAM_SIZE} -T ${LINKERSCRIPT_PATH}")
 
 project(llib)
 
