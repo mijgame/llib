@@ -4,12 +4,26 @@ set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1)
 set(CMAKE_SYSTEM_PROCESSOR cortex-m3)
 
-set(OBJCOPY "C:/SysGCC/arm-eabi/bin/arm-eabi-objcopy")
-set(CORTEX_INCLUDE "C:/ti-software/bmptk/targets/cortex/atmel")
+if (WIN32)
+    set(FIND_ROOT_PATH "C:/SysGCC/arm-eabi")
+    set(OBJCOPY "C:/SysGCC/arm-eabi/bin/arm-eabi-objcopy")
+    set(CMAKE_C_COMPILER C:/SysGCC/arm-eabi/bin/arm-eabi-gcc.exe)
+    set(CMAKE_CXX_COMPILER C:/SysGCC/arm-eabi/bin/arm-eabi-g++.exe)
+else ()
+    set(FIND_ROOT_PATH "/usr/include")
+    set(OBJCOPY "arm-none-eabi-objcopy")
+    set(CMAKE_C_COMPILER arm-none-eabi-gcc)
+    set(CMAKE_CXX_COMPILER arm-none-eabi-g++)
+endif ()
+
+# Cortex header files include directory
+set(CORTEX_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/targets/cortex/atmel")
 set(AS_GCC "${CORTEX_INCLUDE}/sam3xa/source/as_gcc")
 
+message(${CORTEX_INCLUDE})
+
 # Startup & system options
-set(BOOT_SOURCES boot/startup.c)
+set(BOOT_SOURCES boot/startup.c main.cpp)
 set(ROM_START 0x00000000)
 set(ROM_SIZE 512k)
 set(RAM_START 0x20000000)
@@ -20,14 +34,10 @@ set(STACK_SIZE 73728)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 set(BUILD_SHARED_LIBS OFF)
 
-# Set compiler
-set(CMAKE_C_COMPILER C:/SysGCC/arm-eabi/bin/arm-eabi-gcc.exe)
-set(CMAKE_CXX_COMPILER C:/SysGCC/arm-eabi/bin/arm-eabi-g++.exe)
-
-set(CMAKE_FIND_ROOT_PATH C:/SysGCC/arm-eabi)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
 set(COMMON_FLAGS " -D__SAM3X8E__  -Os -mcpu=cortex-m3 -mthumb -Wall -Werror -fno-exceptions -fno-non-call-exceptions -fno-common -ffunction-sections -fdata-sections -fstack-protector-strong -fno-exceptions -fno-asynchronous-unwind-tables -fomit-frame-pointer -fdata-sections -ffunction-sections")
 set(CXX_FLAGS "-std=c++17 -fno-rtti -fno-threadsafe-statics -fno-use-cxa-get-exception-ptr")
