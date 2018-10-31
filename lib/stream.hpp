@@ -11,6 +11,7 @@ namespace llib {
     struct istream {
     };
 
+
     constexpr ostream cout;
     constexpr istream cin;
 

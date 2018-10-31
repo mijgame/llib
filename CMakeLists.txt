@@ -40,10 +40,10 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
-set(COMMON_FLAGS " -D__SAM3X8E__  -Os -mcpu=cortex-m3 -mthumb -Wall -Werror -fno-exceptions -fno-non-call-exceptions -fno-common -ffunction-sections -fdata-sections -fstack-protector-strong -fno-exceptions -fno-asynchronous-unwind-tables -fomit-frame-pointer -fdata-sections -ffunction-sections")
+set(COMMON_FLAGS "-D__SAM3X8E__  -Os -mcpu=cortex-m3 -march=armv7-m -mthumb -Wall -Werror -Wno-maybe-uninitialized  -Wno-unused-local-typedefs -Wno-unused-but-set-variable -Wno-unused-local-typedefs -Wno-unused-function -Wno-attributes -Werror -fno-exceptions -fno-non-call-exceptions -fno-common -ffunction-sections -fdata-sections -fstack-protector-strong -fno-exceptions -fno-asynchronous-unwind-tables -fomit-frame-pointer -fdata-sections -ffunction-sections")
 set(CXX_FLAGS "-std=c++17 -fno-rtti -fno-threadsafe-statics -fno-use-cxa-get-exception-ptr")
 set(C_FLAGS "-std=c11")
-set(LINKER_FLAGS "-nostdlib -nodefaultlibs -I${AS_GCC} -DROM_START=${ROM_START} -DROM_SIZE=${ROM_SIZE} -DRAM_START=${RAM_START} -DRAM_SIZE=${RAM_SIZE} -T ${LINKERSCRIPT_PATH}")
+set(LINKER_FLAGS "-I${AS_GCC} -T ${LINKERSCRIPT_PATH} ${COMMON_FLAGS}  -Wl,--gc-sections -Wl,-fatal-warnings -nodefaultlibs -nostartfiles") #  -nostdlib -nodefaultlibs -nostartfiles
 
 project(llib)
 
@@ -56,6 +56,11 @@ set(CMAKE_EXE_LINKER_FLAGS "${LINKER_FLAGS}")
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(llib ${BOOT_SOURCES} main.cpp lib/peripheral.hpp lib/pins.hpp lib/pio.hpp lib/uart.hpp lib/stream.hpp)
-add_custom_command(TARGET llib POST_BUILD COMMAND ${OBJCOPY} ARGS -O binary -R .bss llib)
+add_executable(llib ${BOOT_SOURCES} lib/peripheral.hpp lib/pins.hpp lib/pio.hpp lib/uart.hpp lib/stream.hpp)
+add_custom_command(TARGET llib POST_BUILD COMMAND ${OBJCOPY} ARGS -O binary -R .bss llib llib.bin)
+
+if(RUN)
+#    add_custom_command(TARGET llib POST_BUILD COMMAND bossac ARGS -e -w -v -b -p /dev/ttyACM0 llib)
+endif()
+
 target_include_directories(llib PRIVATE ${CORTEX_INCLUDE})
