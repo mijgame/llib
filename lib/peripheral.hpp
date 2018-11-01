@@ -16,6 +16,10 @@ namespace llib {
     public:
         using pin = Pin;
 
+        constexpr static void init() {
+            pins::port<typename Pin::port>->PIO_ODR = pins::mask<Pin>;
+        }
+
         constexpr static bool get() {
             return (pins::port<typename Pin::port>->PIO_PDSR & pins::mask<Pin>) != 0;
         }
@@ -33,6 +37,10 @@ namespace llib {
     class pin_out {
     public:
         using pin = Pin;
+
+        constexpr static void init() {
+            pins::port<typename Pin::port>->PIO_OER = pins::mask<Pin>;
+        }
 
         template<bool val>
         constexpr static void set() {
