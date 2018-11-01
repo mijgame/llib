@@ -24,7 +24,7 @@ set(LINKERSCRIPT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/boot/linkerscript.ld")
 message(${CORTEX_INCLUDE})
 
 # Startup & system options
-set(BOOT_SOURCES boot/startup.c main.cpp)
+set(BOOT_SOURCES boot/startup.c main.cpp boot/stack.c)
 set(ROM_START 0x00000000)
 set(ROM_SIZE 512k)
 set(RAM_START 0x20000000)

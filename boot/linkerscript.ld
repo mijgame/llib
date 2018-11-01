@@ -175,7 +175,7 @@ PROVIDE(__exidx_end = __exidx_end);
 __stack_start = .;
 PROVIDE(__stack_start = __stack_start);
 . = ALIGN(4);
-KEEP(*(.bmptk_stack));
+KEEP(*(.llib_stack));
 . = ALIGN(8);
 __main_stack_end = .;
 PROVIDE(__main_stack_end = __main_stack_end);
