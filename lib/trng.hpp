@@ -32,7 +32,7 @@ namespace llib {
             return TRNG->TRNG_ISR & TRNG_ISR_DATRDY;
         }
 
-        uint32_t get() {
+        uint32_t static get() {
             // return the 32bit random number
             return TRNG->TRNG_IMR & TRNG_IMR_DATRDY;
         }
