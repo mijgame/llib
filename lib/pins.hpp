@@ -416,22 +416,22 @@ namespace llib::pins {
 
 
     template<typename Pin>
-    inline constexpr uint32_t mask = 1U << Pin::number;
+    constexpr uint32_t mask = 1U << Pin::number;
 
     template<typename Pin>
-    inline const Pio *port = nullptr;
+    const Pio *port = nullptr;
 
     template<>
-    inline Pio *const port<pioa> = PIOA;
+    Pio *const port<pioa> = PIOA;
 
     template<>
-    inline Pio *const port<piob> = PIOB;
+    Pio *const port<piob> = PIOB;
 
     template<>
-    inline Pio *const port<pioc> = PIOC;
+    Pio *const port<pioc> = PIOC;
 
     template<>
-    inline Pio *const port<piod> = PIOD;
+    Pio *const port<piod> = PIOD;
 }
 
 #endif //LLIB_PINS_HPP
