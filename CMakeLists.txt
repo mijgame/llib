@@ -56,7 +56,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${COMMON_FLAGS} ${LINKER_FLAGS}")
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(llib ${BOOT_SOURCES} lib/peripheral.hpp lib/pins.hpp lib/pio.hpp lib/uart.hpp lib/stream.hpp)
+add_executable(llib ${BOOT_SOURCES} lib/peripheral.hpp lib/pins.hpp lib/pio.hpp lib/uart.hpp lib/stream.hpp lib/bitset.hpp)
 add_custom_command(TARGET llib POST_BUILD COMMAND ${OBJCOPY} ARGS -O binary -R .bss llib llib.bin)
 
 if(RUN)
