@@ -21,9 +21,30 @@ __attribute__ ((section(".vectors"))) = {
 #define SYS_BOARD_PLLAR     (CKGR_PLLAR_ONE | CKGR_PLLAR_MULA(0xdUL) | CKGR_PLLAR_PLLACOUNT(0x3fUL) | CKGR_PLLAR_DIVA(0x1UL))
 #define SYS_BOARD_MCKR (PMC_MCKR_PRES_CLK_2 | PMC_MCKR_CSS_PLLA_CLK)
 
-uint32_t SystemCoreClock;
+void __attribute__((noreturn)) __startup() {
+    extern unsigned int __data_init_start;
+    extern unsigned int __data_start;
+    extern unsigned int __data_end;
+    extern unsigned int __bss_start;
+    extern unsigned int __bss_end;
 
-void SystemInit(void) {
+    unsigned int *s, *d, *e;
+
+    // clear .bss section
+    d = &__bss_start;
+    e = &__bss_end;
+    while (d != e) {
+        *d++ = 0;
+    }
+
+    // copy .data section from flash to ram
+    s = &__data_init_start;
+    d = &__data_start;
+    e = &__data_end;
+    while (d != e) {
+        *d++ = *s++;
+    }
+
     /* Set FWS according to SYS_BOARD_MCKR configuration */
     EFC0->EEFC_FMR = EEFC_FMR_FWS(4);
     EFC1->EEFC_FMR = EEFC_FMR_FWS(4);
@@ -53,35 +74,6 @@ void SystemInit(void) {
     /* Switch to PLLA */
     PMC->PMC_MCKR = SYS_BOARD_MCKR;
     while (!(PMC->PMC_SR & PMC_SR_MCKRDY));
-
-    SystemCoreClock = CHIP_FREQ_CPU_MAX;
-}
-
-void __attribute__((noreturn)) __startup() {
-    extern unsigned int __data_init_start;
-    extern unsigned int __data_start;
-    extern unsigned int __data_end;
-    extern unsigned int __bss_start;
-    extern unsigned int __bss_end;
-
-    unsigned int *s, *d, *e;
-
-    // clear .bss section
-    d = &__bss_start;
-    e = &__bss_end;
-    while (d != e) {
-        *d++ = 0;
-    }
-
-    // copy .data section from flash to ram
-    s = &__data_init_start;
-    d = &__data_start;
-    e = &__data_end;
-    while (d != e) {
-        *d++ = *s++;
-    }
-
-    SystemInit();
 
     // call main
     (void) main();
