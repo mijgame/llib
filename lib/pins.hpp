@@ -2,7 +2,6 @@
 #define LLIB_PINS_HPP
 
 #include "pio.hpp"
-#include "sam.h"
 
 namespace llib::pins {
     struct d0 {

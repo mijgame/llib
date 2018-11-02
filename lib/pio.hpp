@@ -1,7 +1,7 @@
 #ifndef LLIB_PIO_HPP
 #define LLIB_PIO_HPP
 
-#include "sam.h"
+#include "base.hpp"
 
 namespace llib {
     struct pioa {

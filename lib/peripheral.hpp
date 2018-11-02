@@ -1,10 +1,7 @@
 #ifndef LLIB_PERIPHERAL_HPP
 #define LLIB_PERIPHERAL_HPP
 
-#define register
-
 #include <type_traits>
-#include "sam.h"
 
 #include "pins.hpp"
 #include "pio.hpp"
