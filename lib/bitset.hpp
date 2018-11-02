@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <type_traits>
+#include <limits>
 
 namespace llib {
     namespace {
@@ -34,12 +35,92 @@ namespace llib {
     template<int Bits, int>
     class _bitset {
     protected:
-        uint32_t bits[Bits / 32 + 1] = {};
+        constexpr static int ArraySize = Bits / 32 + 1;
+
+        uint32_t bits[ArraySize] = {};
 
 
     public:
         constexpr bool operator[](const int index) const {
-            return bits[index / 32] >> index != 0;
+            return test(index);
+        }
+
+        constexpr int count() const {
+            int result = 0;
+
+            for (int i = 0; i < Bits; i++) {
+                result += test(i);
+            }
+
+            return result;
+        }
+
+        constexpr int size() const {
+            return Bits;
+        }
+
+        constexpr bool test(const int index) const {
+            return (bits[index / 32] >> (index % 32)) != 0;
+        }
+
+        constexpr bool any() const {
+            for (int i = 0; i < Bits; i++) {
+                if (test(i)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        constexpr bool none() const {
+            for (int i = 0; i < Bits; i++) {
+                if (test(i)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        constexpr bool all() const {
+            for (int i = 0; i < Bits; i++) {
+                if (!test(i)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        constexpr void set() {
+            for (int i = 0; i < ArraySize; i++) {
+                bits[i] = std::numeric_limits<uint32_t>::max();
+            }
+        }
+
+        constexpr void set(const int index, const bool value = true) {
+            bits[index / 32] ^= (-value ^ bits[index / 32]) & (1UL << (index % 32));
+        }
+
+        constexpr void reset() {
+            for (int i = 0; i < ArraySize; i++) {
+                bits[i] = 0;
+            }
+        }
+
+        constexpr void reset(const int index) {
+            bits[index / 32] &= ~(1UL << (index % 32));
+        }
+
+        constexpr void flip() {
+            for (int i = 0; i < ArraySize; i++) {
+                bits[i] = ~bits[i];
+            }
+        }
+
+        constexpr void flip(const int index) {
+            bits[index / 32] ^= 1UL << (index % 32);
         }
     };
 
