@@ -6,8 +6,11 @@
 namespace llib {
 
     class trng {
-        constexpr static uint32_t instance_id = ID_TRNG;
+    protected:
         constexpr static uint32_t trng_key = 0x524e47;
+
+    public:
+        constexpr static uint32_t instance_id = ID_TRNG;
 
         template<bool interrupt = true>
         void static init() {
