@@ -64,7 +64,4 @@ if(RUN)
 endif()
 
 target_include_directories(llib PRIVATE ${CORTEX_INCLUDE})
-target_include_directories(llib PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lib>
-    $<INSTALL_INTERFACE:/lib>  # <prefix>/lib
-)
+target_include_directories(llib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/lib)
