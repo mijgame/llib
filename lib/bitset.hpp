@@ -8,10 +8,10 @@
 namespace llib {
     namespace {
         enum variations {
-            max_8 = 0,
-            max_16 = 1,
-            max_32 = 2,
-            max_other = 3
+            max_8,
+            max_16,
+            max_32,
+            max_other,
         };
 
         template<int Bits>
@@ -30,15 +30,112 @@ namespace llib {
 
             return max_other;
         }
+
+        template<int Variation>
+        struct bitset_type {
+            using type = uint32_t;
+        };
+
+        template<>
+        struct bitset_type<max_8> {
+            using type = uint8_t;
+        };
+
+        template<>
+        struct bitset_type<max_16> {
+            using type = uint16_t;
+        };
     }
 
-    template<int Bits, int>
+    template<int Bits, typename InternalType, int Variation>
     class _bitset {
+    protected:
+        InternalType bits = {};
+
+    public:
+        constexpr bool operator[](const int index) const {
+            return test(index);
+        }
+
+        constexpr int count() const {
+            int result = 0;
+
+            for (int i = 0; i < Bits; i++) {
+                result += test(i);
+            }
+
+            return result;
+        }
+
+        constexpr int size() const {
+            return Bits;
+        }
+
+        constexpr bool test(const int index) const {
+            return (bits >> index & 0x1) != 0;
+        }
+
+        constexpr bool any() const {
+            for (int i = 0; i < Bits; i++) {
+                if (test(i)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        constexpr bool none() const {
+            for (int i = 0; i < Bits; i++) {
+                if (test(i)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        constexpr bool all() const {
+            for (int i = 0; i < Bits; i++) {
+                if (!test(i)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        constexpr void set() {
+            bits = std::numeric_limits<uint8_t>::max();
+        }
+
+        constexpr void set(const int index, const bool value = true) {
+            bits ^= (-value ^ bits) << (1UL << index);
+        }
+
+        constexpr void reset() {
+            bits = 0;
+        }
+
+        constexpr void reset(const int index) {
+            bits &= ~(1UL << index);
+        }
+
+        constexpr void flip() {
+            bits = ~bits;
+        }
+
+        constexpr void flip(const int index) {
+            bits ^= 1UL << index;
+        }
+    };
+
+    template<int Bits>
+    class _bitset<Bits, bitset_type<max_other>, max_other> {
     protected:
         constexpr static int ArraySize = Bits / 32 + 1;
 
-        uint32_t bits[ArraySize] = {};
-
+        bitset_type<max_other> bits[ArraySize] = {};
 
     public:
         constexpr bool operator[](const int index) const {
@@ -125,23 +222,11 @@ namespace llib {
     };
 
     template<int Bits>
-    class _bitset<Bits, max_8> {
-    protected:
-        uint8_t bits;
-    };
-
-    template<int Bits>
-    class _bitset<Bits, max_16> {
-        uint16_t bits;
-    };
-
-    template<int Bits>
-    class _bitset<Bits, max_32> {
-        uint32_t bits;
-    };
-
-    template<int Bits>
-    using bitset = _bitset<Bits, bitset_variation<Bits>()>;
+    using bitset = _bitset<
+            Bits,
+            bitset_type<bitset_variation<Bits>()>,
+            bitset_variation<Bits>()
+    >;
 }
 
 #endif //LLIB_BITSET_HPP
