@@ -105,7 +105,7 @@ namespace llib {
             }
 
             constexpr void set() {
-                bits = std::numeric_limits<uint8_t>::max();
+                bits = std::numeric_limits<InternalType>::max();
             }
 
             constexpr void set(const int index, const bool value = true) {
