@@ -7,7 +7,7 @@
 
 namespace llib {
     namespace {
-        enum variations {
+        enum _variations {
             max_8,
             max_16,
             max_32,
@@ -15,7 +15,7 @@ namespace llib {
         };
 
         template<int Bits>
-        constexpr auto bitset_variation() {
+        constexpr auto _bitset_variation() {
             if constexpr(Bits >= 0 && Bits <= 8) {
                 return max_8;
             }
@@ -32,17 +32,17 @@ namespace llib {
         }
 
         template<int Variation>
-        struct bitset_type {
+        struct _bitset_type {
             using type = uint32_t;
         };
 
         template<>
-        struct bitset_type<max_8> {
+        struct _bitset_type<max_8> {
             using type = uint8_t;
         };
 
         template<>
-        struct bitset_type<max_16> {
+        struct _bitset_type<max_16> {
             using type = uint16_t;
         };
 
@@ -130,11 +130,11 @@ namespace llib {
         };
 
         template<int Bits>
-        class _bitset<Bits, bitset_type<max_other>, max_other> {
+        class _bitset<Bits, _bitset_type<max_other>, max_other> {
         protected:
             constexpr static int ArraySize = Bits / 32 + 1;
 
-            bitset_type<max_other> bits[ArraySize] = {};
+            _bitset_type<max_other> bits[ArraySize] = {};
 
         public:
             constexpr bool operator[](const int index) const {
@@ -224,8 +224,8 @@ namespace llib {
     template<int Bits>
     using bitset = _bitset<
             Bits,
-            bitset_type<bitset_variation<Bits>()>,
-            bitset_variation<Bits>()
+            _bitset_type<_bitset_variation<Bits>()>,
+            _bitset_variation<Bits>()
     >;
 }
 
