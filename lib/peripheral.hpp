@@ -135,7 +135,7 @@ namespace llib {
             PMC->PMC_PCER0 = 1U << P::instance_id;
         } else {
             // PCER1
-            PMC->PMC_PCER1 = 1U << P::instance_id;
+            PMC->PMC_PCER1 = 1U << (P::instance_id - 32);
         }
     }
 }
