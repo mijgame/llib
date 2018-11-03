@@ -2,6 +2,7 @@
 #define LLIB_UART_HPP
 
 #include "peripheral.hpp"
+#include "pio.hpp"
 
 namespace llib {
     namespace uart {
@@ -17,7 +18,7 @@ namespace llib {
             }
 
             // Enable clock on port A
-            PMC->PMC_PCER0 = 1 << ID_PIOA;
+            enable_clock<pioa>();
 
             // Disable PIo control on PA9
             PIOA->PIO_PDR = PIO_PA8;
@@ -32,7 +33,7 @@ namespace llib {
             UART->UART_CR = UART_CR_RSTRX | UART_CR_RSTTX | UART_CR_RXDIS | UART_CR_TXDIS;
 
             // Baudrate to 115200
-            UART->UART_MR = 5241600 / 115200;
+            UART->UART_BRGR = 5241600 / 115200;
 
             // No parity, normal channel
             UART->UART_MR = UART_MR_PAR_NO;
