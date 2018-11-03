@@ -41,55 +41,43 @@ namespace llib {
             }
         }
 
+
         template<typename Pin, interrupt Mode>
         constexpr void _set_interrupt_mode() {
             if constexpr (Mode == interrupt::CHANGE) {
                 // Disable additional interrupt mode (detects both rising and falling edges)
-                pins::port < Pin >->PIO_AIMDR = pins::mask<Pin>;
+                pins::port < typename Pin::port >->PIO_AIMDR = pins::mask<Pin>;
             } else {
                 // Enable additional interrupt mode
-                pins::port < Pin >->PIO_AIMER = pins::mask<Pin>;
+                pins::port < typename Pin::port >->PIO_AIMER = pins::mask<Pin>;
 
                 // Select mode
                 if constexpr (Mode == interrupt::LOW) {
-                    pins::port < Pin >->PIO_LSR = pins::mask<Pin>;
-                    pins::port < Pin >->PIO_FELLSR = pins::mask<Pin>;
+                    pins::port < typename Pin::port >->PIO_LSR = pins::mask<Pin>;
+                    pins::port < typename Pin::port >->PIO_FELLSR = pins::mask<Pin>;
                 } else if constexpr (Mode == interrupt::HIGH) {
-                    pins::port < Pin >->PIO_LSR = pins::mask<Pin>;
-                    pins::port < Pin >->PIO_REHLSR = pins::mask<Pin>;
+                    pins::port < typename Pin::port >->PIO_LSR = pins::mask<Pin>;
+                    pins::port < typename Pin::port >->PIO_REHLSR = pins::mask<Pin>;
                 } else if constexpr (Mode == interrupt::FALLING) {
-                    pins::port < Pin >->PIO_ESR = pins::mask<Pin>;
-                    pins::port < Pin >->PIO_FELLSR = pins::mask<Pin>;
+                    pins::port < typename Pin::port >->PIO_ESR = pins::mask<Pin>;
+                    pins::port < typename Pin::port >->PIO_FELLSR = pins::mask<Pin>;
                 } else if constexpr (Mode == interrupt::RISING) {
-                    pins::port < Pin >->PIO_ESR = pins::mask<Pin>;
-                    pins::port < Pin >->PIO_REHLSR = pins::mask<Pin>;
+                    pins::port < typename Pin::port >->PIO_ESR = pins::mask<Pin>;
+                    pins::port < typename Pin::port >->PIO_REHLSR = pins::mask<Pin>;
                 }
             }
 
             // Enable interrupt
-            pins::port < Pin >->PIO_IER = pins::mask<Pin>;
+            pins::port < typename Pin::port >->PIO_IER = pins::mask<Pin>;
         }
 
         template<typename Port>
         struct _callbacks {
             static interrupt_callback callbacks[32];
-            static bool initialized;
-
-            constexpr static void init() {
-                if (initialized) {
-                    return;
-                }
-
-                for (auto &callback : callbacks) {
-                    callback = nullptr;
-                }
-
-                initialized = true;
-            }
         };
 
         template<typename Port>
-        bool _callbacks<Port>::initialized = false;
+        interrupt_callback _callbacks<Port>::callbacks[32] = {};
     }
 
     template<typename Pin, interrupt Mode>
@@ -100,9 +88,14 @@ namespace llib {
 
         for (uint32_t t = pins::mask<Pin>; t > 1; t >>= 1, position++);
 
-        _callbacks<typename Pin::port>::init();
         _set_interrupt_mode<Pin, Mode>();
     }
+
+    template<typename Pin>
+    void detach_interrupt() {
+        pins::port<typename Pin::port>->PIO_IDR = pins::mask<Pin>;
+    }
+
 }
 
 extern "C" {
