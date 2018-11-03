@@ -119,7 +119,7 @@ namespace llib {
     class pin_in_invert : public pin_in<typename PinIn::pin> {
     public:
         constexpr static bool get() {
-            return ! pin_in<typename PinIn::pin>::get();
+            return !pin_in<typename PinIn::pin>::get();
         }
     };
 
