@@ -277,61 +277,73 @@ namespace llib::pins {
     struct a0 {
         using port = pioa;
         constexpr static uint32_t number = 16;
+        constexpr static uint32_t channel = 7;
     };
 
     struct a1 {
         using port = pioa;
         constexpr static uint32_t number = 24;
+        constexpr static uint32_t channel = 6;
     };
 
     struct a2 {
         using port = pioa;
         constexpr static uint32_t number = 23;
+        constexpr static uint32_t channel = 5;
     };
 
     struct a3 {
         using port = pioa;
         constexpr static uint32_t number = 22;
+        constexpr static uint32_t channel = 4;
     };
 
     struct a4 {
         using port = pioa;
         constexpr static uint32_t number = 6;
+        constexpr static uint32_t channel = 3;
     };
 
     struct a5 {
         using port = pioa;
         constexpr static uint32_t number = 4;
+        constexpr static uint32_t channel = 2;
     };
 
     struct a6 {
         using port = pioa;
         constexpr static uint32_t number = 3;
+        constexpr static uint32_t channel = 1;
     };
 
     struct a7 {
         using port = pioa;
         constexpr static uint32_t number = 2;
+        constexpr static uint32_t channel = 0;
     };
 
     struct a8 {
         using port = piob;
         constexpr static uint32_t number = 17;
+        constexpr static uint32_t channel = 10;
     };
 
     struct a9 {
         using port = piob;
         constexpr static uint32_t number = 18;
+        constexpr static uint32_t channel = 11;
     };
 
     struct a10 {
         using port = piob;
         constexpr static uint32_t number = 19;
+        constexpr static uint32_t channel = 12;
     };
 
     struct a11 {
         using port = piob;
         constexpr static uint32_t number = 20;
+        constexpr static uint32_t channel = 13;
     };
 
     struct dac0 {
@@ -417,6 +429,9 @@ namespace llib::pins {
 
     template<typename Pin>
     constexpr uint32_t mask = 1U << Pin::number;
+
+    template<typename Pin>
+    constexpr uint32_t channel = 1U << Pin::channel;
 
     template<typename Pin>
     const Pio *port = nullptr;
