@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <limits>
 
+#include "math.hpp"
 #include "uart.hpp"
 
 namespace llib {
@@ -25,6 +26,14 @@ namespace llib {
 
     ostream operator<<(ostream str, bool v) {
         uart::put_char(v ? '1' : '0');
+        return str;
+    }
+
+    ostream operator<<(ostream str, char *s) {
+        for (char *p = s; *p != '\0'; p++) {
+            str << *p;
+        }
+
         return str;
     }
 
@@ -67,104 +76,6 @@ namespace llib {
             v /= 10;
         } while (v);
 
-        return str;
-    }
-
-    ostream operator<<(ostream str, double v) {
-        constexpr double precision = 0.00000000000001;
-        constexpr int max_string_size = 32;
-
-        char buf[max_string_size];
-
-        if (std::isnan(v)) {
-            str << "NaN";
-        } else if (std::isinf(v)) {
-            str << "inf";
-        } else if (v == 0.0) {
-            str << 0;
-        } else {
-            int digit, m, m1;
-            char *c = buf;
-
-            bool neg = v < 0;
-            if (neg) {
-                v = -v;
-            }
-
-            // Calculate magnitude
-            m = std::log10(v);
-            bool useExp = (m >= 14 || (neg && m >= 9) || m <= -9);
-
-            if (neg) {
-                *(c++) = '-';
-            }
-
-            // Scientific notation
-            if (useExp) {
-                if (m < 0) {
-                    m -= 1.0;
-                }
-
-                v /= std::pow(10.0, m);
-                m1 = m;
-                m = 0;
-            }
-
-            if (m < 1.0) {
-                m = 0;
-            }
-
-            // Convert the number
-            while (v > precision || m >= 0) {
-                double weight = pow(10.0, m);
-                if (weight > 0 && !std::isinf(weight)) {
-                    digit = std::floor(v / weight);
-                    v -= (digit * weight);
-                    *(c++) = '0' + digit;
-                }
-
-                if (m == 0 && v > 0) {
-                    *(c++) = '.';
-                }
-
-                m--;
-            }
-
-            if (useExp) {
-                *(c++) = 'e';
-
-                if (m1 > 0) {
-                    *(c++) = '+';
-                } else {
-                    *(c++) = '-';
-                    m1 = -m1;
-                }
-
-                m = 0;
-                while (m1 > 0) {
-                    *(c++) = '0' + (m1 % 10);
-                    m1 /= 10;
-                    m++;
-                }
-
-                c -= m;
-                for (int i = 0, j = m - 1; i < j; i++, j--) {
-                    c[i] ^= c[j];
-                    c[j] ^= c[i];
-                    c[i] ^= c[j];
-                }
-
-                c += m;
-            }
-
-            *(c) = '\0';
-        }
-
-        return str;
-    }
-
-    ostream operator<<(ostream str, float v) {
-        str << static_cast<double>(v);
         return str;
     }
 }
