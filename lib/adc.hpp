@@ -47,7 +47,7 @@ namespace llib {
         static bool value_available() {
             // return if the conversion is ready
             // this register is cleared after a read
-            return (ADC->ADC_ISR & ADC_ISR_DRDY)
+            return (ADC->ADC_ISR & ADC_ISR_DRDY);
         }
 
         static uint16_t get() {
