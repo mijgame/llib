@@ -10,7 +10,7 @@ namespace llib {
             constexpr static uint32_t instance_id = ID_UART;
         };
 
-        template<unsigned int baud = 115200>
+        template<unsigned int Baud = 115200>
         void init() {
             static bool initialised = false;
 
@@ -34,7 +34,7 @@ namespace llib {
             UART->UART_CR = UART_CR_RSTRX | UART_CR_RSTTX | UART_CR_RXDIS | UART_CR_TXDIS;
 
             // Baudrate to 115200
-            UART->UART_BRGR = 5241600 / baud;
+            UART->UART_BRGR = 5241600 / Baud;
 
             // No parity, normal channel
             UART->UART_MR = UART_MR_PAR_NO;
