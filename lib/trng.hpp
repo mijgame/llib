@@ -13,7 +13,7 @@ namespace llib {
         constexpr static uint32_t instance_id = ID_TRNG;
 
         template<bool Interrupt = true>
-        void static init() {
+        constexpr void static init() {
             // Enable clock
             enable_clock<trng>();
 
@@ -26,13 +26,13 @@ namespace llib {
             }
         }
 
-        bool static value_available() {
+        static bool value_available() {
             // return if new data is in the TRNG_IMR register
             // this register is cleared after a read
             return TRNG->TRNG_ISR & TRNG_ISR_DATRDY;
         }
 
-        uint32_t static get() {
+        static uint32_t get() {
             // return the 32bit random number
             return TRNG->TRNG_IMR & TRNG_IMR_DATRDY;
         }
