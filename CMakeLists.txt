@@ -24,7 +24,7 @@ set(LINKERSCRIPT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/boot/linkerscript.ld")
 message(${CORTEX_INCLUDE})
 
 # Startup & system options
-set(BOOT_SOURCES boot/startup.c main.cpp boot/stack.c lib/interrupt.hpp lib/defines.hpp lib/math.hpp)
+set(BOOT_SOURCES boot/startup.c main.cpp boot/stack.c lib/interrupt.hpp lib/defines.hpp lib/math.hpp lib/rtt.hpp)
 set(ROM_START 0x00000000)
 set(ROM_SIZE 512k)
 set(RAM_START 0x20000000)
@@ -56,7 +56,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${COMMON_FLAGS} ${LINKER_FLAGS}")
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(llib ${BOOT_SOURCES} lib/trng.hpp lib/peripheral.hpp lib/pins.hpp lib/pio.hpp lib/uart.hpp lib/stream.hpp lib/bitset.hpp)
+add_executable(llib ${BOOT_SOURCES} lib/adc.hpp lib/trng.hpp lib/peripheral.hpp lib/pins.hpp lib/pio.hpp lib/uart.hpp lib/stream.hpp lib/bitset.hpp)
 add_custom_command(TARGET llib POST_BUILD COMMAND ${OBJCOPY} ARGS -O binary -R .bss llib llib.bin)
 
 if(RUN)
