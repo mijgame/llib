@@ -44,13 +44,19 @@ namespace llib {
             }
         }
 
+        static bool value_available() {
+            // return if the conversion is ready
+            // this register is cleared after a read
+            return (ADC->ADC_ISR & ADC_ISR_DRDY)
+        }
+
         static uint16_t get() {
             if constexpr(!Freerunning) {
                 // Start analog to digital conversion
                 ADC->ADC_CR = ADC_CR_START;
 
                 // Wait until conversion is ready
-                while ((ADC->ADC_ISR & ADC_ISR_DRDY) == 0);
+                while(!value_available()){}
             }
 
             // Return last 16 bits
