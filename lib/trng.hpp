@@ -12,7 +12,7 @@ namespace llib {
     public:
         constexpr static uint32_t instance_id = ID_TRNG;
 
-        template<bool interrupt = true>
+        template<bool Interrupt = true>
         void static init() {
             // Enable clock
             enable_clock<trng>();
@@ -20,8 +20,8 @@ namespace llib {
             // Enable trng
             TRNG->TRNG_CR = TRNG_CR_KEY(trng::trng_key) | (uint32_t(0x01) & TRNG_CR_ENABLE);
 
-            if constexpr (interrupt) {
-                // Enable interrupt
+            if constexpr (Interrupt) {
+                // Enable Interrupt
                 TRNG->TRNG_IER = TRNG_IER_DATRDY;
             }
         }
