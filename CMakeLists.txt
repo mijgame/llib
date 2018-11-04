@@ -62,7 +62,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${COMMON_FLAGS} ${LINKER_FLAGS}")
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(LLIB_HEADERS lib/adc.hpp lib/trng.hpp lib/peripheral.hpp lib/pins.hpp lib/pio.hpp lib/uart.hpp lib/stream.hpp lib/bitset.hpp lib/watchdog.hpp lib/dynamic_array.hpp)
+set(LLIB_HEADERS lib/adc.hpp lib/trng.hpp lib/peripheral.hpp lib/pins.hpp lib/pio.hpp lib/uart.hpp lib/stream.hpp lib/bitset.hpp lib/watchdog.hpp lib/dynamic_array.hpp lib/spi.hpp)
 
 add_executable(llib ${BOOT_SOURCES} ${LLIB_HEADERS})
 add_custom_command(TARGET llib POST_BUILD COMMAND ${OBJCOPY} ARGS -O binary -R .bss llib llib.bin)
