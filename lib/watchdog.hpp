@@ -20,7 +20,7 @@ namespace llib{
             WDT->WDT_MR = WDT_MR_WDIDLEHLT                          // stop watchdog if cpu is in idle mode
                           | WDT_MR_WDDBGHLT                         // stop watchdog if cpu is in debug state
                           | WDT_MR_WDFIEN                           // enable watchdog interupts
-                          | WDT_MR_WDV(Counter)                     // set counter value(default takes 16 seconds to trigger reset)
+                          | WDT_MR_WDV(CounterStart)                // set counter value(default takes 16 seconds to trigger reset)
                           | WDT_MR_WDD(Delta)                       // set the range the watchdog is allowed to restart
                                                                     // if restart is before this value it will trow an error
                           | static_cast<uint32_t>(reset << 13);     // if true this will reset the cpu if underflow or an error occured                        
