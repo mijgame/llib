@@ -14,9 +14,6 @@ elseif(APPLE)
     set(OBJCOPY "/opt/arm-none-eabi/bin/arm-none-eabi-objcopy")
     set(CMAKE_C_COMPILER "/opt/arm-none-eabi/bin/arm-none-eabi-gcc")
     set(CMAKE_CXX_COMPILER "/opt/arm-none-eabi/bin/arm-none-eabi-g++")
-else()
-    set(TERMINAL "${CMAKE_CURRENT_SOURCE_DIR}/tools/lpc21isp_197/lpc21isp_hr.exe")
-    set(BOSSAC "C:/ti-software/bmptk/tools/bmptk-bossac.exe")
 else ()
     set(OBJCOPY "$ENV{HOME}/opt/gcc-arm-none-eabi-7-2018-q2-update/bin/arm-none-eabi-objcopy")
     set(CMAKE_C_COMPILER "$ENV{HOME}/opt/gcc-arm-none-eabi-7-2018-q2-update/bin/arm-none-eabi-gcc")
@@ -65,7 +62,9 @@ set(CMAKE_EXE_LINKER_FLAGS "${COMMON_FLAGS} ${LINKER_FLAGS}")
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(llib ${BOOT_SOURCES} lib/adc.hpp lib/trng.hpp lib/peripheral.hpp lib/pins.hpp lib/pio.hpp lib/uart.hpp lib/stream.hpp lib/bitset.hpp)
+set(LLIB_HEADERS lib/adc.hpp lib/trng.hpp lib/peripheral.hpp lib/pins.hpp lib/pio.hpp lib/uart.hpp lib/stream.hpp lib/bitset.hpp lib/watchdog.hpp)
+
+add_executable(llib ${BOOT_SOURCES} ${LLIB_HEADERS})
 add_custom_command(TARGET llib POST_BUILD COMMAND ${OBJCOPY} ARGS -O binary -R .bss llib llib.bin)
 
 target_include_directories(llib PRIVATE ${CORTEX_INCLUDE})
