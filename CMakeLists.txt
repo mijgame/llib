@@ -4,14 +4,20 @@ set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1)
 set(CMAKE_SYSTEM_PROCESSOR cortex-m3)
 
+set(SERIAL_PORT /dev/ttyACM0)
+
 if (WIN32)
     set(OBJCOPY "C:/SysGCC/arm-eabi/bin/arm-eabi-objcopy")
     set(CMAKE_C_COMPILER C:/SysGCC/arm-eabi/bin/arm-eabi-gcc.exe)
     set(CMAKE_CXX_COMPILER C:/SysGCC/arm-eabi/bin/arm-eabi-g++.exe)
+    set(TERMINAL "${CMAKE_CURRENT_SOURCE_DIR}/tools/lpc21isp_197/lpc21isp_hr.exe")
+    set(BOSSAC "C:/ti-software/bmptk/tools/bmptk-bossac.exe")
 else ()
     set(OBJCOPY "$ENV{HOME}/opt/gcc-arm-none-eabi-7-2018-q2-update/bin/arm-none-eabi-objcopy")
     set(CMAKE_C_COMPILER "$ENV{HOME}/opt/gcc-arm-none-eabi-7-2018-q2-update/bin/arm-none-eabi-gcc")
     set(CMAKE_CXX_COMPILER "$ENV{HOME}/opt/gcc-arm-none-eabi-7-2018-q2-update/bin/arm-none-eabi-g++")
+    set(TERMINAL "${CMAKE_CURRENT_SOURCE_DIR}/tools/lpc21isp_197/lpc21isp_hr_linux")
+    set(BOSSAC "bossac")
 endif ()
 
 # Cortex header files include directory
@@ -20,8 +26,6 @@ set(AS_GCC "${CORTEX_INCLUDE}/sam3xa/source/as_gcc")
 
 # Linkerscript for Arduino Due
 set(LINKERSCRIPT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/boot/linkerscript.ld")
-
-message(${CORTEX_INCLUDE})
 
 # Startup & system options
 set(BOOT_SOURCES boot/startup.c main.cpp boot/stack.c lib/interrupt.hpp lib/defines.hpp lib/math.hpp lib/rtt.hpp)
@@ -40,7 +44,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
-set(COMMON_FLAGS "-D__SAM3X8E__  -Os -mcpu=cortex-m3 -march=armv7-m -mthumb -Wall -Werror -Wno-maybe-uninitialized  -Wno-unused-local-typedefs -Wno-unused-but-set-variable -Wno-unused-local-typedefs -Wno-unused-function -Wno-attributes -Werror -fno-exceptions -fno-non-call-exceptions -fno-common -ffunction-sections -fdata-sections -fstack-protector-strong -fno-exceptions -fno-asynchronous-unwind-tables -fomit-frame-pointer -fdata-sections -ffunction-sections")
+set(COMMON_FLAGS "-D__SAM3X8E__  -Os -mcpu=cortex-m3 -march=armv7-m -mthumb -Wall -Werror -Wno-maybe-uninitialized  -Wno-unused-local-typedefs -Wno-unused-but-set-variable -Wno-unused-local-typedefs -Wno-unused-function -Wno-attributes -Werror -fno-exceptions -fno-non-call-exceptions -fno-common -ffunction-sections -fdata-sections -fno-exceptions -fno-asynchronous-unwind-tables -fomit-frame-pointer -fdata-sections -ffunction-sections")
 set(CXX_FLAGS "-std=c++17 -fno-rtti -fno-threadsafe-statics -fno-use-cxa-get-exception-ptr")
 set(C_FLAGS "-std=c11")
 set(LINKER_FLAGS "-I${AS_GCC} -T ${LINKERSCRIPT_PATH} -Wl,--gc-sections -Wl,-fatal-warnings -nodefaultlibs -nostartfiles") #  -nostdlib -nodefaultlibs -nostartfiles
@@ -58,10 +62,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_executable(llib ${BOOT_SOURCES} lib/adc.hpp lib/trng.hpp lib/peripheral.hpp lib/pins.hpp lib/pio.hpp lib/uart.hpp lib/stream.hpp lib/bitset.hpp)
 add_custom_command(TARGET llib POST_BUILD COMMAND ${OBJCOPY} ARGS -O binary -R .bss llib llib.bin)
-
-if(RUN)
-#    add_custom_command(TARGET llib POST_BUILD COMMAND bossac ARGS -e -w -v -b -p /dev/ttyACM0 llib)
-endif()
 
 target_include_directories(llib PRIVATE ${CORTEX_INCLUDE})
 target_include_directories(llib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/lib)
