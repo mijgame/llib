@@ -277,73 +277,73 @@ namespace llib::pins {
     struct a0 {
         using port = pioa;
         constexpr static uint32_t number = 16;
-        constexpr static uint32_t channel = 7;
+        constexpr static uint32_t adc_channel = 7;
     };
 
     struct a1 {
         using port = pioa;
         constexpr static uint32_t number = 24;
-        constexpr static uint32_t channel = 6;
+        constexpr static uint32_t adc_channel = 6;
     };
 
     struct a2 {
         using port = pioa;
         constexpr static uint32_t number = 23;
-        constexpr static uint32_t channel = 5;
+        constexpr static uint32_t adc_channel = 5;
     };
 
     struct a3 {
         using port = pioa;
         constexpr static uint32_t number = 22;
-        constexpr static uint32_t channel = 4;
+        constexpr static uint32_t adc_channel = 4;
     };
 
     struct a4 {
         using port = pioa;
         constexpr static uint32_t number = 6;
-        constexpr static uint32_t channel = 3;
+        constexpr static uint32_t adc_channel = 3;
     };
 
     struct a5 {
         using port = pioa;
         constexpr static uint32_t number = 4;
-        constexpr static uint32_t channel = 2;
+        constexpr static uint32_t adc_channel = 2;
     };
 
     struct a6 {
         using port = pioa;
         constexpr static uint32_t number = 3;
-        constexpr static uint32_t channel = 1;
+        constexpr static uint32_t adc_channel = 1;
     };
 
     struct a7 {
         using port = pioa;
         constexpr static uint32_t number = 2;
-        constexpr static uint32_t channel = 0;
+        constexpr static uint32_t adc_channel = 0;
     };
 
     struct a8 {
         using port = piob;
         constexpr static uint32_t number = 17;
-        constexpr static uint32_t channel = 10;
+        constexpr static uint32_t adc_channel = 10;
     };
 
     struct a9 {
         using port = piob;
         constexpr static uint32_t number = 18;
-        constexpr static uint32_t channel = 11;
+        constexpr static uint32_t adc_channel = 11;
     };
 
     struct a10 {
         using port = piob;
         constexpr static uint32_t number = 19;
-        constexpr static uint32_t channel = 12;
+        constexpr static uint32_t adc_channel = 12;
     };
 
     struct a11 {
         using port = piob;
         constexpr static uint32_t number = 20;
-        constexpr static uint32_t channel = 13;
+        constexpr static uint32_t adc_channel = 13;
     };
 
     struct dac0 {
@@ -431,7 +431,7 @@ namespace llib::pins {
     constexpr uint32_t mask = 1U << Pin::number;
 
     template<typename Pin>
-    constexpr uint32_t channel = 1U << Pin::channel;
+    constexpr uint32_t adc_channel = 1U << Pin::adc_channel;
 
     template<typename Pin>
     const Pio *port = nullptr;

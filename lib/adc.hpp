@@ -19,7 +19,7 @@ namespace llib {
             enable_clock<pin_adc>();
 
             // Remove pin from pio
-            ADC->ADC_CHER = pins::channel<Pin>;
+            ADC->ADC_CHER = pins::adc_channel<Pin>;
 
             // select resolution (10 - 12 bits)
             ADC->ADC_MR = static_cast<uint32_t>(!LowHighRes << 4);
@@ -44,17 +44,23 @@ namespace llib {
             }
         }
 
+        static bool value_available() {
+            // return if the conversion is ready
+            // this register is cleared after a read
+            return (ADC->ADC_ISR & ADC_ISR_DRDY);
+        }
+
         static uint16_t get() {
             if constexpr(!Freerunning) {
                 // Start analog to digital conversion
                 ADC->ADC_CR = ADC_CR_START;
 
                 // Wait until conversion is ready
-                while ((ADC->ADC_ISR & ADC_ISR_DRDY) == 0);
+                while(!value_available()){}
             }
 
             // Return last 16 bits
-            return ADC->ADC_CDR[Pin::channel] & 0xFFFF;
+            return ADC->ADC_CDR[Pin::adc_channel] & 0xFFFF;
         }
 
     };
