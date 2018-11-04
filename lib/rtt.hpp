@@ -8,7 +8,7 @@ namespace llib {
     public:
         constexpr static uint32_t instance_id = ID_RTT;
 
-        template<uint16_t Prescaler = 0, bool AlarmInterrupt = true, bool IncrementInterrupt = true>
+        template<uint16_t Prescaler = 0x00008000, bool AlarmInterrupt = true, bool IncrementInterrupt = true>
         void static init() {
             RTT->RTT_MR = static_cast<uint32_t>(0)
                           | (IncrementInterrupt << 17)
@@ -16,7 +16,7 @@ namespace llib {
                           | Prescaler;
         }
 
-        template<uint16_t Prescaler = 0, bool AlarmInterrupt = true, bool IncrementInterrupt = true>
+        template<uint16_t Prescaler = 0x00008000, bool AlarmInterrupt = true, bool IncrementInterrupt = true>
         static void reset() {
             RTT->RTT_MR = static_cast<uint32_t>(0)
                           | (1 << 18) // Real-time Timer Restart (RTTRST)
@@ -34,20 +34,31 @@ namespace llib {
         }
 
         static bool timer_advanced() {
-            return ((RTT->RTT_SR >> 1) & 0x1) != 0;
+            if (((RTT->RTT_SR >> 1) & 0x1) == 0) {
+                return false;
+            }
+
+            /*
+             * We need to disable interrupts, wait for the SR
+             * to clear to 0 and enable interrupts again so
+             * the ISR is not called twice.
+             */
+
+            // Disable interrupt
+            RTT->RTT_MR &= ~(1 << 17);
+
+            while(RTT->RTT_SR != 0);
+
+            // Enable interrupt again
+            RTT->RTT_MR |= 1 << 17;
+
+            return true;
         }
 
         static uint32_t get() {
             // Per the datasheet; read the same value twice for best accuracy
-            uint32_t first = RTT->RTT_VR;
-            uint32_t second = RTT->RTT_VR;
-
-            while (first != second) {
-                first = second;
-                second = RTT->RTT_VR;
-            }
-
-            return first;
+            (void) RTT->RTT_VR;
+            return RTT->RTT_VR;
         }
     };
 }
