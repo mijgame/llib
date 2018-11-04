@@ -26,6 +26,10 @@ namespace llib {
             }
         }
 
+        static void disable_interrupt() {
+            TRNG->TRNG_IDR = TRNG_IDR_DATRDY;
+        }
+
         static bool value_available() {
             // return if new data is in the TRNG_IMR register
             // this register is cleared after a read
@@ -34,7 +38,7 @@ namespace llib {
 
         static uint32_t get() {
             // return the 32bit random number
-            return TRNG->TRNG_IMR & TRNG_IMR_DATRDY;
+            return TRNG->TRNG_ODATA;
         }
     };
 }
