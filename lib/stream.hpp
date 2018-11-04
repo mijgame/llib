@@ -76,6 +76,8 @@ namespace llib {
             v /= 10;
         } while (v);
 
+        str << buf;
+
         return str;
     }
 }
