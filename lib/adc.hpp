@@ -19,7 +19,7 @@ namespace llib {
             enable_clock<pin_adc>();
 
             // Remove pin from pio
-            ADC->ADC_CHER = pins::channel<Pin>;
+            ADC->ADC_CHER = pins::adc_channel<Pin>;
 
             // select resolution (10 - 12 bits)
             ADC->ADC_MR = static_cast<uint32_t>(!LowHighRes << 4);
@@ -60,7 +60,7 @@ namespace llib {
             }
 
             // Return last 16 bits
-            return ADC->ADC_CDR[Pin::channel] & 0xFFFF;
+            return ADC->ADC_CDR[Pin::adc_channel] & 0xFFFF;
         }
 
     };
