@@ -9,8 +9,14 @@ namespace llib {
     template<typename T, size_t Size>
     class dynamic_array {
     protected:
-        T data[Size] = {};
+        T store[Size] = {};
         size_t index = 0;
+
+        void free_position(const size_t pos) {
+            for (size_t i = this->index; i != pos; --i) {
+                store[i + 1] = store[i];
+            }
+        }
 
     public:
         /**
@@ -55,11 +61,6 @@ namespace llib {
                 at = rhs.at;
             }
 
-            void swap(bidirectional_iterator &iter) {
-                std::swap(at, iter.at);
-                std::swap(subject, iter.subject);
-            }
-
             bool operator==(const bidirectional_iterator &rhs) {
                 return at == rhs.at
                        && std::addressof(subject) == std::addressof(rhs.subject);
@@ -70,11 +71,11 @@ namespace llib {
             }
 
             reference operator*() {
-                return subject.data[at];
+                return subject.store[at];
             }
 
             pointer operator->() {
-                return &subject.data[at];
+                return &subject.store[at];
             }
 
             /**
@@ -109,31 +110,49 @@ namespace llib {
             }
         };
 
-        void add(const T &entry) {
-            data[index++] = entry;
+        T &front() {
+            return store[0];
+        }
+
+        T &back() {
+            return store[index];
+        }
+
+        T *data() {
+            return data;
+        }
+
+        bool empty() const {
+            return size() == 0;
+        }
+
+        size_t size() const {
+            return index;
+        }
+
+        size_t max_size() const {
+            return Size;
+        }
+
+        void clear() {
+            index = 0;
+        }
+
+        void insert(const size_t pos, const T& value) {
+            free_position(pos);
+            store[pos] = value;
+            index++;
         }
 
         template<typename ...Args>
-        void emplace(Args &&... args) {
-            data[index++] = T(std::forward<Args>(args)...);
+        void emplace(const size_t pos, Args &&... args) {
+            free_position(pos);
+            store[pos] = T(std::forward<Args>(args)...);
+            index++;
         }
 
-        void set(const T &entry, const size_t index) {
-            data[index] = entry;
-        }
-
-        bool contains(const T &entry) const {
-            for (size_t i = 0; i < index; i++) {
-                if (data[i] == entry) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        void remove(const size_t index) {
-            if (index == this->index) {
+        void erase(const size_t pos) {
+            if (pos == this->index) {
                 this->index--;
                 return;
             }
@@ -142,27 +161,43 @@ namespace llib {
             // index on will be shifted one left in the array, overwriting the index to
             // remove. This makes removals expensive in the front of the array but prevents
             // fragmentation.
-            for (size_t i = index; i < this->index - 1; i++) {
-                data[i] = data[i + 1];
+            for (size_t i = pos; i < this->index - 1; ++i) {
+                store[i] = store[i + 1];
             }
 
             this->index--;
         }
 
-        size_t size() const {
-            return index;
+        void erase(const size_t start, const size_t end) {
+            for (size_t pos = end; pos != start; --pos) {
+                erase(pos);
+            }
         }
 
-        constexpr size_t capacity() const {
-            return Size;
+        void push_back(const T &entry) {
+            store[index++] = entry;
+        }
+
+        template<typename ...Args>
+        void emplace_back(Args &&... args) {
+            store[index++] = T(std::forward<Args>(args)...);
+        }
+
+        void pop_back() {
+            index--;
+        }
+
+        void swap(dynamic_array<T, Size> &other) {
+            std::swap(store, other.store);
+            std::swap(index, other.index);
         }
 
         T &operator[](const size_t index) {
-            return data[index];
+            return store[index];
         }
 
         T operator[](const size_t index) const {
-            return data[index];
+            return store[index];
         }
 
         /**
@@ -193,6 +228,55 @@ namespace llib {
             return bidirectional_iterator(*this, index);
         }
     };
+
+    template<typename T, size_t Size>
+    bool operator==(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
+        for (int i = 0; i < Size; i++) {
+            if (lhs[i] != rhs[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    template<typename T, size_t Size>
+    bool operator!=(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
+        return !operator==(lhs, rhs);
+    }
+
+    template<typename T, size_t Size>
+    bool operator<(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
+        for (int i = 0; i < Size; i++) {
+            if (!(lhs[i] < rhs[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    template<typename T, size_t Size>
+    bool operator<=(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
+        return !(lhs < rhs);
+    }
+
+    template<typename T, size_t Size>
+    bool operator>(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
+        return !(lhs < rhs);
+    }
+
+    template<typename T, size_t Size>
+    bool operator>=(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
+        return !(lhs < rhs);
+    }
+}
+
+namespace std {
+    template<typename T, size_t Size>
+    void swap(const llib::dynamic_array<T, Size> &lhs, const llib::dynamic_array<T, Size> &rhs) {
+        lhs.swap(rhs);
+    }
 }
 
 #endif //LLIB_DYNAMIC_ARRAY_HPP
