@@ -224,7 +224,7 @@ namespace llib {
     template<int Bits>
     using bitset = _bitset<
             Bits,
-            _bitset_type<_bitset_variation<Bits>()>,
+            typename _bitset_type<_bitset_variation<Bits>()>::type,
             _bitset_variation<Bits>()
     >;
 }
