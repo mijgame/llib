@@ -134,7 +134,7 @@ namespace llib {
         protected:
             constexpr static int ArraySize = Bits / 32 + 1;
 
-            _bitset_type<max_other> bits[ArraySize] = {};
+            _bitset_type<max_other>::type bits[ArraySize] = {};
 
         public:
             constexpr bool operator[](const int index) const {
