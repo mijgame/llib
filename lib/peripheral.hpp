@@ -138,6 +138,18 @@ namespace llib {
             PMC->PMC_PCER1 = 1U << (P::instance_id - 32);
         }
     }
+
+    /**
+     * Enable the clock on multiple peripherals.
+     *
+     * @tparam P
+     * @tparam Args
+     */
+    template<typename P, typename P2, typename ...Args>
+    void enable_clock() {
+        enable_clock<P>();
+        enable_clock<P2, Args...>();
+    }
 }
 
 #endif //LLIB_PERIPHERAL_HPP
