@@ -7,6 +7,7 @@ namespace llib::pins {
     struct d0 {
         using port = pioa;
         constexpr static uint32_t number = 8;
+        constexpr static uint32_t pwm_channel = 0;
     };
 
     struct d1 {
@@ -152,6 +153,7 @@ namespace llib::pins {
     struct d29 {
         using port = pioc;
         constexpr static uint32_t number = 6;
+        constexpr static uint32_t pwm_channel = 2;
     };
 
     struct d30 {
@@ -314,6 +316,7 @@ namespace llib::pins {
         using port = pioa;
         constexpr static uint32_t number = 3;
         constexpr static uint32_t adc_channel = 1;
+        constexpr static uint32_t pwm_channel = 1;
     };
 
     struct a7 {
@@ -374,6 +377,7 @@ namespace llib::pins {
     struct sda {
         using port = piob;
         constexpr static uint32_t number = 12;
+        constexpr static uint32_t pwm_channel = 0;
     };
 
     struct scl1 {
@@ -432,6 +436,9 @@ namespace llib::pins {
 
     template<typename Pin>
     constexpr uint32_t adc_channel = 1U << Pin::adc_channel;
+
+    template<typename Pin>
+    constexpr uint32_t pwm_channel = 1U << Pin::pwm_channel;
 
     template<typename Pin>
     const Pio *port = nullptr;
