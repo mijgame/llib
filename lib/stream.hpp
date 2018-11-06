@@ -25,13 +25,13 @@ namespace llib {
     }
 
     ostream operator<<(ostream str, bool v) {
-        uart::put_char(v ? '1' : '0');
+        uart::put_char('0' + v);
         return str;
     }
 
     ostream operator<<(ostream str, char *s) {
         for (char *p = s; *p != '\0'; p++) {
-            str << *p;
+            uart::put_char(*p);
         }
 
         return str;
@@ -39,7 +39,7 @@ namespace llib {
 
     ostream operator<<(ostream str, const char *s) {
         for (const char *p = s; *p != '\0'; p++) {
-            str << *p;
+            uart::put_char(*p);
         }
 
         return str;
