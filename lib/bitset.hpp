@@ -82,33 +82,15 @@ namespace llib {
             }
 
             constexpr bool any() const {
-                for (int i = 0; i < Bits; i++) {
-                    if (test(i)) {
-                        return true;
-                    }
-                }
-
-                return false;
+                return bits > 0;
             }
 
             constexpr bool none() const {
-                for (int i = 0; i < Bits; i++) {
-                    if (test(i)) {
-                        return false;
-                    }
-                }
-
-                return true;
+                return bits == 0;
             }
 
             constexpr bool all() const {
-                for (int i = 0; i < Bits; i++) {
-                    if (!test(i)) {
-                        return false;
-                    }
-                }
-
-                return true;
+                return bits == std::numeric_limits<InternalType>::max();
             }
 
             constexpr void set() {
@@ -167,8 +149,8 @@ namespace llib {
             }
 
             constexpr bool any() const {
-                for (int i = 0; i < Bits; i++) {
-                    if (test(i)) {
+                for (int i = 0; i < ArraySize; i++) {
+                    if (bits[i] > 0) {
                         return true;
                     }
                 }
@@ -177,8 +159,8 @@ namespace llib {
             }
 
             constexpr bool none() const {
-                for (int i = 0; i < Bits; i++) {
-                    if (test(i)) {
+                for (int i = 0; i < ArraySize; i++) {
+                    if (bits[i] != 0) {
                         return false;
                     }
                 }
@@ -187,8 +169,8 @@ namespace llib {
             }
 
             constexpr bool all() const {
-                for (int i = 0; i < Bits; i++) {
-                    if (!test(i)) {
+                for (int i = 0; i < ArraySize; i++) {
+                    if (bits[i] != std::numeric_limits<_bitset_type<max_other>::type>::max()) {
                         return false;
                     }
                 }
@@ -244,7 +226,7 @@ namespace llib {
     }
 
     template<typename OutputStream, int Bits>
-    OutputStream operator<<(OutputStream str, const bitset<Bits> &bitset) {
+    OutputStream operator<<(OutputStream str, const bitset <Bits> &bitset) {
         for (int i = 0; i < Bits; i++) {
             str << bitset.test(i);
         }
