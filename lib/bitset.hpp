@@ -4,6 +4,10 @@
 #include <cstdint>
 #include <type_traits>
 #include <limits>
+#include <iterator>
+#include <cstddef>
+
+#include "stream.hpp"
 
 namespace llib {
     namespace {
@@ -34,19 +38,22 @@ namespace llib {
         template<int Variation>
         struct _bitset_type {
             using type = uint32_t;
+            constexpr static int variation = Variation;
         };
 
         template<>
         struct _bitset_type<max_8> {
             using type = uint8_t;
+            constexpr static int variation = max_8;
         };
 
         template<>
         struct _bitset_type<max_16> {
             using type = uint16_t;
+            constexpr static int variation = max_16;
         };
 
-        template<int Bits, typename InternalType, int Variation>
+        template<int Bits, typename InternalType>
         class _bitset {
         protected:
             InternalType bits = {};
@@ -130,7 +137,7 @@ namespace llib {
         };
 
         template<int Bits>
-        class _bitset<Bits, _bitset_type<max_other>, max_other> {
+        class _bitset<Bits, _bitset_type<max_other>> {
         protected:
             constexpr static int ArraySize = Bits / 32 + 1;
 
@@ -224,9 +231,26 @@ namespace llib {
     template<int Bits>
     using bitset = _bitset<
             Bits,
-            typename _bitset_type<_bitset_variation<Bits>()>::type,
-            _bitset_variation<Bits>()
+            typename _bitset_type<_bitset_variation<Bits>()>::type
     >;
+
+    template<typename OutputStream, int Bits>
+    OutputStream operator<<(OutputStream str, bitset<Bits> &bitset) {
+        for (int i = 0; i < Bits; i++) {
+            str << bitset.test(i);
+        }
+
+        return str;
+    }
+
+    template<typename OutputStream, int Bits>
+    OutputStream operator<<(OutputStream str, const bitset<Bits> &bitset) {
+        for (int i = 0; i < Bits; i++) {
+            str << bitset.test(i);
+        }
+
+        return str;
+    }
 }
 
 #endif //LLIB_BITSET_HPP
