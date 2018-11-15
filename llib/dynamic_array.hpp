@@ -19,6 +19,14 @@ namespace llib {
         }
 
     public:
+        dynamic_array() {}
+
+        dynamic_array(std::initializer_list<T> list) {
+            for (const auto &item : list) {
+                push_back(item);
+            }
+        }
+
         /**
          * A bidirectional iterator for the dynamic array;
          * used for for-ranges or standard algorithms.
