@@ -3,5 +3,4 @@ cmake*/
 build/
 main.cpp
 *.cbp
-llib
 .vscode/*
