@@ -272,11 +272,4 @@ namespace llib {
     }
 }
 
-namespace std {
-    template<typename T, size_t Size>
-    void swap(const llib::dynamic_array<T, Size> &lhs, const llib::dynamic_array<T, Size> &rhs) {
-        lhs.swap(rhs);
-    }
-}
-
 #endif //LLIB_DYNAMIC_ARRAY_HPP
