@@ -19,12 +19,61 @@ namespace llib {
         }
 
     public:
-        dynamic_array() {}
+        dynamic_array() = default;
 
         dynamic_array(std::initializer_list<T> list) {
             for (const auto &item : list) {
                 push_back(item);
             }
+        }
+
+        template<typename InputIterator>
+        dynamic_array(InputIterator first, InputIterator last) {
+            for (auto it = first; it != last; ++it) {
+                push_back(*it);
+            }
+        }
+
+        dynamic_array(const dynamic_array &x) {
+            for (size_t i = 0; i < x.size(); i++) {
+                push_back(x[i]);
+            }
+        }
+
+        dynamic_array(dynamic_array &&x) {
+            store = std::move(x.store);
+            index = std::move(x.index);
+
+            x.index = 0;
+        }
+
+        dynamic_array &operator=(const dynamic_array &x) {
+            for (size_t i = 0; i < Size; i++) {
+                store[i] = x.store[i];
+            }
+
+            index = x.index;
+
+            return *this;
+        }
+
+        dynamic_array &operator=(dynamic_array &&x) {
+            store = std::move(x.store);
+            index = std::move(x.index);
+
+            x.index = 0;
+
+            return *this;
+        }
+
+        dynamic_array &operator=(std::initializer_list<T> list) {
+            index = 0;
+
+            for (const auto &item : list) {
+                push_back(item);
+            }
+
+            return *this;
         }
 
         /**
@@ -49,10 +98,8 @@ namespace llib {
             bidirectional_iterator(dynamic_array<T, Size> &subject, size_t start)
                     : subject(subject), at(start) {}
 
-            bidirectional_iterator(const bidirectional_iterator &rhs) {
-                subject = rhs.subject;
-                at = rhs.at;
-            }
+            bidirectional_iterator(const bidirectional_iterator &rhs)
+                    : subject(rhs.subject), at(rhs.at) {}
 
             bidirectional_iterator(bidirectional_iterator &&rhs) {
                 subject = rhs.subject;
@@ -182,13 +229,37 @@ namespace llib {
             }
         }
 
+        void assign(size_t n, const T &val) {
+            for (size_t i = 0; i < n; i++) {
+                store[i] = val;
+            }
+        }
+
+        void assign(std::initializer_list<T> list) {
+            index = 0;
+
+            for (const auto &item : list) {
+                push_back(item);
+            }
+        }
+
         void push_back(const T &entry) {
+            store[index++] = entry;
+        }
+
+        void push_back(T &&entry) {
             store[index++] = entry;
         }
 
         template<typename ...Args>
         void emplace_back(Args &&... args) {
             store[index++] = T(std::forward<Args>(args)...);
+        }
+
+        template<typename ...Args>
+        void emplace_back(size_t pos, Args &&... args) {
+            free_position(pos);
+            store[pos] = T(std::forward<Args>(args)...);
         }
 
         void pop_back() {
