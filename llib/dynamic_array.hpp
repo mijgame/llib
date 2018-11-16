@@ -233,6 +233,8 @@ namespace llib {
             for (size_t i = 0; i < n; i++) {
                 store[i] = val;
             }
+
+            index = n;
         }
 
         void assign(std::initializer_list<T> list) {
