@@ -6,43 +6,13 @@
 #include <limits>
 
 #include "math.hpp"
-#include "uart.hpp"
+#include "stream_base.hpp"
+
+#include <stream.hpp>
 
 namespace llib {
-    enum class base {
-        HEX,
-        DEC,
-        OCT,
-        BIN
-    };
-
-    namespace {
-        constexpr base _default_base = base::DEC;
-        constexpr bool _default_boolalpha = false;
-    }
-
-    template<base B = _default_base, bool Boolalpha = _default_boolalpha>
-    class ostream {
-    public:
-        constexpr static llib::base base = B;
-        constexpr static bool boolalpha = Boolalpha;
-    };
-
-    struct istream {
-    };
-
-    namespace {
-        template<base B = _default_base, bool Boolalpha = _default_boolalpha>
-        struct _cout : public ostream<B, Boolalpha> {
-            void write_impl(char c) {
-                // TODO: request an output from the target
-                uart::put_char(c);
-            }
-        };
-    }
-
     [[maybe_unused]]
-    constexpr _cout cout;
+    constexpr target::cout cout;
 
     struct _boolalpha {};
 

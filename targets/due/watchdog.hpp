@@ -3,7 +3,7 @@
 
 #include "base.hpp"
 
-namespace llib {
+namespace llib::due {
 
     class watchdog {
     public:

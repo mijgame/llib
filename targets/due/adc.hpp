@@ -3,7 +3,7 @@
 
 #include "peripheral.hpp"
 
-namespace llib {
+namespace llib::due {
 
     template<typename Pin, bool Freerunning = true>
     class pin_adc {

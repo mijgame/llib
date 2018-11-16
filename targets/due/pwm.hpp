@@ -6,7 +6,7 @@
 //TODO Fix this
 
 /*
-namespace llib{
+namespace llib::due {
 
     template<typename Pin>
     class pin_pwm{

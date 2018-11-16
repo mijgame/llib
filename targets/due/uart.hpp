@@ -4,7 +4,7 @@
 #include "peripheral.hpp"
 #include "pio.hpp"
 
-namespace llib {
+namespace llib::due {
     namespace uart {
         struct uart {
             constexpr static uint32_t instance_id = ID_UART;

@@ -3,8 +3,8 @@
 
 #include <type_traits>
 
-#include "pins.hpp"
-#include "pio.hpp"
+#include "base.hpp"
+#include <pins.hpp>
 
 namespace llib {
 
@@ -14,19 +14,19 @@ namespace llib {
         using pin = Pin;
 
         constexpr static void init() {
-            pins::port<typename Pin::port>->PIO_ODR = pins::mask<Pin>;
+            target::pin_in<Pin>::init();
         }
 
         constexpr static bool get() {
-            return (pins::port<typename Pin::port>->PIO_PDSR & pins::mask<Pin>) != 0;
+            return target::pin_in<Pin>::get();
         }
 
         constexpr static void pullup_enable() {
-            pins::port<typename Pin::port>->PIO_PUDR = pins::mask<Pin>;
+            target::pin_in<Pin>::pullup_enable();
         }
 
         constexpr static void pullup_disable() {
-            pins::port<typename Pin::port>->PIO_PUER = pins::mask<Pin>;
+            target::pin_in<Pin>::pullup_disable();
         }
     };
 
@@ -36,23 +36,16 @@ namespace llib {
         using pin = Pin;
 
         constexpr static void init() {
-            pins::port<typename Pin::port>->PIO_OER = pins::mask<Pin>;
+            target::pin_out<Pin>::init();
         }
 
         template<bool val>
         constexpr static void set() {
-            if constexpr (val) {
-                pins::port<typename Pin::port>->PIO_SODR = pins::mask<Pin>;
-            } else {
-                pins::port<typename Pin::port>->PIO_CODR = pins::mask<Pin>;
-            }
+            target::pin_out<Pin>::template set<val>();
         }
 
         constexpr static void set(const bool val) {
-            (val
-             ? pins::port<typename Pin::port>->PIO_SODR
-             : pins::port<typename Pin::port>->PIO_CODR
-            ) = pins::mask<Pin>;
+            target::pin_out<Pin>::set(val);
         }
     };
 
@@ -92,26 +85,16 @@ namespace llib {
         using pin = Pin;
 
         constexpr static bool get() {
-            return pin_in<Pin>::get();
+            return target::pin_oc<Pin>::get();
         }
 
         template<bool val>
         constexpr static void set() {
-            if constexpr (val) {
-                pins::port<Pin>->PIO_ODR = pins::mask<Pin>;
-            } else {
-                pins::port<Pin>->PIO_OER = pins::mask<Pin>;
-                pins::port<Pin>->PIO_CODR = pins::mask<Pin>;
-            }
+            target::pin_oc<Pin>::template set<val>();
         }
 
         constexpr static void set(const bool val) {
-            if (val) {
-                pins::port<Pin>->PIO_ODR = pins::mask<Pin>;
-            } else {
-                pins::port<Pin>->PIO_OER = pins::mask<Pin>;
-                pins::port<Pin>->PIO_CODR = pins::mask<Pin>;
-            }
+            target::pin_oc<Pin>::set(val);
         }
     };
 

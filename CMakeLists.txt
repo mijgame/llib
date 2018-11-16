@@ -26,6 +26,9 @@ endif ()
 set(CORTEX_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/cortex/atmel")
 set(AS_GCC "${CORTEX_INCLUDE}/sam3xa/source/as_gcc")
 
+# Targets
+set(TARGET_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/targets/due")
+
 # Linkerscript for Arduino Due
 set(LINKERSCRIPT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/boot/linkerscript.ld")
 
@@ -62,10 +65,11 @@ set(CMAKE_EXE_LINKER_FLAGS "${COMMON_FLAGS} ${LINKER_FLAGS}")
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(LLIB_HEADERS llib/adc.hpp llib/trng.hpp llib/peripheral.hpp llib/pins.hpp llib/pio.hpp llib/uart.hpp llib/stream.hpp llib/bitset.hpp llib/watchdog.hpp llib/dynamic_array.hpp llib/spi.hpp)
+set(LLIB_HEADERS llib/adc.hpp llib/trng.hpp llib/peripheral.hpp llib/uart.hpp llib/stream.hpp llib/bitset.hpp llib/watchdog.hpp llib/dynamic_array.hpp llib/spi.hpp)
 
-add_executable(llib ${BOOT_SOURCES} ${LLIB_HEADERS})
+add_executable(llib ${BOOT_SOURCES} ${LLIB_HEADERS} ${TARGET_INCLUDE})
 add_custom_command(TARGET llib POST_BUILD COMMAND ${OBJCOPY} ARGS -O binary -R .bss llib llib.bin)
 
 target_include_directories(llib PRIVATE ${CORTEX_INCLUDE})
+target_include_directories(llib PRIVATE ${TARGET_INCLUDE})
 target_include_directories(llib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/llib)

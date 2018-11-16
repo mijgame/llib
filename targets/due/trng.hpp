@@ -3,7 +3,7 @@
 
 #include "peripheral.hpp"
 
-namespace llib {
+namespace llib::due {
 
     class trng {
     protected:

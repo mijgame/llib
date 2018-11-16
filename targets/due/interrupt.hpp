@@ -4,7 +4,7 @@
 #include "base.hpp"
 #include "pins.hpp"
 
-namespace llib {
+namespace llib::due {
     enum class interrupt {
         CHANGE,
         LOW,

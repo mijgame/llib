@@ -7,7 +7,7 @@
 #include "error.hpp"
 #include <type_traits>
 
-namespace llib {
+namespace llib::due {
     namespace spi {
         struct spi_port_spi0 {};
 

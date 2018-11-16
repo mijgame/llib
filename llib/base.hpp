@@ -5,4 +5,11 @@
 
 #include "sam.h"
 
+// TODO: switch targets
+namespace llib {
+    namespace due {}
+
+    namespace target = due;
+}
+
 #endif //LLIB_BASE_HPP

@@ -3,7 +3,7 @@
 
 #include "peripheral.hpp"
 
-namespace llib {
+namespace llib::due {
     class rtt {
     public:
         constexpr static uint32_t instance_id = ID_RTT;

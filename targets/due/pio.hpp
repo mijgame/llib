@@ -3,7 +3,7 @@
 
 #include "base.hpp"
 
-namespace llib {
+namespace llib::due {
     struct pioa {
         constexpr static uint32_t instance_id = ID_PIOA;
         constexpr static uint32_t irqn = static_cast<uint32_t>(PIOA_IRQn);
