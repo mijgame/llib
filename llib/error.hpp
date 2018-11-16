@@ -4,7 +4,6 @@
 #include "stream.hpp"
 
 #define LLIB_ERROR(message) {           \
-    ::llib::uart::init();               \
     ::llib::cout << "ERROR ("           \
                  << __file_ << ':'      \
                  << __line__ << "): "   \
