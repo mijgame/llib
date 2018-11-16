@@ -28,12 +28,13 @@ set(AS_GCC "${CORTEX_INCLUDE}/sam3xa/source/as_gcc")
 
 # Targets
 set(TARGET_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/targets/due")
+set(TARGET_STARTUP "${CMAKE_CURRENT_SOURCE_DIR}/targets/due/startup.c")
 
 # Linkerscript for Arduino Due
 set(LINKERSCRIPT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/boot/linkerscript.ld")
 
 # Startup & system options
-set(BOOT_SOURCES boot/startup.c main.cpp boot/stack.c llib/interrupt.hpp llib/defines.hpp llib/math.hpp llib/rtt.hpp)
+set(BOOT_SOURCES boot/startup.c main.cpp boot/stack.c)
 set(ROM_START 0x00000000)
 set(ROM_SIZE 512k)
 set(RAM_START 0x20000000)
@@ -65,9 +66,9 @@ set(CMAKE_EXE_LINKER_FLAGS "${COMMON_FLAGS} ${LINKER_FLAGS}")
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(LLIB_HEADERS llib/adc.hpp llib/trng.hpp llib/peripheral.hpp llib/uart.hpp llib/stream.hpp llib/bitset.hpp llib/watchdog.hpp llib/dynamic_array.hpp llib/spi.hpp)
+set(LLIB_HEADERS llib/peripheral.hpp llib/stream.hpp llib/stream_base.hpp llib/bitset.hpp llib/dynamic_array.hpp llib/defines.hpp llib/math.hpp)
 
-add_executable(llib ${BOOT_SOURCES} ${LLIB_HEADERS} ${TARGET_INCLUDE})
+add_executable(llib ${BOOT_SOURCES} ${LLIB_HEADERS} ${TARGET_INCLUDE} ${TARGET_STARTUP})
 add_custom_command(TARGET llib POST_BUILD COMMAND ${OBJCOPY} ARGS -O binary -R .bss llib llib.bin)
 
 target_include_directories(llib PRIVATE ${CORTEX_INCLUDE})
