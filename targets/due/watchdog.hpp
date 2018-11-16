@@ -1,5 +1,5 @@
-#ifndef LLIB_WATCHDOG_HPP
-#define LLIB_WATCHDOG_HPP
+#ifndef LLIB_DUE_WATCHDOG_HPP
+#define LLIB_DUE_WATCHDOG_HPP
 
 #include "base.hpp"
 
@@ -42,4 +42,4 @@ namespace llib::due {
     };
 }
 
-#endif
+#endif //LLIB_DUE_WATCHDOG_HPP

@@ -1,5 +1,5 @@
-#ifndef LLIB_PIO_HPP
-#define LLIB_PIO_HPP
+#ifndef LLIB_DUE_PIO_HPP
+#define LLIB_DUE_PIO_HPP
 
 #include "base.hpp"
 
@@ -25,4 +25,4 @@ namespace llib::due {
     };
 }
 
-#endif //LLIB_PIO_HPP
+#endif //LLIB_DUE_PIO_HPP

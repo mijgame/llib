@@ -1,5 +1,5 @@
-#ifndef LLIB_PINS_HPP
-#define LLIB_PINS_HPP
+#ifndef LLIB_DUE_PINS_HPP
+#define LLIB_DUE_PINS_HPP
 
 #include "pio.hpp"
 
@@ -535,4 +535,4 @@ namespace llib::due {
     };
 }
 
-#endif //LLIB_PINS_HPP
+#endif //LLIB_DUE_PINS_HPP

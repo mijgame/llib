@@ -1,5 +1,5 @@
-#ifndef LLIB_INTERRUPT_HPP
-#define LLIB_INTERRUPT_HPP
+#ifndef LLIB_DUE_INTERRUPT_HPP
+#define LLIB_DUE_INTERRUPT_HPP
 
 #include "base.hpp"
 #include "pins.hpp"
@@ -160,4 +160,4 @@ void PIOD_HANDLER() {
 }
 }
 
-#endif //LLIB_INTERRUPT_HPP
+#endif //LLIB_DUE_INTERRUPT_HPP

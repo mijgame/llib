@@ -1,5 +1,5 @@
-#ifndef LLIB_UART_HPP
-#define LLIB_UART_HPP
+#ifndef LLIB_DUE_UART_HPP
+#define LLIB_DUE_UART_HPP
 
 #include "peripheral.hpp"
 #include "pio.hpp"
@@ -65,4 +65,4 @@ namespace llib::due {
     }
 }
 
-#endif //LLIB_UART_HPP
+#endif //LLIB_DUE_UART_HPP

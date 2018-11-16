@@ -1,5 +1,5 @@
-#ifndef LLIB_PWM_HPP
-#define LLIB_PWM_HPP
+#ifndef LLIB_DUE_PWM_HPP
+#define LLIB_DUE_PWM_HPP
 
 #include "peripheral.hpp"
 
@@ -48,4 +48,4 @@ namespace llib::due {
 }
 */
 
-#endif
+#endif //LLIB_DUE_PWM_HPP

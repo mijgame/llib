@@ -1,5 +1,5 @@
-#ifndef LLIB_RTT_HPP
-#define LLIB_RTT_HPP
+#ifndef LLIB_DUE_RTT_HPP
+#define LLIB_DUE_RTT_HPP
 
 #include "peripheral.hpp"
 
@@ -63,4 +63,4 @@ namespace llib::due {
     };
 }
 
-#endif //LLIB_RTT_HPP
+#endif //LLIB_DUE_RTT_HPP

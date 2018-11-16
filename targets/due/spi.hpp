@@ -1,5 +1,5 @@
-#ifndef LLIB_SPI_HPP
-#define LLIB_SPI_HPP
+#ifndef LLIB_DUE_SPI_HPP
+#define LLIB_DUE_SPI_HPP
 
 #include "base.hpp"
 #include "pins.hpp"
@@ -157,4 +157,4 @@ namespace llib::due {
     //};
 }
 
-#endif //LLIB_SPI_HPP
+#endif //LLIB_DUE_SPI_HPP

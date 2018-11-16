@@ -1,5 +1,5 @@
-#ifndef LLIB_ADC_HPP
-#define LLIB_ADC_HPP
+#ifndef LLIB_DUE_ADC_HPP
+#define LLIB_DUE_ADC_HPP
 
 #include "peripheral.hpp"
 
@@ -66,4 +66,4 @@ namespace llib::due {
     };
 }
 
-#endif
+#endif //LLIB_DUE_ADC_HPP
