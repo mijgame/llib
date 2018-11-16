@@ -258,12 +258,6 @@ namespace llib {
             store[index++] = T(std::forward<Args>(args)...);
         }
 
-        template<typename ...Args>
-        void emplace_back(size_t pos, Args &&... args) {
-            free_position(pos);
-            store[pos] = T(std::forward<Args>(args)...);
-        }
-
         void pop_back() {
             index--;
         }
