@@ -21,8 +21,7 @@ namespace llib {
         constexpr static bool boolalpha = Boolalpha;
     };
 
-    struct istream {
-    };
+    struct istream {};
 }
 
 #endif //LLIB_STREAM_BASE_HPP
