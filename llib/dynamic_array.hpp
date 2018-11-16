@@ -48,7 +48,7 @@ namespace llib {
         }
 
         dynamic_array &operator=(const dynamic_array &x) {
-            for (size_t i = 0; i < Size; i++) {
+            for (size_t i = 0; i < x.index; i++) {
                 store[i] = x.store[i];
             }
 
