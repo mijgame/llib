@@ -4,3 +4,4 @@ build/
 main.cpp
 *.cbp
 .vscode/*
+llib.lss
