@@ -272,6 +272,7 @@ namespace llib::due {
         struct d52 {
             using port = piob;
             constexpr static uint32_t number = 21;
+            constexpr static uint32_t spi_number = 2;
         };
 
         struct d53 {
@@ -350,6 +351,7 @@ namespace llib::due {
             using port = piob;
             constexpr static uint32_t number = 20;
             constexpr static uint32_t adc_channel = 13;
+            constexpr static uint32_t spi_number = 1;
         };
 
         struct dac0 {
