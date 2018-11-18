@@ -106,7 +106,7 @@ namespace llib::due {
 
                 if constexpr (M == mode::MASTER) {
                     // Set SPI configuration parameters.
-                    spi::port<SPI>->SPI_MR = SPI_MR_MSTR | SPI_MR_PS | SPI_MR_MODFDIS | SPI_MR_DLYBCS(1) | 1 << 7;
+                    spi::port<SPI>->SPI_MR = SPI_MR_MSTR | SPI_MR_PS | SPI_MR_MODFDIS | SPI_MR_DLYBCS(1);
                     spi::port<SPI>->SPI_CSR[pin_to_spi<Pin>()] = (static_cast<uint32_t>(Spm) & 0x03)
                                                                  | SPI_CSR_SCBR(Divider) | SPI_CSR_DLYBCT(1)
                                                                  | SPI_CSR_DLYBS(1) | SPI_CSR_CSAAT
