@@ -463,6 +463,7 @@ namespace llib::due {
         using pin = Pin;
 
         constexpr static void init() {
+            enable_clock<typename Pin::port>();
             pins::port<typename Pin::port>->PIO_ODR = pins::mask<Pin>;
         }
 
@@ -485,6 +486,7 @@ namespace llib::due {
         using pin = Pin;
 
         constexpr static void init() {
+            enable_clock<typename Pin::port>();
             pins::port<typename Pin::port>->PIO_OER = pins::mask<Pin>;
         }
 
@@ -509,6 +511,10 @@ namespace llib::due {
     class pin_oc {
     public:
         using pin = Pin;
+
+        constexpr static void init() {
+            enable_clock<typename Pin::port>();
+        }
 
         constexpr static bool get() {
             return pin_in<Pin>::get();
