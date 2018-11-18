@@ -9,10 +9,7 @@
 
 namespace llib::due {
     namespace spi {
-        struct spi_port_spi0 {};
-
         struct spi0 {
-            using port = spi_port_spi0;
             constexpr static uint32_t instance_id = ID_SPI0;
         };
 
@@ -25,7 +22,7 @@ namespace llib::due {
         Spi *const port = nullptr;
 
         template<>
-        Spi *const port<spi_port_spi0> = SPI0;
+        Spi *const port<spi0> = SPI0;
 
         enum class spi_mode : uint8_t {
             MODE_0 = 0x02,
