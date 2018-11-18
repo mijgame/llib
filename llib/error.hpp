@@ -5,8 +5,8 @@
 
 #define LLIB_ERROR(message) {           \
     ::llib::cout << "ERROR ("           \
-                 << __file_ << ':'      \
-                 << __line__ << "): "   \
+                 << __FILE__ << ':'      \
+                 << __LINE__ << "): "   \
                  << message             \
                  << ::llib::endl;       \
 }

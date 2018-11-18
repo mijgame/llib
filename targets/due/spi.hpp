@@ -51,12 +51,17 @@ namespace llib::due {
                 pins::port<typename PPin::port>->PIO_IDR = pins::mask<PPin>;
 
                 // change pio multiplexer
-                if constexpr (std::is_same_v<typename PPin::port, pioa>) {
+                if constexpr (std::is_same<typename PPin::port, pioa>::value) {
                     uint32_t t = pins::port<typename PPin::port>->PIO_ABSR;
                     pins::port<typename PPin::port>->PIO_ABSR &= (~pins::mask<PPin> & t);
-                } else {
+                } else if constexpr (std::is_same<typename PPin::port, piob>::value) {
                     uint32_t t = pins::port<typename PPin::port>->PIO_ABSR;
-                    pins::port<typename PPin::port>->PIO_ABSR &= (pins::mask<PPin> | t);
+                    pins::port<typename PPin::port>->PIO_ABSR = (pins::mask<PPin> | t);
+                }
+                else{
+                    // do nothing sinds we cant use different pio's
+                    LLIB_ERROR("Wrong Pin detected cant use pin's that are not in pioa/piob")
+                    for(;;);
                 }
                 pins::port<typename PPin::port>->PIO_PDR = pins::mask<PPin>;
 
@@ -101,9 +106,10 @@ namespace llib::due {
 
                 if constexpr (M == mode::MASTER) {
                     // Set SPI configuration parameters.
-                    spi::port<SPI>->SPI_MR = SPI_MR_MSTR | SPI_MR_PS | SPI_MR_MODFDIS;
+                    spi::port<SPI>->SPI_MR = SPI_MR_MSTR | SPI_MR_PS | SPI_MR_MODFDIS | SPI_MR_DLYBCS(1) | 1 << 7;
                     spi::port<SPI>->SPI_CSR[pin_to_spi<Pin>()] = (static_cast<uint32_t>(Spm) & 0x03)
                                                                  | SPI_CSR_SCBR(Divider) | SPI_CSR_DLYBCT(1)
+                                                                 | SPI_CSR_DLYBS(1) | SPI_CSR_CSAAT
                                                                  | ((static_cast<uint32_t>(B) << SPI_CSR_BITS_Pos) &
                                                                     SPI_CSR_BITS_Msk);
                 } else {
