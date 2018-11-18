@@ -43,16 +43,16 @@ namespace llib::due {
             BIT_16 = 8
         };
 
-        template<typename SPI, typename Pin = pins::d10>
+        template<typename SPI, typename Pin = pins::d10_multi>
         class bus {
         private:
             template<typename PPin>
             static void configure_pin() {
                 // special cases sinds d10 and d4 have multiple pio's
-                if(std::is_same_v<typename PPin::port, pins::d10>){
+                if(std::is_same_v<PPin, pins::d10>){
                     return configure_pin<pins::d10_multi>();
                 }                
-                if(std::is_same_v<typename PPin::port, pins::d4>){
+                if(std::is_same_v<PPin, pins::d4>){
                     return configure_pin<pins::d4_multi>();
                 }         
                                    
