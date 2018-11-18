@@ -85,6 +85,8 @@ namespace llib {
             dynamic_array<T, Size> &subject;
             size_t at;
 
+            friend dynamic_array;
+
         public:
             using difference_type = std::ptrdiff_t;
             using value_type = T;
@@ -199,11 +201,20 @@ namespace llib {
             index++;
         }
 
+        void insert(const bidirectional_iterator &it, const T &value) {
+            insert(it.at, value);
+        }
+
         template<typename ...Args>
         void emplace(const size_t pos, Args &&... args) {
             free_position(pos);
             store[pos] = T(std::forward<Args>(args)...);
             index++;
+        }
+
+        template<typename ...Args>
+        void emplace(const bidirectional_iterator &it, Args &&... args) {
+            emplace(it.at, std::forward<Args>(args)...);
         }
 
         void erase(const size_t pos) {
