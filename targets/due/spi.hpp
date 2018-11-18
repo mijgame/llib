@@ -68,13 +68,7 @@ namespace llib::due {
 
             template<typename PPin>
             constexpr static uint8_t pin_to_spi() {
-                if constexpr (std::is_same_v<PPin, pins::d10>) {
-                    return 0;
-                }
-
-                if constexpr (std::is_same_v<PPin, pins::d4>) {
-                    return 1;
-                }
+                return PPin::spi_number;
             }
 
             constexpr static uint32_t SPI_PCS(uint32_t npcs) {
