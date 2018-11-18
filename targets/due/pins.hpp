@@ -32,6 +32,12 @@ namespace llib::due {
             constexpr static uint32_t spi_number = 1;
         };
 
+        struct d4_multi {
+            using port = pioa;
+            constexpr static uint32_t number = 29;
+            constexpr static uint32_t spi_number = 1;
+        };        
+
         struct d5 {
             using port = pioc;
             constexpr static uint32_t number = 25;
@@ -62,6 +68,12 @@ namespace llib::due {
             constexpr static uint32_t number = 29;
             constexpr static uint32_t spi_number = 0;
         };
+
+        struct d10_multi {
+            using port = pioa;
+            constexpr static uint32_t number = 28;
+            constexpr static uint32_t spi_number = 0;
+        };        
 
         struct d11 {
             using port = piod;

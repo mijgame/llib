@@ -48,16 +48,24 @@ namespace llib::due {
         private:
             template<typename PPin>
             static void configure_pin() {
+                // special cases sinds d10 and d4 have multiple pio's
+                if(std::is_same_v<typename PPin::port, pins::d10>){
+                    return configure_pin<pins::d10_multi>();
+                }                
+                if(std::is_same_v<typename PPin::port, pins::d4>){
+                    return configure_pin<pins::d4_multi>();
+                }         
+                                   
                 pins::port<typename PPin::port>->PIO_IDR = pins::mask<PPin>;
 
                 // change pio multiplexer
-                if constexpr (std::is_same<typename PPin::port, pioa>::value) {
+                if constexpr (std::is_same_v<typename PPin::port, pioa>) {
                     uint32_t t = pins::port<typename PPin::port>->PIO_ABSR;
                     pins::port<typename PPin::port>->PIO_ABSR &= (~pins::mask<PPin> & t);
-                } else if constexpr (std::is_same<typename PPin::port, piob>::value) {
+                } else if constexpr (std::is_same_v<typename PPin::port, piob>) {
                     uint32_t t = pins::port<typename PPin::port>->PIO_ABSR;
                     pins::port<typename PPin::port>->PIO_ABSR = (pins::mask<PPin> | t);
-                }
+                }          
                 else{
                     // do nothing sinds we cant use different pio's
                     LLIB_ERROR("Wrong Pin detected cant use pin's that are not in pioa/piob")
@@ -74,7 +82,7 @@ namespace llib::due {
             template<typename PPin>
             constexpr static uint8_t pin_to_spi() {
                 return PPin::spi_number;
-            }
+            }         
 
             constexpr static uint32_t SPI_PCS(uint32_t npcs) {
                 return ((~(1 << (npcs)) & 0xF) << 16);
