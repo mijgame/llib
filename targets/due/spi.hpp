@@ -80,13 +80,13 @@ namespace llib::due {
                 }
             }
 
-            constexpr uint32_t SPI_PCS(uint32_t npcs) {
+            constexpr static uint32_t SPI_PCS(uint32_t npcs) {
                 return ((~(1 << (npcs)) & 0xF) << 16);
             }
 
         public:
-            template<mode M, spi_mode sp_m, uint32_t divider, bits b>
-            void init() {
+            template<mode M, spi_mode Spm, uint32_t Divider, bits B>
+            void static init() {
                 // disable write protection spi
                 REG_SPI0_WPMR = 0x53504900;
 
@@ -111,27 +111,27 @@ namespace llib::due {
                 if constexpr (M == mode::MASTER) {
                     // Set SPI configuration parameters.
                     spi::port<SPI>->SPI_MR = SPI_MR_MSTR | SPI_MR_PS | SPI_MR_MODFDIS;
-                    spi::port<SPI>->SPI_CSR[pin_to_spi<Pin>()] = (static_cast<uint32_t>(sp_m) & 0x03)
-                                                                 | SPI_CSR_SCBR(divider) | SPI_CSR_DLYBCT(1)
-                                                                 | ((static_cast<uint32_t>(b) << SPI_CSR_BITS_Pos) &
+                    spi::port<SPI>->SPI_CSR[pin_to_spi<Pin>()] = (static_cast<uint32_t>(Spm) & 0x03)
+                                                                 | SPI_CSR_SCBR(Divider) | SPI_CSR_DLYBCT(1)
+                                                                 | ((static_cast<uint32_t>(B) << SPI_CSR_BITS_Pos) &
                                                                     SPI_CSR_BITS_Msk);
                 } else {
                     // Set SPI configuration parameters.
                     spi::port<SPI>->SPI_MR = SPI_MR_PS | SPI_MR_MODFDIS;
-                    spi::port<SPI>->SPI_CSR[pin_to_spi<Pin>()] = (static_cast<uint32_t>(sp_m) & 0x03)
-                                                                 | SPI_CSR_SCBR(divider) | SPI_CSR_DLYBCT(1);
+                    spi::port<SPI>->SPI_CSR[pin_to_spi<Pin>()] = (static_cast<uint32_t>(Spm) & 0x03)
+                                                                 | SPI_CSR_SCBR(Divider) | SPI_CSR_DLYBCT(1);
                 }
 
                 // enable spi
                 spi::port<SPI>->SPI_CR = SPI_CR_SPIEN;
             }
 
-            uint16_t read() {
+            static uint16_t read() {
                 while ((spi::port<SPI>->SPI_SR & SPI_SR_RDRF) == 0);
                 return spi::port<SPI>->SPI_RDR & 0xFFFF;
             }
 
-            void write(uint16_t Data) {
+            static void write(uint16_t Data) {
                 while ((spi::port<SPI>->SPI_SR & SPI_SR_TXEMPTY) == 0);
                 spi::port<SPI>->SPI_TDR = Data | SPI_PCS(static_cast<uint32_t>(pin_to_spi<Pin>()));
                 while ((spi::port<SPI>->SPI_SR & SPI_SR_TDRE) == 0);
