@@ -98,7 +98,7 @@ namespace llib {
             }
 
             constexpr void set(const int index, const bool value = true) {
-                bits ^= (-value ^ bits) << (1UL << index);
+                bits ^= (-value ^ bits) & (1UL << index);
             }
 
             constexpr void reset() {
