@@ -74,3 +74,4 @@ add_custom_command(TARGET llib POST_BUILD COMMAND ${OBJCOPY} ARGS -O binary -R .
 target_include_directories(llib PRIVATE ${CORTEX_INCLUDE})
 target_include_directories(llib PRIVATE ${TARGET_INCLUDE})
 target_include_directories(llib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/llib)
+target_include_directories(llib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/targets/due)
