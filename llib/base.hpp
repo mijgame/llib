@@ -7,9 +7,12 @@
 
 // TODO: switch targets
 namespace llib {
-    namespace due {}
+    namespace due {
+        namespace pins {}
+    }
 
     namespace target = due;
+    namespace pins = target::pins;
 }
 
 #endif //LLIB_BASE_HPP

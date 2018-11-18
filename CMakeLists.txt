@@ -34,7 +34,7 @@ set(TARGET_STARTUP "${CMAKE_CURRENT_SOURCE_DIR}/targets/due/startup.c")
 set(LINKERSCRIPT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/boot/linkerscript.ld")
 
 # Startup & system options
-set(BOOT_SOURCES boot/startup.c main.cpp boot/stack.c)
+set(BOOT_SOURCES boot/startup.c main.cpp boot/stack.c boot/polyfill.c)
 set(ROM_START 0x00000000)
 set(ROM_SIZE 512k)
 set(RAM_START 0x20000000)
@@ -50,10 +50,10 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
-set(COMMON_FLAGS "-D__SAM3X8E__  -Os -mcpu=cortex-m3 -march=armv7-m -mthumb -Wall -Werror -Wno-maybe-uninitialized  -Wno-unused-local-typedefs -Wno-unused-but-set-variable -Wno-unused-local-typedefs -Wno-unused-function -Wno-attributes -Werror -fno-exceptions -fno-non-call-exceptions -fno-common -ffunction-sections -fdata-sections -fno-exceptions -fno-asynchronous-unwind-tables -fomit-frame-pointer -fdata-sections -ffunction-sections")
+set(COMMON_FLAGS "-D__SAM3X8E__  -Os -mcpu=cortex-m3 -march=armv7-m -mthumb -Wall -Werror -Wno-maybe-uninitialized -Wno-unused-local-typedefs -Wno-unused-but-set-variable -Wno-unused-local-typedefs -Wno-unused-function -Wno-attributes -Werror -fno-exceptions -fno-non-call-exceptions -fno-common -ffunction-sections -fdata-sections -fno-exceptions -fno-asynchronous-unwind-tables -fomit-frame-pointer -fdata-sections -ffunction-sections -nostdlib")
 set(CXX_FLAGS "-std=c++17 -fno-rtti -fno-threadsafe-statics -fno-use-cxa-get-exception-ptr")
 set(C_FLAGS "-std=c11")
-set(LINKER_FLAGS "-I${AS_GCC} -T ${LINKERSCRIPT_PATH} -Wl,--gc-sections -Wl,-fatal-warnings -nodefaultlibs -nostartfiles") #  -nostdlib -nodefaultlibs -nostartfiles
+set(LINKER_FLAGS "-I${AS_GCC} -T ${LINKERSCRIPT_PATH} -Wl,--gc-sections -Wl,-fatal-warnings -nostdlib -nodefaultlibs -nostartfiles") #  -nostdlib -nodefaultlibs -nostartfiles
 
 project(llib)
 

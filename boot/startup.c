@@ -1,3 +1,4 @@
+#include <limits.h>
 #define register
 
 int main();
@@ -9,6 +10,9 @@ void __startup();
 
 extern unsigned __stack_end();
 extern void __target_startup();
+
+extern void *memcpy(void *destination, const void *source, size_t num);
+extern void *memset(void *ptr, int value, size_t num);
 
 void (*const volatile __vectors[8])(void)
 __attribute__ ((section(".vectors"))) = {
@@ -23,22 +27,11 @@ void __attribute__((noreturn)) __startup() {
     extern unsigned int __bss_start;
     extern unsigned int __bss_end;
 
-    unsigned int *s, *d, *e;
-
     // clear .bss section
-    d = &__bss_start;
-    e = &__bss_end;
-    while (d != e) {
-        *d++ = 0;
-    }
+    memset(&__bss_start, 0, &__bss_end - &__bss_start);
 
     // copy .data section from flash to ram
-    s = &__data_init_start;
-    d = &__data_start;
-    e = &__data_end;
-    while (d != e) {
-        *d++ = *s++;
-    }
+    memcpy(&__data_start, &__data_init_start, &__data_end - &__data_start);
 
     __target_startup();
 
