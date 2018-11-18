@@ -57,7 +57,7 @@ namespace llib {
         if constexpr (OutputStream::boolalpha) {
             str << (v ? "true" : "false");
         } else {
-            str << ('0' + v);
+            str << char('0' + v);
         }
 
         return str;
