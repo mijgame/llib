@@ -5,6 +5,8 @@
 #include <utility>
 #include <iterator>
 
+#include "math.hpp"
+
 namespace llib {
     template<typename T, size_t Size>
     class dynamic_array {
@@ -740,9 +742,22 @@ namespace llib {
         }
     };
 
+    /**
+     * Check if the array contents are equal.
+     * The smallest array size decides how many elements
+     * are checked.
+     *
+     * @tparam T
+     * @tparam Size
+     * @param lhs
+     * @param rhs
+     * @return
+     */
     template<typename T, size_t Size>
     bool operator==(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
-        for (int i = 0; i < Size; i++) {
+        int size = min(lhs.size(), rhs.size());
+
+        for (int i = 0; i < size; i++) {
             if (lhs[i] != rhs[i]) {
                 return false;
             }
@@ -751,14 +766,39 @@ namespace llib {
         return true;
     }
 
+    /**
+     * Check if the array contents are not equal.
+     * The smallest array size decides how many elements
+     * are checked.
+     *
+     * @tparam T
+     * @tparam Size
+     * @param lhs
+     * @param rhs
+     * @return
+     */
     template<typename T, size_t Size>
     bool operator!=(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
         return !operator==(lhs, rhs);
     }
 
+    /**
+     * Check if each element is less then
+     * the element in the other array.
+     * The smallest array size decides how many elements
+     * are checked.
+     *
+     * @tparam T
+     * @tparam Size
+     * @param lhs
+     * @param rhs
+     * @return
+     */
     template<typename T, size_t Size>
     bool operator<(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
-        for (int i = 0; i < Size; i++) {
+        int size = min(lhs.size(), rhs.size());
+
+        for (int i = 0; i < size; i++) {
             if (!(lhs[i] < rhs[i])) {
                 return false;
             }
@@ -767,16 +807,52 @@ namespace llib {
         return true;
     }
 
+    /**
+     * Check if each element is less then or equal to
+     * the element in the other array.
+     * The smallest array size decides how many elements
+     * are checked.
+     *
+     * @tparam T
+     * @tparam Size
+     * @param lhs
+     * @param rhs
+     * @return
+     */
     template<typename T, size_t Size>
     bool operator<=(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
         return !(lhs < rhs);
     }
 
+    /**
+     * Check if each element is greater than
+     * the element in the other array.
+     * The smallest array size decides how many elements
+     * are checked.
+     *
+     * @tparam T
+     * @tparam Size
+     * @param lhs
+     * @param rhs
+     * @return
+     */
     template<typename T, size_t Size>
     bool operator>(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
         return !(lhs < rhs);
     }
 
+    /**
+     * Check if each element is greater than or equal to
+     * the element in the other array.
+     * The smallest array size decides how many elements
+     * are checked.
+     *
+     * @tparam T
+     * @tparam Size
+     * @param lhs
+     * @param rhs
+     * @return
+     */
     template<typename T, size_t Size>
     bool operator>=(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
         return !(lhs < rhs);
