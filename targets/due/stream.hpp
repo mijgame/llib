@@ -7,6 +7,9 @@
 namespace llib::due {
     template<base B = _default_base, bool Boolalpha = _default_boolalpha>
     struct cout : public ostream<B, Boolalpha> {
+        template<llib::base IB, bool IBoolalpha>
+        using instance = cout<IB, IBoolalpha>;
+
         void write_impl(char c) {
             uart::put_char(c);
         }

@@ -120,7 +120,7 @@ namespace llib {
 
     template<typename OutputStream>
     auto operator<<(OutputStream, _boolalpha) {
-        return ostream<OutputStream::base, true>();
+        return typename OutputStream::template instance<OutputStream::base, true>();
     }
 }
 

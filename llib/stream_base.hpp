@@ -19,6 +19,9 @@ namespace llib {
     public:
         constexpr static llib::base base = B;
         constexpr static bool boolalpha = Boolalpha;
+
+        template<llib::base IB, bool IBoolalpha>
+        using instance = ostream<IB, IBoolalpha>;
     };
 
     struct istream {};
