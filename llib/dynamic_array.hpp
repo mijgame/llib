@@ -744,8 +744,6 @@ namespace llib {
 
     /**
      * Check if the array contents are equal.
-     * The smallest array size decides how many elements
-     * are checked.
      *
      * @tparam T
      * @tparam Size
@@ -755,9 +753,7 @@ namespace llib {
      */
     template<typename T, size_t Size>
     bool operator==(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
-        int size = min(lhs.size(), rhs.size());
-
-        for (int i = 0; i < size; i++) {
+        for (size_t i = 0; i < Size; i++) {
             if (lhs[i] != rhs[i]) {
                 return false;
             }
@@ -796,9 +792,7 @@ namespace llib {
      */
     template<typename T, size_t Size>
     bool operator<(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
-        int size = min(lhs.size(), rhs.size());
-
-        for (int i = 0; i < size; i++) {
+        for (size_t i = 0; i < Size; i++) {
             if (!(lhs[i] < rhs[i])) {
                 return false;
             }
