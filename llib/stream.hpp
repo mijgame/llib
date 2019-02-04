@@ -1,11 +1,13 @@
 #ifndef LLIB_STREAM_HPP
 #define LLIB_STREAM_HPP
 
+#include <type_traits>
 #include <stdio.h>
 
+#include "base.hpp"
 #include "stream_base.hpp"
 
-#include <stream.hpp>
+#include <stream_target.hpp>
 
 namespace llib {
     [[maybe_unused]]

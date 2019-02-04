@@ -1,8 +1,6 @@
 #ifndef LLIB_PERIPHERAL_HPP
 #define LLIB_PERIPHERAL_HPP
 
-#include <type_traits>
-
 #include "base.hpp"
 #include <pins.hpp>
 

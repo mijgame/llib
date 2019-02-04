@@ -48,17 +48,17 @@ namespace llib::due {
             initialised = true;
         }
 
-        bool char_available() {
+        inline bool char_available() {
             return (UART->UART_SR & 1) != 0;
         }
 
-        char get_char() {
+        inline char get_char() {
             while (!char_available());
 
             return UART->UART_RHR;
         }
 
-        void put_char(const char c) {
+        inline void put_char(const char c) {
             while ((UART->UART_SR & 2) == 0);
             UART->UART_THR = c;
         }

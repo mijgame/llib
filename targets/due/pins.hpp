@@ -37,7 +37,7 @@ namespace llib::due {
             using port = pioa;
             constexpr static uint32_t number = 29;
             constexpr static uint32_t spi_number = 1;
-        };        
+        };
 
         struct d5 {
             using port = pioc;
@@ -73,7 +73,7 @@ namespace llib::due {
             using port = pioa;
             constexpr static uint32_t number = 28;
             constexpr static uint32_t spi_number = 0;
-        };        
+        };
 
         struct d11 {
             using port = piod;
@@ -539,46 +539,46 @@ namespace llib::due {
         template<bool val>
         constexpr static void set() {
             if constexpr (val) {
-                pins::port < Pin >->PIO_ODR = pins::mask<Pin>;
+                pins::port<Pin>->PIO_ODR = pins::mask<Pin>;
             } else {
-                pins::port < Pin >->PIO_OER = pins::mask<Pin>;
-                pins::port < Pin >->PIO_CODR = pins::mask<Pin>;
+                pins::port<Pin>->PIO_OER = pins::mask<Pin>;
+                pins::port<Pin>->PIO_CODR = pins::mask<Pin>;
             }
         }
 
         constexpr static void set(const bool val) {
             if (val) {
-                pins::port < Pin >->PIO_ODR = pins::mask<Pin>;
+                pins::port<Pin>->PIO_ODR = pins::mask<Pin>;
             } else {
-                pins::port < Pin >->PIO_OER = pins::mask<Pin>;
-                pins::port < Pin >->PIO_CODR = pins::mask<Pin>;
+                pins::port<Pin>->PIO_OER = pins::mask<Pin>;
+                pins::port<Pin>->PIO_CODR = pins::mask<Pin>;
             }
         }
     };
 
     template<typename Pin>
-    void set_peripheral(){
+    void set_peripheral() {
         pins::port<typename Pin::port>->PIO_IDR = pins::mask<Pin>;
+        uint32_t t = pins::port<typename Pin::port>->PIO_ABSR;
 
-        // change pio multiplexer
+        // Change pio multiplexer
         if constexpr (std::is_same_v<typename Pin::port, pioa>) {
-            uint32_t t = pins::port<typename Pin::port>->PIO_ABSR;
             pins::port<typename Pin::port>->PIO_ABSR &= (~pins::mask<Pin> & t);
         } else if constexpr (std::is_same_v<typename Pin::port, piob>) {
-            uint32_t t = pins::port<typename Pin::port>->PIO_ABSR;
             pins::port<typename Pin::port>->PIO_ABSR = (pins::mask<Pin> | t);
-        }          
-        else{
+        } else {
             // do nothing sinds we cant use different pio's
-            LLIB_ERROR("Wrong Pin detected cant use pin's that are not in pioa/piob")
-            for(;;);
+            LLIB_ERROR("Wrong Pin detected; can'tt use pins that are not in pioa/piob.")
+            for (;;);
         }
+
         pins::port<typename Pin::port>->PIO_PDR = pins::mask<Pin>;
 
-        /* Disable interrupts on the pin(s) */
+        // Disable interrupts on the pin(s)
         pins::port<typename Pin::port>->PIO_IDR = pins::mask<Pin>;
+
         // disable pull ups
-        pins::port<typename Pin::port>->PIO_PUDR = pins::mask<Pin>;        
+        pins::port<typename Pin::port>->PIO_PUDR = pins::mask<Pin>;
     }
 }
 

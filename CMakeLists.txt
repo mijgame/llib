@@ -28,7 +28,7 @@ set(AS_GCC "${CORTEX_INCLUDE}/sam3xa/source/as_gcc")
 
 # Targets
 set(TARGET_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/targets/due")
-set(TARGET_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targets/due/wait.cpp")
+set(TARGET_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targets/due/wait.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/targets/due/stream_target.cpp")
 set(TARGET_STARTUP "${CMAKE_CURRENT_SOURCE_DIR}/targets/due/startup.c")
 
 # Linkerscript for Arduino Due
