@@ -58,30 +58,21 @@ namespace llib::due {
                                    
                 pins::port<typename PPin::port>->PIO_IDR = pins::mask<PPin>;
 
-                // change pio multiplexer
-                if constexpr (std::is_same_v<typename PPin::port, pioa>) {
-                    uint32_t t = pins::port<typename PPin::port>->PIO_ABSR;
-                    pins::port<typename PPin::port>->PIO_ABSR &= (~pins::mask<PPin> & t);
-                } else if constexpr (std::is_same_v<typename PPin::port, piob>) {
-                    uint32_t t = pins::port<typename PPin::port>->PIO_ABSR;
-                    pins::port<typename PPin::port>->PIO_ABSR = (pins::mask<PPin> | t);
-                }          
-                else{
-                    // do nothing sinds we cant use different pio's
-                    LLIB_ERROR("Wrong Pin detected cant use pin's that are not in pioa/piob")
-                    for(;;);
-                }
-                pins::port<typename PPin::port>->PIO_PDR = pins::mask<PPin>;
-
-                /* Disable interrupts on the pin(s) */
-                pins::port<typename PPin::port>->PIO_IDR = pins::mask<PPin>;
-                // disable pull ups
-                pins::port<typename PPin::port>->PIO_PUDR = pins::mask<PPin>;
+                set_peripheral<PPin>();
             }
 
             template<typename PPin>
             constexpr static uint8_t pin_to_spi() {
-                return PPin::spi_number;
+                // special cases sinds d10 and d4 have multiple pio's
+                if constexpr (std::is_same_v<PPin, pins::d10>){
+                    return pins::d10_multi::spi_number;
+                }
+                else if (std::is_same_v<PPin, pins::d4>){
+                    return pins::d4_multi::spi_number;
+                }
+                else{
+                    return PPin::spi_number;
+                }
             }         
 
             constexpr static uint32_t SPI_PCS(uint32_t npcs) {
@@ -143,23 +134,6 @@ namespace llib::due {
             }
         };
     }
-
-    //struct spi_uart {
-    //    constexpr static uint32_t instance_id = ID_SPI1;
-    //};
-
-    //template<>
-    //Pio *const spi::port<spi_uart> = SPI0;
-
-
-
-    //template<>
-    //class bus<spi_uart> {
-    //public:
-    //    constexpr void init() {
-    //
-    //    }
-    //};
 }
 
 #endif //LLIB_DUE_SPI_HPP
