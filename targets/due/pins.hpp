@@ -2,6 +2,8 @@
 #define LLIB_DUE_PINS_HPP
 
 #include "pio.hpp"
+#include "error.hpp"
+#include <type_traits>
 
 namespace llib::due {
     namespace pins {
@@ -29,7 +31,6 @@ namespace llib::due {
         struct d4 {
             using port = pioc;
             constexpr static uint32_t number = 26;
-            constexpr static uint32_t spi_number = 1;
         };
 
         struct d4_multi {
@@ -66,7 +67,6 @@ namespace llib::due {
         struct d10 {
             using port = pioc;
             constexpr static uint32_t number = 29;
-            constexpr static uint32_t spi_number = 0;
         };
 
         struct d10_multi {
@@ -555,6 +555,31 @@ namespace llib::due {
             }
         }
     };
+
+    template<typename Pin>
+    void set_peripheral(){
+        pins::port<typename Pin::port>->PIO_IDR = pins::mask<Pin>;
+
+        // change pio multiplexer
+        if constexpr (std::is_same_v<typename Pin::port, pioa>) {
+            uint32_t t = pins::port<typename Pin::port>->PIO_ABSR;
+            pins::port<typename Pin::port>->PIO_ABSR &= (~pins::mask<Pin> & t);
+        } else if constexpr (std::is_same_v<typename Pin::port, piob>) {
+            uint32_t t = pins::port<typename Pin::port>->PIO_ABSR;
+            pins::port<typename Pin::port>->PIO_ABSR = (pins::mask<Pin> | t);
+        }          
+        else{
+            // do nothing sinds we cant use different pio's
+            LLIB_ERROR("Wrong Pin detected cant use pin's that are not in pioa/piob")
+            for(;;);
+        }
+        pins::port<typename Pin::port>->PIO_PDR = pins::mask<Pin>;
+
+        /* Disable interrupts on the pin(s) */
+        pins::port<typename Pin::port>->PIO_IDR = pins::mask<Pin>;
+        // disable pull ups
+        pins::port<typename Pin::port>->PIO_PUDR = pins::mask<Pin>;        
+    }
 }
 
 #endif //LLIB_DUE_PINS_HPP
