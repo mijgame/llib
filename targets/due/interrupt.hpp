@@ -44,31 +44,33 @@ namespace llib::due {
 
         template<typename Pin, interrupt Mode>
         constexpr void _set_interrupt_mode() {
+            const auto mask = pins::mask<Pin>;
+
             if constexpr (Mode == interrupt::CHANGE) {
                 // Disable additional interrupt mode (detects both rising and falling edges)
-                pins::port<typename Pin::port>->PIO_AIMDR = pins::mask<Pin>;
+                pins::port<typename Pin::port>->PIO_AIMDR = mask;
             } else {
                 // Enable additional interrupt mode
-                pins::port<typename Pin::port>->PIO_AIMER = pins::mask<Pin>;
+                pins::port<typename Pin::port>->PIO_AIMER = mask;
 
                 // Select mode
                 if constexpr (Mode == interrupt::LOW) {
-                    pins::port<typename Pin::port>->PIO_LSR = pins::mask<Pin>;
-                    pins::port<typename Pin::port>->PIO_FELLSR = pins::mask<Pin>;
+                    pins::port<typename Pin::port>->PIO_LSR = mask;
+                    pins::port<typename Pin::port>->PIO_FELLSR = mask;
                 } else if constexpr (Mode == interrupt::HIGH) {
-                    pins::port<typename Pin::port>->PIO_LSR = pins::mask<Pin>;
-                    pins::port<typename Pin::port>->PIO_REHLSR = pins::mask<Pin>;
+                    pins::port<typename Pin::port>->PIO_LSR = mask;
+                    pins::port<typename Pin::port>->PIO_REHLSR = mask;
                 } else if constexpr (Mode == interrupt::FALLING) {
-                    pins::port<typename Pin::port>->PIO_ESR = pins::mask<Pin>;
-                    pins::port<typename Pin::port>->PIO_FELLSR = pins::mask<Pin>;
+                    pins::port<typename Pin::port>->PIO_ESR = mask;
+                    pins::port<typename Pin::port>->PIO_FELLSR = mask;
                 } else if constexpr (Mode == interrupt::RISING) {
-                    pins::port<typename Pin::port>->PIO_ESR = pins::mask<Pin>;
-                    pins::port<typename Pin::port>->PIO_REHLSR = pins::mask<Pin>;
+                    pins::port<typename Pin::port>->PIO_ESR = mask;
+                    pins::port<typename Pin::port>->PIO_REHLSR = mask;
                 }
             }
 
             // Enable interrupt
-            pins::port<typename Pin::port>->PIO_IER = pins::mask<Pin>;
+            pins::port<typename Pin::port>->PIO_IER = mask;
         }
 
         template<typename Port>
@@ -83,11 +85,6 @@ namespace llib::due {
     template<typename Pin, interrupt Mode>
     void attach_interrupt(interrupt_callback func) {
         _enable_interrupt_source_for_pin<Pin>();
-
-        uint32_t position = 0;
-
-        for (uint32_t t = pins::mask<Pin>; t > 1; t >>= 1, position++);
-
         _set_interrupt_mode<Pin, Mode>();
     }
 
@@ -106,8 +103,8 @@ void PIOA_HANDLER() {
     while ((leading_zeros = __CLZ(isr)) < 32) {
         auto pin = static_cast<uint8_t>(32 - leading_zeros - 1);
 
-        if (llib::_callbacks<llib::pioa>::callbacks[pin]) {
-            llib::_callbacks<llib::pioa>::callbacks[pin]();
+        if (llib::due::_callbacks<llib::target::pioa>::callbacks[pin]) {
+            llib::due::_callbacks<llib::target::pioa>::callbacks[pin]();
         }
 
         isr = isr & (~(1 << pin));
@@ -121,8 +118,8 @@ void PIOB_HANDLER() {
     while ((leading_zeros = __CLZ(isr)) < 32) {
         auto pin = static_cast<uint8_t>(32 - leading_zeros - 1);
 
-        if (llib::_callbacks<llib::piob>::callbacks[pin]) {
-            llib::_callbacks<llib::piob>::callbacks[pin]();
+        if (llib::due::_callbacks<llib::target::piob>::callbacks[pin]) {
+            llib::due::_callbacks<llib::target::piob>::callbacks[pin]();
         }
 
         isr = isr & (~(1 << pin));
@@ -136,8 +133,8 @@ void PIOC_HANDLER() {
     while ((leading_zeros = __CLZ(isr)) < 32) {
         auto pin = static_cast<uint8_t>(32 - leading_zeros - 1);
 
-        if (llib::_callbacks<llib::pioc>::callbacks[pin]) {
-            llib::_callbacks<llib::pioc>::callbacks[pin]();
+        if (llib::due::_callbacks<llib::target::pioc>::callbacks[pin]) {
+            llib::due::_callbacks<llib::target::pioc>::callbacks[pin]();
         }
 
         isr = isr & (~(1 << pin));
@@ -151,8 +148,8 @@ void PIOD_HANDLER() {
     while ((leading_zeros = __CLZ(isr)) < 32) {
         auto pin = static_cast<uint8_t>(32 - leading_zeros - 1);
 
-        if (llib::_callbacks<llib::piod>::callbacks[pin]) {
-            llib::_callbacks<llib::piod>::callbacks[pin]();
+        if (llib::due::_callbacks<llib::target::piod>::callbacks[pin]) {
+            llib::due::_callbacks<llib::target::piod>::callbacks[pin]();
         }
 
         isr = isr & (~(1 << pin));
