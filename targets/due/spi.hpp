@@ -55,9 +55,8 @@ namespace llib::due {
                 if(std::is_same_v<PPin, pins::d4>){
                     return configure_pin<pins::d4_multi>();
                 }         
-                                   
-                pins::port<typename PPin::port>->PIO_IDR = pins::mask<PPin>;
 
+                // change the peripheral multiplexer to the other port
                 set_peripheral<PPin>();
             }
 
