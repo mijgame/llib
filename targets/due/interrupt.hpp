@@ -80,6 +80,22 @@ namespace llib::due {
 
         template<typename Port>
         interrupt_callback _callbacks<Port>::callbacks[32] = {};
+
+        template<typename Port>
+        constexpr void _handle_isr() {
+            uint32_t isr = pins::port<Port>->PIO_ISR;
+            uint8_t leading_zeros = 0;
+
+            while ((leading_zeros = __CLZ(isr)) < 32) {
+                auto pin = static_cast<uint8_t>(32 - leading_zeros - 1);
+
+                if (llib::due::_callbacks<Port>::callbacks[pin]) {
+                    llib::due::_callbacks<Port>::callbacks[pin]();
+                }
+
+                isr = isr & (~(1 << pin));
+            }
+        }
     }
 
     template<typename Pin, interrupt Mode>
@@ -92,68 +108,23 @@ namespace llib::due {
     void detach_interrupt() {
         pins::port<typename Pin::port>->PIO_IDR = pins::mask<Pin>;
     }
-
 }
 
 extern "C" {
 void PIOA_HANDLER() {
-    uint32_t isr = PIOA->PIO_ISR;
-    uint8_t leading_zeros;
-
-    while ((leading_zeros = __CLZ(isr)) < 32) {
-        auto pin = static_cast<uint8_t>(32 - leading_zeros - 1);
-
-        if (llib::due::_callbacks<llib::target::pioa>::callbacks[pin]) {
-            llib::due::_callbacks<llib::target::pioa>::callbacks[pin]();
-        }
-
-        isr = isr & (~(1 << pin));
-    }
+    llib::due::_handle_isr<llib::target::pioa>();
 }
 
 void PIOB_HANDLER() {
-    uint32_t isr = PIOB->PIO_ISR;
-    uint8_t leading_zeros;
-
-    while ((leading_zeros = __CLZ(isr)) < 32) {
-        auto pin = static_cast<uint8_t>(32 - leading_zeros - 1);
-
-        if (llib::due::_callbacks<llib::target::piob>::callbacks[pin]) {
-            llib::due::_callbacks<llib::target::piob>::callbacks[pin]();
-        }
-
-        isr = isr & (~(1 << pin));
-    }
+    llib::due::_handle_isr<llib::target::piob>();
 }
 
 void PIOC_HANDLER() {
-    uint32_t isr = PIOC->PIO_ISR;
-    uint8_t leading_zeros;
-
-    while ((leading_zeros = __CLZ(isr)) < 32) {
-        auto pin = static_cast<uint8_t>(32 - leading_zeros - 1);
-
-        if (llib::due::_callbacks<llib::target::pioc>::callbacks[pin]) {
-            llib::due::_callbacks<llib::target::pioc>::callbacks[pin]();
-        }
-
-        isr = isr & (~(1 << pin));
-    }
+    llib::due::_handle_isr<llib::target::pioc>();
 }
 
 void PIOD_HANDLER() {
-    uint32_t isr = PIOD->PIO_ISR;
-    uint8_t leading_zeros;
-
-    while ((leading_zeros = __CLZ(isr)) < 32) {
-        auto pin = static_cast<uint8_t>(32 - leading_zeros - 1);
-
-        if (llib::due::_callbacks<llib::target::piod>::callbacks[pin]) {
-            llib::due::_callbacks<llib::target::piod>::callbacks[pin]();
-        }
-
-        isr = isr & (~(1 << pin));
-    }
+    llib::due::_handle_isr<llib::target::piod>();
 }
 }
 
