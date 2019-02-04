@@ -1,6 +1,24 @@
+dist: trusty
+sudo: required
 language: cpp
 compiler: gcc
-
-os: linux
-
-
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-8
+      - g++-8
+      - cmake
+      - g++-arm-linux-gnueabi
+script:
+  # Link gcc and g++ to their standard commands
+  - ln -s /usr/bin/gcc-8 /usr/local/bin/gcc
+  - ln -s /usr/bin/g++-8 /usr/local/bin/g++
+  # Export CC and CXX to tell cmake which compiler to use
+  - export CC=/usr/bin/gcc-8
+  - export CXX=/usr/bin/g++-8
+  # Check versions of gcc, g++ and cmake
+  - gcc -v && g++ -v && cmake --version
+  # Run your build commands next
+  - cmake --build
