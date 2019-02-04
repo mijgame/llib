@@ -210,6 +210,7 @@ namespace llib {
 
             random_access_iterator &operator--() {
                 at--;
+                return *this;
             }
 
             const random_access_iterator operator--(int) {
