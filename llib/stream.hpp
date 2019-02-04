@@ -1,11 +1,8 @@
 #ifndef LLIB_STREAM_HPP
 #define LLIB_STREAM_HPP
 
-#include <cmath>
 #include <stdio.h>
-#include <limits>
 
-#include "math.hpp"
 #include "stream_base.hpp"
 
 #include <stream.hpp>
@@ -46,118 +43,144 @@ namespace llib {
     constexpr char endl = '\n';
 
     namespace {
-        template<typename T>
-        struct _unsigned_type {
-            using type = T;
-        };
+        /**
+         * Reverse a char buffer.
+         *
+         * @internal
+         * @param str
+         * @param length
+         * @return
+         */
+        constexpr void _reverse(char *str, const int length) {
+            int start = 0;
+            int end = length - 1;
 
-        template<>
-        struct _unsigned_type<char> {
-            using type = uint8_t;
-        };
-
-        template<>
-        struct _unsigned_type<signed short> {
-            using type = uint16_t;
-        };
-
-        template<>
-        struct _unsigned_type<signed int> {
-            using type = uint32_t ;
-        };
-
-        template<>
-        struct _unsigned_type<signed long> {
-            using type = uint64_t;
-        };
-
-        template<typename T>
-        using _unsigned_type_t = typename _unsigned_type<T>::type;
-
-        template<typename T>
-        void _integral_to_hex_buffer(T v, char *buffer) {
-            auto val = static_cast<_unsigned_type_t<T>>(v);
-
-            char *p = buffer;
-
-            // TODO: showbase
-            *p++ = '0';
-            *p++ = 'x';
-
-            // Convert nibbles
-            for (int i = sizeof(val) * 2; i != 0; i--) {
-                auto nibble = static_cast<uint8_t>(val >> (i * 4 - 4));
-
-                if (nibble > 9) {
-                    *p++ = char('A' + (nibble - 10));
-                } else {
-                    *p++ = char('0' + nibble);
-                }
+            while (start < end) {
+                char temp = *(str + start);
+                *(str + start++) = *(str + end);
+                *(str + end--) = temp;
             }
-
-            *p = '\0';
         }
 
+        /**
+         * Add the prefix to the output stream.
+         *
+         * @internal
+         * @param str
+         * @param base
+         * @return
+         */
+        constexpr int _add_prefix(char *str, int base) {
+            char *p = str;
+
+            if (base == 8) {
+                *p++ = 'b';
+                *p = '0';
+
+                return 2;
+            }
+
+            if (base == 16) {
+                *p++ = 'x';
+                *p = '0';
+
+                return 2;
+            }
+
+            return 0;
+        }
+
+        /**
+         * Internal itoa for stream output.
+         *
+         * @internal
+         * @param num
+         * @param str
+         * @param base
+         * @return
+         */
+        constexpr char *_itoa(int num, char *str, int base) {
+            // Handle 0 explicitly, otherwise empty string is printed for 0
+            if (num == 0) {
+                str[0] = '0';
+                int added = _add_prefix(&str[1], base);
+
+                str[added + 1] = '\0';
+
+                return str;
+            }
+
+            int i = 0;
+            bool negative = false;
+
+            // In standard itoa(), negative numbers are handled only with
+            // base 10. Otherwise numbers are considered unsigned.
+            if (num < 0 && base == 10) {
+                negative = true;
+                num = -num;
+            }
+
+            // Process individual digits
+            while (num != 0) {
+                int rem = num % base;
+
+                if (rem > 9) {
+                    str[i++] = '0' + (rem - 10);
+                } else {
+                    str[i++] = '0' + rem;
+                }
+
+                num /= base;
+            }
+
+            // If number is negative, append '-'
+            if (negative) {
+                str[i++] = '-';
+            }
+
+            // For hex, append 0x
+            int added = _add_prefix(&str[i], base);
+            str[i += added] = '\0'; // Append string terminator
+
+            // Reverse the string
+            _reverse(str, i);
+
+            return str;
+        }
+
+        /**
+         * Helper function that counts the amount of characters in the
+         * positive representation of the given number.
+         *
+         * @internal
+         * @tparam T
+         * @param v
+         * @return
+         */
         template<typename T>
-        void _integral_to_dec_buffer(T v, char *p) {
+        constexpr int _count_chars(T v, const int base) {
             if (v < 0) {
-                *p++ = '-';
                 v *= -1;
             }
 
-            int shifter = v;
-
-            // Move to where representation ends
-            do {
-                ++p;
-                shifter /= 10;
-            } while (shifter);
-
-            *p = '\0';
-
-            // Move back, inserting digits
-            do {
-                // Reuse division in modulo
-                const auto div = v / 10;
-
-                *(--p) = '0' + (v - 10 * div);
-                v /= 10;
-            } while (v);
-        }
-
-        template<typename T>
-        void _integral_to_oct_buffer(T v, char *buffer) {
-            auto val = static_cast<_unsigned_type_t<T>>(v);
-
-            char *p = buffer;
-
-            // Move to where representation ends
-            int shifter = val; // TODO: int?
-
-            do {
-                ++p;
-                shifter /= 8;
-            } while (shifter);
-
-            p += 2; // Allow for base
-            *p = '\0';
-
-            if (val == 0) {
-                *p++ = '0';
-            } else {
-                char remainder;
-                while (val > 0) {
-                    remainder = (val % 8) + '0';
-                    *p-- = remainder;
-                    val /= 8;
-                }
+            int chars = 0;
+            while (v) {
+                chars += 1;
+                v /= base;
             }
 
-            // TODO: showbase
-            *p-- = 'o';
-            *p = '0';
+            return chars;
         }
 
+        /**
+         * Convert a integral numeric value to a binary
+         * representation with leading zero's.
+         *
+         * @internal
+         * @tparam T
+         * @param v
+         * @param buffer
+         */
         template<typename T>
         void _integral_to_bin_buffer(T v, char *buffer) {
             char *p = buffer;
@@ -211,27 +234,27 @@ namespace llib {
     }
 
     template<
-            typename T,
-            typename OutputStream,
-            typename = std::enable_if_t<std::is_integral_v<T>>
+        typename T,
+        typename OutputStream,
+        typename = std::enable_if_t<std::is_integral_v<T>>
     >
     OutputStream operator<<(OutputStream str, T v) {
         if constexpr(OutputStream::base == base::HEX) {
             /*
              * A single hex char describes a nibble, so
-             * sizeof(T) * 4 will hold the hex representation and
+             * sizeof(T) * 2 will hold the hex representation and
              * the +3 is for the leading 0x and trailing \0.
              */
             char buf[sizeof(T) * 2 + 3];
-            _integral_to_hex_buffer(v, buf);
+            _itoa(v, buf, 16);
             str << buf;
         } else if constexpr (OutputStream::base == base::DEC) {
             /*
              * The buffer wil be the maximum amount of digits in the type
              * + a optional leading '-' or '+' + a \0.
              */
-            char buf[std::numeric_limits<T>::max_digits10 + 2];
-            _integral_to_dec_buffer(v, buf);
+            char buf[_count_chars(v, 10) + 2] = {};
+            _itoa(v, buf, 10);
             str << buf;
         } else if constexpr (OutputStream::base == base::OCT) {
             /*
@@ -239,7 +262,7 @@ namespace llib {
              * 0o and the trailing \0.
              */
             char buf[sizeof(T) * 3 + 3];
-            _integral_to_oct_buffer(v, buf);
+            _itoa(v, buf, 8);
             str << buf;
         } else {
             // binary
