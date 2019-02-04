@@ -99,9 +99,7 @@ namespace llib {
         }
 
         template<typename T>
-        void _integral_to_dec_buffer(T v, char *buffer) {
-            char *p = buffer;
-
+        void _integral_to_dec_buffer(T v, char *p) {
             if (v < 0) {
                 *p++ = '-';
                 v *= -1;
@@ -116,12 +114,15 @@ namespace llib {
             } while (shifter);
 
             *p = '\0';
-            do { // Move back, inserting digits
-                *--p = char(v % 10) + '0';
+
+            // Move back, inserting digits
+            do {
+                // Reuse division in modulo
+                const auto div = v / 10;
+
+                *(--p) = '0' + (v - 10 * div);
                 v /= 10;
             } while (v);
-
-            *p = '\0';
         }
 
         template<typename T>
@@ -250,7 +251,6 @@ namespace llib {
             _integral_to_bin_buffer(v, buf);
             str << buf;
         }
-
 
         return str;
     }
