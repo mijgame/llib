@@ -67,7 +67,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${COMMON_FLAGS} ${LINKER_FLAGS}")
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(LLIB_HEADERS llib/peripheral.hpp llib/stream.hpp llib/stream_base.hpp llib/bitset.hpp llib/dynamic_array.hpp llib/queue.hpp llib/list.hpp llib/defines.hpp llib/math.hpp llib/wait.hpp)
+set(LLIB_HEADERS llib/peripheral.hpp llib/stream.hpp llib/stream_base.hpp llib/bitset.hpp llib/dynamic_array.hpp llib/queue.hpp llib/list.hpp llib/defines.hpp llib/math.hpp llib/wait.hpp llib/string.hpp)
 
 add_executable(llib ${BOOT_SOURCES} ${LLIB_HEADERS} ${TARGET_INCLUDE} ${TARGET_STARTUP} ${TARGET_SOURCES})
 add_custom_command(TARGET llib POST_BUILD COMMAND ${OBJCOPY} ARGS -O binary -R .bss llib llib.bin)
