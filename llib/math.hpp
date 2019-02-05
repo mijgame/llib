@@ -84,9 +84,9 @@ namespace llib {
     template<typename T>
     constexpr LLIB_FORCE_INLINE T abs(const T x) {
         if constexpr (std::is_unsigned_v<T>) {
-            return x < 0 ? -x : x;
-        } else {
             return x;
+        } else {
+            return x < 0 ? -x : x;
         }
     }
 
