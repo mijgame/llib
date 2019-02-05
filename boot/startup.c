@@ -48,14 +48,14 @@ __attribute__ ((section(".vectors"))) = {
 
 void __default_handler(void);
 #pragma weak __nmi_handler        = __default_handler /* NMI handler */
-#pragma weak HardFault_Handler  = __default_handler /* Hard Fault handler */
-#pragma weak MemManage_Handler  = __default_handler /* MPU Fault Handler */
-#pragma weak BusFault_Handler   = __default_handler /* Bus Fault Handler */
-#pragma weak UsageFault_Handler = __default_handler /* Usage Fault Handler */
-#pragma weak SVC_Handler        = __default_handler /* SVCall Handler */
-#pragma weak DebugMon_Handler   = __default_handler /* Debug Monitor Handler */
-#pragma weak PendSV_Handler     = __default_handler /* PendSV Handler */
-#pragma weak SysTick_Handler    = __default_handler /* SysTick Handler */
+#pragma weak __hardfault_handler  = __default_handler /* Hard Fault handler */
+#pragma weak __memmanage_handler  = __default_handler /* MPU Fault Handler */
+#pragma weak __busfault_handler   = __default_handler /* Bus Fault Handler */
+#pragma weak __usagefault_handler = __default_handler /* Usage Fault Handler */
+#pragma weak __svc_handler        = __default_handler /* SVCall Handler */
+#pragma weak __debugmon_handler   = __default_handler /* Debug Monitor Handler */
+#pragma weak __pendsv_handler     = __default_handler /* PendSV Handler */
+#pragma weak __systick_handler    = __default_handler /* SysTick Handler */
 
 void __default_handler(void) {
     while (1);
