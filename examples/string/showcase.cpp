@@ -42,6 +42,8 @@ int main() {
         llib::cout << "Smaller buffer:   " << smaller << llib::endl;
         llib::cout << "Front:            " << combined.front() << llib::endl;
         llib::cout << "Back:             " << combined.back() << llib::endl;
+        llib::cout << "Starts with:      " << combined.starts_with("Hello") << llib::endl;
+        llib::cout << "Ends with:        " << combined.ends_with("Hello") << llib::endl;
 
         llib::cout << llib::endl;
 

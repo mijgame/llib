@@ -378,6 +378,79 @@ namespace llib {
         }
 
         /**
+         * Check whether the string starts with the given string.
+         *
+         * @tparam OtherBufferSize
+         * @param str
+         * @return
+         */
+        template<size_t OtherBufferSize>
+        constexpr bool ends_with(const string<OtherBufferSize> &str) const {
+            const auto offset = buffer_length - str.len();
+
+            for (size_t i = 0; i < str.len(); i++) {
+                if (buffer[offset + i] != str[i]) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /**
+         * Check whether the string starts with the given string.
+         *
+         * @param str
+         * @return
+         */
+        constexpr bool ends_with(const char *str) const {
+            const auto len = str_len(str);
+            const auto offset = buffer_length - len;
+
+            for (size_t i = 0; i < len; i++) {
+                if (buffer[offset + i] != str[i]) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /**
+         * Check whether the string starts with the given string.
+         *
+         * @tparam OtherBufferSize
+         * @param str
+         * @return
+         */
+        template<size_t OtherBufferSize>
+        constexpr bool starts_with(const string<OtherBufferSize> &str) const {
+            for (size_t i = 0; i < str.len(); i++) {
+                if (buffer[i] != str[i]) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /**
+         * Check whether the string starts with the given string.
+         *
+         * @param str
+         * @return
+         */
+        constexpr bool starts_with(const char *str) const {
+            for (size_t i = 0; i < str_len(str); i++) {
+                if (buffer[i] != str[i]) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /**
          * Get a reference to the character at the given index.
          *
          * @param index
