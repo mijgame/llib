@@ -55,6 +55,7 @@ set(COMMON_FLAGS "-D__SAM3X8E__ -Os -mcpu=cortex-m3 -march=armv7-m -mthumb -Wall
 set(CXX_FLAGS "-std=c++17 -fno-rtti -fno-threadsafe-statics -fno-use-cxa-get-exception-ptr")
 set(C_FLAGS "-std=c11")
 set(LINKER_FLAGS "-I${AS_GCC} -T ${LINKERSCRIPT_PATH} -lgcc -Wl,--gc-sections -Wl,-fatal-warnings -nostdlib -nodefaultlibs -nostartfiles") #
+SET(ASM_FLAGS "-x assembler-with-cpp")
 
 project(llib)
 
@@ -64,8 +65,12 @@ set(CMAKE_C_FLAGS_RELEASE "${COMMON_FLAGS} ${C_FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "${COMMON_FLAGS} ${CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS_RELEASE "${COMMON_FLAGS} ${CXX_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${COMMON_FLAGS} ${LINKER_FLAGS}")
+set(CMAKE_ASM_FLAGS "${COMMON_FLAGS} ${C_FLAGS} ${ASM_FLAGS}")
 
 set(CMAKE_CXX_STANDARD 17)
+
+# enable assembly
+enable_language(ASM)
 
 set(LLIB_HEADERS llib/peripheral.hpp llib/stream.hpp llib/stream_base.hpp llib/bitset.hpp llib/dynamic_array.hpp llib/queue.hpp llib/list.hpp llib/defines.hpp llib/math.hpp llib/wait.hpp llib/string.hpp)
 
