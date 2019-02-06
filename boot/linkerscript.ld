@@ -44,7 +44,7 @@ MEMORY
 {
 rom (rx) : org = 0x00000000, len = 512k
 ram (rwx) : org = 0x20070000, len = 96k
-nul (rwx) : org = 0x20000000 + 96k, len = 0k
+nul (rwx) : org = 0x20070000 + 96k, len = 0k
 }
 __rom_start = ORIGIN(rom);
 __rom_size = LENGTH(rom);
