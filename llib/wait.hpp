@@ -54,6 +54,15 @@ namespace llib {
      * @param ns
      */
     void wait_for(uint64_t ns);
+
+    /**
+     * Sleep for the given amount of nanoseconds.
+     * The implementation of this function is left to the
+     * target and accuracy might very.
+     *
+     * Likely, this function is most accurate in the microsecond range.
+     */
+    void sleep_for(uint64_t);
 }
 
 #endif //LLIB_WAIT_HPP

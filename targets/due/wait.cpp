@@ -46,4 +46,10 @@ namespace llib {
 
         while (_us() < end);
     }
+
+    void sleep_for(uint64_t ns) {
+        // TODO: use timer
+
+        wait_for(ns);
+    }
 }
