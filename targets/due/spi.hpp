@@ -11,6 +11,7 @@ namespace llib::due {
     namespace spi {
         struct spi0 {
             constexpr static uint32_t instance_id = ID_SPI0;
+            constexpr static uint32_t irqn = static_cast<uint32_t>(SPI0_IRQn);
         };
 
         enum class mode {

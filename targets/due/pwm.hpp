@@ -12,6 +12,7 @@ namespace llib::due {
     class pin_pwm{
         public:
             constexpr static uint32_t instance_id = ID_PWM;
+            constexpr static uint32_t irqn = static_cast<uint32_t>(PWM_IRQn);
 
             using pin = Pin;
 

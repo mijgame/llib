@@ -9,6 +9,7 @@ namespace llib::due {
     class pin_adc {
     public:
         constexpr static uint32_t instance_id = ID_ADC;
+        constexpr static uint32_t irqn = static_cast<uint32_t>(ADC_IRQn);
 
         using pin = Pin;
 

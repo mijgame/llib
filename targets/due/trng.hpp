@@ -11,6 +11,7 @@ namespace llib::due {
 
     public:
         constexpr static uint32_t instance_id = ID_TRNG;
+        constexpr static uint32_t irqn = static_cast<uint32_t>(TRNG_IRQn);
 
         template<bool Interrupt = true>
         constexpr void static init() {

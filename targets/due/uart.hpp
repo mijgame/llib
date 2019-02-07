@@ -8,6 +8,7 @@ namespace llib::due {
     namespace uart {
         struct uart {
             constexpr static uint32_t instance_id = ID_UART;
+            constexpr static uint32_t irqn = static_cast<uint32_t>(UART_IRQn);
         };
 
         template<unsigned int Baud = 115200>

@@ -7,6 +7,7 @@ namespace llib::due {
     class rtt {
     public:
         constexpr static uint32_t instance_id = ID_RTT;
+        constexpr static uint32_t irqn = static_cast<uint32_t>(RTT_IRQn);
 
         template<uint16_t Prescaler = 0x00008000, bool AlarmInterrupt = true, bool IncrementInterrupt = true>
         void static init() {
