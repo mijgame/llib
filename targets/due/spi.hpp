@@ -43,18 +43,18 @@ namespace llib::due {
             BIT_16 = 8
         };
 
-        template<typename SPI, typename Pin = pins::d10_multi>
+        template<typename SPI, typename Pin = pins::d10>
         class bus {
         private:
             template<typename PPin>
             static void configure_pin() {
                 // special cases sinds d10 and d4 have multiple pio's
-                if(std::is_same_v<PPin, pins::d10>){
+                if constexpr(std::is_same_v<PPin, pins::d10>){
                     return configure_pin<pins::d10_multi>();
                 }                
-                if(std::is_same_v<PPin, pins::d4>){
+                else if(std::is_same_v<PPin, pins::d4>){
                     return configure_pin<pins::d4_multi>();
-                }         
+                }    
 
                 // change the peripheral multiplexer to the other port
                 set_peripheral<PPin>();
