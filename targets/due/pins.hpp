@@ -568,7 +568,7 @@ namespace llib::due {
             pins::port<typename Pin::port>->PIO_ABSR = (pins::mask<Pin> | t);
         } else {
             // do nothing sinds we cant use different pio's
-            LLIB_ERROR("Wrong Pin detected; can'tt use pins that are not in pioa/piob.")
+            LLIB_ERROR("Wrong Pin detected; can't use pins that are not in pioa/piob.")
             for (;;);
         }
 
