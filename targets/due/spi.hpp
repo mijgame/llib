@@ -79,7 +79,7 @@ namespace llib::due {
             }
 
         public:
-            template<mode M, spi_mode Spm, uint32_t Divider, bits B>
+            template<spi_mode Spm = spi_mode::MODE_0, uint32_t Divider = 20, mode M = mode::MASTER, bits B = bits::BIT_8>
             void static init() {
                 // disable write protection spi
                 REG_SPI0_WPMR = 0x53504900;
