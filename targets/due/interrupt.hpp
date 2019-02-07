@@ -91,16 +91,23 @@ namespace llib::due {
 
                 if (llib::due::_callbacks<Port>::callbacks[pin]) {
                     llib::due::_callbacks<Port>::callbacks[pin]();
-                }
-
+                } 
+            
                 isr = isr & (~(1 << pin));
             }
+        }
+
+        template<typename Pin>
+        constexpr void _set_callback_func(interrupt_callback func){    
+            // TODO: fix the crash as this crashes the due atm       
+            //llib::due::_callbacks<typename Pin::port>::callbacks[Pin::number] = func;
         }
     }
 
     template<typename Pin, interrupt Mode>
-    void attach_interrupt(interrupt_callback func) {
+    void attach_interrupt(interrupt_callback func) {        
         _enable_interrupt_source_for_pin<Pin>();
+        _set_callback_func<Pin>(func);        
         _set_interrupt_mode<Pin, Mode>();
     }
 
@@ -111,19 +118,19 @@ namespace llib::due {
 }
 
 extern "C" {
-void PIOA_HANDLER() {
+void __PIOA_Handler() {
     llib::due::_handle_isr<llib::target::pioa>();
 }
 
-void PIOB_HANDLER() {
+void __PIOB_Handler() {
     llib::due::_handle_isr<llib::target::piob>();
 }
 
-void PIOC_HANDLER() {
+void __PIOC_Handler() {
     llib::due::_handle_isr<llib::target::pioc>();
 }
 
-void PIOD_HANDLER() {
+void __PIOD_Handler() {
     llib::due::_handle_isr<llib::target::piod>();
 }
 }
