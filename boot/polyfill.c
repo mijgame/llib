@@ -1,4 +1,5 @@
 #include <limits.h>
+#include <stdlib.h>
 
 int memcmp(const void *ptr1, const void *ptr2, size_t num) {
     __uint8_t *a = (__uint8_t*) ptr1;
