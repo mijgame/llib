@@ -54,7 +54,7 @@ namespace llib::due {
                 }                
                 else if(std::is_same_v<PPin, pins::d4>){
                     return configure_pin<pins::d4_multi>();
-                }    
+                }         
 
                 // change the peripheral multiplexer to the other port
                 set_peripheral<PPin>();
@@ -127,9 +127,13 @@ namespace llib::due {
             }
 
             static void write(uint16_t Data) {
-                while ((spi::port<SPI>->SPI_SR & SPI_SR_TXEMPTY) == 0);
+                while (is_transfering());
                 spi::port<SPI>->SPI_TDR = Data | SPI_PCS(static_cast<uint32_t>(pin_to_spi<Pin>()));
                 while ((spi::port<SPI>->SPI_SR & SPI_SR_TDRE) == 0);
+            }
+
+            static bool is_transfering(){
+                return (spi::port<SPI>->SPI_SR & SPI_SR_TXEMPTY) == 0;
             }
         };
     }
