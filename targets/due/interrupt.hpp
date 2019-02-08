@@ -117,10 +117,9 @@ namespace llib::due {
             while ((trailing_zeros = __CLZ(__RBIT(mask))) < 32) {
                 auto bit = static_cast<uint8_t>(trailing_zeros);
 
-                // TODO: fix the crash as this crashes the due atm   
                 // set the function on the positions of the bits in the mask
-                //llib::due::_callbacks<Handler>::callbacks[bit] = func;
-            
+                llib::due::_callbacks<Handler>::callbacks[bit] = func;
+
                 mask &= (~(1 << bit));
             }   
         }
@@ -134,9 +133,8 @@ namespace llib::due {
             while ((trailing_zeros = __CLZ(__RBIT(mask))) < 32) {
                 auto bit = static_cast<uint8_t>(trailing_zeros);
 
-                // TODO: fix the crash as this crashes the due atm   
                 // set the function on the positions of the bits in the mask
-                //llib::due::_callbacks<Handler>::callbacks[bit] = NULL;
+                llib::due::_callbacks<Handler>::callbacks[bit] = NULL;
             
                 mask &= (~(1 << bit));
             }
@@ -146,7 +144,7 @@ namespace llib::due {
     template<typename Pin, interrupt Mode>
     void attach_interrupt(interrupt_callback func) {        
         _enable_interrupt_source_for_pin<Pin>();
-        _set_callback_func<typename Pin::port, Pin::number>(func);        
+        _set_callback_func<typename Pin::port, uint32_t(1U << Pin::number)>(func);        
         _set_interrupt_mode<Pin, Mode>();
     }
 
