@@ -86,7 +86,7 @@ namespace llib::due {
 
         template<typename Port>
         struct _callbacks {
-            static interrupt_callback callbacks[32];
+            static void (*callbacks[32])();
         };
 
         template<typename Port>
