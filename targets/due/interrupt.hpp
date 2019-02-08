@@ -190,6 +190,13 @@ namespace llib::due {
 
         // disable interrupt if all callbacks are disabled
         _disable_interrupt_source<Handler>();
+    }
+
+    template<uint16_t irqn_id>
+    static void software_interrupt(){
+        // activate a interrupt within software
+        // 0x03 -> activates IRQ3
+        NVIC->STIR = (irqn_id & 0x‭1FF‬);
     }    
 }
 
