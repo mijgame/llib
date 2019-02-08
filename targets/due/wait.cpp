@@ -1,36 +1,34 @@
 #include <wait.hpp>
 
 #include "base.hpp"
+#include "stream.hpp"
 
 namespace llib {
-    uint_fast64_t _ticks() {
-        static bool initialized = false;
+    uint64_t _ticks() {
+        // save data sinds we can only read the flag once
+        uint32_t SysTick_CTRL = SysTick->CTRL;
 
-        if (!initialized) {
-            EFC0->EEFC_FMR = EEFC_FMR_FWS(4);
-            EFC1->EEFC_FMR = EEFC_FMR_FWS(4);
-
+        if (!(SysTick_CTRL & SysTick_CTRL_ENABLE_Msk)) {
             SysTick->CTRL = 0;          // Stop timer
             SysTick->LOAD = 0xFFFFFF;   // 24-bit timer
             SysTick->VAL = 0;           // Clear timer
             SysTick->CTRL = 5;          // Start timer
-
-            initialized = true;
         }
 
-        static uint32_t last_low = 0;
-        static uint64_t high = 0;
+        static uint64_t high_counter = 0;
 
-        uint32_t low = 0xFFFFFF - (SysTick->VAL & 0xFFFFFF);
-
-        if (low < last_low) {
+        if (SysTick_CTRL & SysTick_CTRL_COUNTFLAG_Msk) {
             // Rollover, increment
-            high += 0x1ULL << 24;
+            high_counter += ((SysTick->LOAD & 0xFFFFFF) + 1);
         }
 
-        last_low = low;
+        uint32_t low_counter = (SysTick->LOAD & 0xFFFFFF) - (SysTick->VAL & 0xFFFFFF);
 
-        return (low | high);
+        return (high_counter + low_counter);
+    }
+
+    uint64_t _ns() {
+        return _ticks() * 12;
     }
 
     uint64_t _us() {
@@ -41,15 +39,21 @@ namespace llib {
         // Due works on 84mhz, so a single tick is 11.9ns
         // for now only a us resolution is used.
         // TODO: support ns resolution
+                
+        auto end = _ns() + ns;
 
-        auto end = _us() + (ns / 1000);
-
-        while (_us() < end);
-    }
+        while (_ns() < end);
+    } 
 
     void sleep_for(uint64_t ns) {
         // TODO: use timer
 
         wait_for(ns);
+    }
+}
+
+extern "C"{
+    void __systick_handler(){
+        // do nothing
     }
 }
