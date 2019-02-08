@@ -6,8 +6,10 @@
 
 #include "base.hpp"
 #include "stream_base.hpp"
+#include "math.hpp"
 
 #include <stream_target.hpp>
+#include <cmath>
 
 namespace llib {
     [[maybe_unused]]
@@ -45,6 +47,24 @@ namespace llib {
     constexpr char endl = '\n';
 
     namespace {
+        /**
+         * Copy the given string into the buffer.
+         *
+         * @internal
+         * @param buffer
+         * @param str
+         * @return
+         */
+        constexpr void _strcopy(char *buffer, const char *str) {
+            int i = 0;
+            while (str[i] != '\0') {
+                buffer[i] = str[i];
+                i += 1;
+            }
+
+            buffer[i] = '\0';
+        }
+
         /**
          * Reverse a char buffer.
          *
@@ -277,6 +297,130 @@ namespace llib {
             str << buf;
         }
 
+        return str;
+    }
+
+    /**
+     * Output a double precision floating point
+     * number.
+     *
+     * @tparam OutputStream
+     * @param str
+     * @param v
+     * @return
+     */
+    template<typename OutputStream>
+    OutputStream operator<<(OutputStream str, double v) {
+//        constexpr double precision = 0.00000000000001;
+        constexpr double precision = 0.001;
+
+        char buffer[32];
+
+        if (std::isnan(v)) {
+            _strcopy(buffer, "NaN");
+        } else if (std::isinf(v)) {
+            _strcopy(buffer, "Inf");
+        } else if (v == 0.0) {
+            _strcopy(buffer, "0");
+        } else {
+            int digit, m, m1;
+            char *c = buffer;
+
+            int neg = (v < 0);
+
+            if (neg) {
+                v = -v;
+            }
+
+            // Calculate magnitude
+            m = llib::log10(v);
+
+            int use_exp = (m >= 14 || (neg && m >= 9) || m <= -9);
+
+            if (neg) {
+                *(c++) = '-';
+            }
+
+            // Set up for scientific notation
+            if (use_exp) {
+                if (m < 0) {
+                    m -= 1.0;
+                }
+
+                v /= llib::pow(10.0, m);
+                m1 = m;
+                m = 0;
+            }
+
+            if (m < 1.0) {
+                m = 0;
+            }
+
+            // Convert the number
+            while (v > precision || m >= 0) {
+                double weight = llib::pow(10.0, m);
+
+                llib::cout << weight << llib::endl;
+
+                if (weight > 0 && !std::isinf(weight)) {
+                    digit = llib::floor(v / weight);
+                    v -= (digit * weight);
+                    *(c++) = '0' + digit;
+                }
+
+                if (m == 0 && v > 0) {
+                    *(c++) = '.';
+                }
+
+                m--;
+            }
+
+            if (use_exp) {
+                // Convert the exponent
+                int i, j;
+                *(c++) = 'e';
+
+                if (m1 > 0) {
+                    *(c++) = '+';
+                } else {
+                    *(c++) = '-';
+                    m1 = -m1;
+                }
+
+                m = 0;
+                while (m1 > 0) {
+                    *(c++) = '0' + m1 % 10;
+                    m1 /= 10;
+                    m++;
+                }
+
+                c -= m;
+                for (i = 0, j = m - 1; i < j; i++, j--) {
+                    std::swap(c[i], c[j]);
+                }
+
+                c += m;
+            }
+
+            *(c) = '\0';
+        }
+
+        str << buffer;
+
+        return str;
+    }
+
+    /**
+     * Output a floating point number.
+     *
+     * @tparam OutputStream
+     * @param str
+     * @param v
+     * @return
+     */
+    template<typename OutputStream>
+    OutputStream operator<<(OutputStream str, float v) {
+        str << static_cast<double>(v);
         return str;
     }
 
