@@ -17,7 +17,7 @@ namespace llib::due {
     using interrupt_callback = void (*)();
 
     namespace {
-        template<typename Handler>
+        template<typename Handler, uint8_t priority>
         constexpr void _enable_interrupt_source() {
             // enable clock of peripheral
             enable_clock<Handler>();
@@ -28,8 +28,8 @@ namespace llib::due {
             // Clean pending irq
             NVIC->ICPR[Handler::irqn >> 5] = (1 << (Handler::irqn & 0x1F));
 
-            // Set priority to 0
-            NVIC->IP[Handler::irqn] = 0;
+            // Set priority to priority
+            NVIC->IP[Handler::irqn] = ((priority << (8 - __NVIC_PRIO_BITS)) & 0xFF);
 
             // Enable irq
             NVIC->ISER[Handler::irqn >> 5] = (1 << (Handler::irqn & 0x1F));
@@ -44,11 +44,11 @@ namespace llib::due {
             NVIC->ICPR[Handler::irqn >> 5] = (1 << (Handler::irqn & 0x1F));
         }        
 
-        template<typename Pin>
+        template<typename Pin, uint8_t priority>
         void _enable_interrupt_source_for_pin() {
             // check if an interupt has already been set in the pio of the pin
             if(!(pins::port<typename Pin::port>->PIO_IMR)){
-                _enable_interrupt_source<typename Pin::port>();
+                _enable_interrupt_source<typename Pin::port, priority>();
             }
         }
 
@@ -141,9 +141,19 @@ namespace llib::due {
         }        
     }
 
-    template<typename Pin, interrupt Mode>
+    /**
+     * Set an interrupt on a pin with interrupt mode, priority and a 
+     *  function to call when the interrupt happens
+     *
+     * @param func funtion to execute on interrupt call
+     * @tparam Pin the pin for the interrupt
+     * @tparam Mode for the pin to generate a interrupt
+     * @tparam priority priority for the interrupt. Sets the priority for the 
+     *     whole pio doesnt update if the pio has already been set.
+     */
+    template<typename Pin, interrupt Mode, uint8_t priority = 7>
     void attach_interrupt(interrupt_callback func) {        
-        _enable_interrupt_source_for_pin<Pin>();
+        _enable_interrupt_source_for_pin<Pin, priority>();
         _set_callback_func<typename Pin::port, uint32_t(1U << Pin::number)>(func);        
         _set_interrupt_mode<Pin, Mode>();
     }
@@ -158,11 +168,11 @@ namespace llib::due {
         }
     }
 
-    template<typename Handler, uint32_t mask>
+    template<typename Handler, uint32_t mask, uint8_t priority = 7>
     void attach_interrupt(interrupt_callback func) {
         // add function to iqrn on positions of mask and enable the iqrn interupt
         _set_callback_func<Handler, mask>(func);
-        _enable_interrupt_source<Handler>();
+        _enable_interrupt_source<Handler, priority>();
     }
 
     template<typename Handler, uint32_t mask>
