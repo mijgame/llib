@@ -196,7 +196,7 @@ namespace llib::due {
     static void software_interrupt(){
         // activate a interrupt within software
         // 0x03 -> activates IRQ3
-        NVIC->STIR = (irqn_id & 0x‭1FF‬);
+        NVIC->STIR = (irqn_id & 0x1FF);
     }    
 }
 
