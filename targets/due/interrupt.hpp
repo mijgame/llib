@@ -3,6 +3,7 @@
 
 #include "base.hpp"
 #include "pins.hpp"
+#include "spi.hpp"
 
 namespace llib::due {
     enum class interrupt {
