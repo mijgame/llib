@@ -488,11 +488,11 @@ namespace llib::due {
         }
 
         constexpr static void pullup_enable() {
-            pins::port<typename Pin::port>->PIO_PUDR = pins::mask<Pin>;
+            pins::port<typename Pin::port>->PIO_PUER = pins::mask<Pin>;
         }
 
         constexpr static void pullup_disable() {
-            pins::port<typename Pin::port>->PIO_PUER = pins::mask<Pin>;
+            pins::port<typename Pin::port>->PIO_PUDR = pins::mask<Pin>;
         }
     };
 
