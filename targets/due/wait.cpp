@@ -18,16 +18,17 @@ namespace llib {
 
         if (SysTick_CTRL & SysTick_CTRL_COUNTFLAG_Msk) {
             // Rollover, increment
-            high_counter += ((SysTick->LOAD & 0xFFFFFF) + 1);
+            high_counter += 1ULL << 24;
         }
 
-        uint32_t low_counter = (SysTick->LOAD & 0xFFFFFF) - (SysTick->VAL & 0xFFFFFF);
+        uint32_t low_counter = 0xFFFFFF - (SysTick->VAL & 0xFFFFFF);
 
         return (high_counter + low_counter);
     }
 
     uint64_t _ns() {
-        return _ticks() / 12;
+        auto ticks = _ticks();
+        return ticks * 11 + (ticks / 10 * 9);
     }
 
     uint64_t _us() {
