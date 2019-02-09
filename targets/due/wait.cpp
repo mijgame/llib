@@ -27,7 +27,7 @@ namespace llib {
     }
 
     uint64_t _ns() {
-        return _ticks() * 12;
+        return _ticks() / 12;
     }
 
     uint64_t _us() {
