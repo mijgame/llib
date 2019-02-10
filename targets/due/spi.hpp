@@ -51,10 +51,10 @@ namespace llib::due {
             static void configure_pin() {
                 // special cases sinds d10 and d4 have multiple pio's
                 if constexpr(std::is_same_v<PPin, pins::d10>){
-                    return configure_pin<pins::d10_multi>();
+                    return configure_pin<pins::cs0>();
                 }                
                 else if(std::is_same_v<PPin, pins::d4>){
-                    return configure_pin<pins::d4_multi>();
+                    return configure_pin<pins::cs1>();
                 }         
 
                 // change the peripheral multiplexer to the other port
@@ -65,10 +65,10 @@ namespace llib::due {
             constexpr static uint8_t pin_to_spi() {
                 // special cases sinds d10 and d4 have multiple pio's
                 if constexpr (std::is_same_v<PPin, pins::d10>){
-                    return pins::d10_multi::spi_number;
+                    return pins::cs0::spi_number;
                 }
                 else if (std::is_same_v<PPin, pins::d4>){
-                    return pins::d4_multi::spi_number;
+                    return pins::cs1::spi_number;
                 }
                 else{
                     return PPin::spi_number;
