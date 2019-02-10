@@ -9,124 +9,134 @@ namespace llib::due {
     namespace pins {
         struct d0 {
             using port = pioa;
+            using periph = pio_periph_a;
             constexpr static uint32_t number = 8;
             constexpr static uint32_t pwm_channel = 0;
         };
 
         struct d1 {
             using port = pioa;
+            using periph = pio_periph_a;
             constexpr static uint32_t number = 9;
         };
 
         struct d2 {
             using port = piob;
+            using periph = pio_periph_b;
             constexpr static uint32_t number = 25;
         };
 
         struct d3 {
             using port = pioc;
+            using periph = pio_periph_b;
             constexpr static uint32_t number = 28;
         };
 
         struct d4 {
             using port = pioc;
+            using periph = pio_periph_b;
             constexpr static uint32_t number = 26;
-        };
-
-        struct d4_multi {
-            using port = pioa;
-            constexpr static uint32_t number = 29;
-            constexpr static uint32_t spi_number = 1;
         };
 
         struct d5 {
             using port = pioc;
+            using periph = pio_periph_b;
             constexpr static uint32_t number = 25;
         };
 
         struct d6 {
             using port = pioc;
+            using periph = pio_periph_b;
             constexpr static uint32_t number = 24;
         };
 
         struct d7 {
             using port = pioc;
+            using periph = pio_periph_b;
             constexpr static uint32_t number = 23;
         };
 
         struct d8 {
             using port = pioc;
+            using periph = pio_periph_b;
             constexpr static uint32_t number = 22;
         };
 
         struct d9 {
             using port = pioc;
+            using periph = pio_periph_b;
             constexpr static uint32_t number = 21;
         };
 
         struct d10 {
             using port = pioc;
+            using periph = pio_periph_b;
             constexpr static uint32_t number = 29;
-        };
-
-        struct d10_multi {
-            using port = pioa;
-            constexpr static uint32_t number = 28;
-            constexpr static uint32_t spi_number = 0;
         };
 
         struct d11 {
             using port = piod;
+            using periph = pio_periph_b;
             constexpr static uint32_t number = 7;
         };
 
         struct d12 {
             using port = piod;
+            using periph = pio_periph_b;
             constexpr static uint32_t number = 8;
         };
 
         struct d13 {
             using port = piob;
+            using periph = pio_periph_b;
             constexpr static uint32_t number = 27;
         };
 
         struct d14 {
             using port = piod;
+            using periph = pio_periph_b;
             constexpr static uint32_t number = 4;
         };
 
         struct d15 {
             using port = piod;
+            using periph = pio_periph_b;
             constexpr static uint32_t number = 5;
         };
 
         struct d16 {
             using port = pioa;
+            using periph = pio_periph_a;
             constexpr static uint32_t number = 13;
         };
 
         struct d17 {
             using port = pioa;
+            using periph = pio_periph_a;
             constexpr static uint32_t number = 12;
         };
 
         struct d18 {
             using port = pioa;
+            using periph = pio_periph_a;
             constexpr static uint32_t number = 11;
         };
 
         struct d19 {
             using port = pioa;
+            using periph = pio_periph_a;
             constexpr static uint32_t number = 10;
         };
 
         struct d20 {
             using port = piob;
+            using periph = pio_periph_a;
             constexpr static uint32_t number = 12;
         };
 
         struct d21 {
             using port = piob;
+            using periph = pio_periph_a;
             constexpr static uint32_t number = 13;
         };
 
@@ -283,6 +293,7 @@ namespace llib::due {
 
         struct d52 {
             using port = piob;
+            using periph = pio_periph_b;
             constexpr static uint32_t number = 21;
             constexpr static uint32_t spi_number = 2;
         };
@@ -361,6 +372,7 @@ namespace llib::due {
 
         struct a11 {
             using port = piob;
+            using periph = pio_periph_b;
             constexpr static uint32_t number = 20;
             constexpr static uint32_t adc_channel = 13;
             constexpr static uint32_t spi_number = 1;
@@ -378,75 +390,105 @@ namespace llib::due {
 
         struct cantx {
             using port = pioa;
+            using periph = pio_periph_a;
             constexpr static uint32_t number = 1;
         };
 
         struct canrx {
             using port = pioa;
+            using periph = pio_periph_a;
             constexpr static uint32_t number = 0;
         };
 
         struct scl {
             using port = piob;
+            using periph = pio_periph_a;
             constexpr static uint32_t number = 13;
         };
 
         struct sda {
             using port = piob;
+            using periph = pio_periph_a;
             constexpr static uint32_t number = 12;
             constexpr static uint32_t pwm_channel = 0;
         };
 
         struct scl1 {
             using port = pioa;
+            using periph = pio_periph_a;
             constexpr static uint32_t number = 18;
         };
 
         struct sda1 {
             using port = pioa;
-            constexpr static uint32_t number = 18;
+            using periph = pio_periph_a;
+            constexpr static uint32_t number = 17;
         };
 
         struct tx {
             using port = pioa;
+            using periph = pio_periph_a;
             constexpr static uint32_t number = 9;
         };
 
         struct rx {
             using port = pioa;
+            using periph = pio_periph_a;
             constexpr static uint32_t number = 8;
         };
 
         struct led {
             using port = piob;
+            using periph = pio_periph_b;
             constexpr static uint32_t number = 27;
         };
 
         struct sck {
             using port = pioa;
+            using periph = pio_periph_a;
             constexpr static uint32_t number = 27;
         };
 
         struct miso {
             using port = pioa;
+            using periph = pio_periph_a;
             constexpr static uint32_t number = 25;
         };
 
         struct mosi {
             using port = pioa;
+            using periph = pio_periph_a;
             constexpr static uint32_t number = 26;
         };
 
         struct cs0 {
-            using port = pioc;
-            constexpr static uint32_t number = 29;
+            using port = pioa;
+            using periph = pio_periph_a;
+            constexpr static uint32_t number = 28;
+            constexpr static uint32_t spi_number = 0;
         };
 
         struct cs1 {
-            using port = pioc;
-            constexpr static uint32_t number = 26;
+            using port = pioa;
+            using periph = pio_periph_a;
+            constexpr static uint32_t number = 29;
+            constexpr static uint32_t spi_number = 1;
+        };    
+        
+        struct cs2 {
+            using port = piob;
+            using periph = pio_periph_b;
+            constexpr static uint32_t number = 20;
+            constexpr static uint32_t adc_channel = 13;
+            constexpr static uint32_t spi_number = 1;            
         };
 
+        struct cs3 {
+            using port = piob;
+            using periph = pio_periph_b;
+            constexpr static uint32_t number = 21;
+            constexpr static uint32_t spi_number = 2;
+        };
 
         template<typename Pin>
         constexpr uint32_t mask = 1U << Pin::number;
@@ -562,23 +604,20 @@ namespace llib::due {
         uint32_t t = pins::port<typename Pin::port>->PIO_ABSR;
 
         // Change pio multiplexer
-        if constexpr (std::is_same_v<typename Pin::port, pioa>) {
+        if constexpr (std::is_same_v<typename Pin::periph, pio_periph_a>) {
             pins::port<typename Pin::port>->PIO_ABSR &= (~pins::mask<Pin> & t);
-        } else if constexpr (std::is_same_v<typename Pin::port, piob>) {
+        } else if constexpr (std::is_same_v<typename Pin::periph, pio_periph_b>) {
             pins::port<typename Pin::port>->PIO_ABSR = (pins::mask<Pin> | t);
-        } else {
-            // do nothing sinds we cant use different pio's
-            LLIB_ERROR("Wrong Pin detected; can't use pins that are not in pioa/piob.")
-            for (;;);
         }
-
-        pins::port<typename Pin::port>->PIO_PDR = pins::mask<Pin>;
 
         // Disable interrupts on the pin(s)
         pins::port<typename Pin::port>->PIO_IDR = pins::mask<Pin>;
 
         // disable pull ups
         pins::port<typename Pin::port>->PIO_PUDR = pins::mask<Pin>;
+
+        // remove pin from pio controller
+        pins::port<typename Pin::port>->PIO_PDR = pins::mask<Pin>;
     }
 }
 

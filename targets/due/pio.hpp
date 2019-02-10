@@ -24,6 +24,10 @@ namespace llib::due {
         constexpr static uint32_t irqn = static_cast<uint32_t>(PIOD_IRQn);
     };
 
+    struct pio_periph_a {};
+
+    struct pio_periph_b {};
+
     /**
     * Enable the clock on the peripheral.
     *
