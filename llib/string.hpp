@@ -60,6 +60,12 @@ namespace llib {
 
     public:
         /**
+         * npos is a constant that refers to the end of the string
+         * when used for lengths and/or positions.
+         */
+        constexpr static size_t npos = std::numeric_limits<size_t>::max();
+
+        /**
          * Empty constructor.
          */
         constexpr string() {
@@ -82,14 +88,8 @@ namespace llib {
          * @param value
          * @param n
          */
-        constexpr string(char value, const size_t n) {
-           buffer_length = n;
-
-           for (size_t i = 0; i < n; i++) {
-               buffer[i] = value;
-           }
-
-           buffer[buffer_length + 1] = '\0';
+        constexpr string(const char value, const size_t n) {
+           assign(value, n);
         }
 
         /**
@@ -98,7 +98,7 @@ namespace llib {
          * @param value
          */
         constexpr explicit string(const char *value) {
-            *this = value;
+            assign(value);
         }
 
         /**
@@ -109,13 +109,7 @@ namespace llib {
          * @param n
          */
         constexpr string(const char *value, const size_t n) {
-            buffer_length = n;
-
-            for (size_t i = 0; i < n; i++) {
-                buffer[i] = value[i];
-            }
-
-            buffer[n + 1] = '\0';
+            assign(value, n);
         }
 
         /**
@@ -130,7 +124,7 @@ namespace llib {
             typename = std::enable_if_t<BufferSize >= OtherBufferSize>
         >
         constexpr explicit string(const string<OtherBufferSize> &other) {
-            *this = other;
+            assign(other);
         }
 
         /**
@@ -145,14 +139,7 @@ namespace llib {
             typename = std::enable_if_t<BufferSize >= OtherBufferSize>
         >
         constexpr string(const string<OtherBufferSize> &other, const size_t n) {
-            buffer_length = n;
-            const char *value = other.c_str();
-
-            for (size_t i = 0; i < n; i++) {
-                buffer[i] = value[i];
-            }
-
-            buffer[n + 1] = '\0';
+            assign(other, 0, n);
         }
 
         /**
@@ -165,13 +152,7 @@ namespace llib {
          */
         template<typename InputIterator>
         constexpr string(InputIterator first, InputIterator last) {
-            buffer_length = 0;
-
-            for (auto it = first; it != last; ++it) {
-                buffer[buffer_length++] = *it;
-            }
-
-            buffer[buffer_length + 1] = '\0';
+            assign(first, last);
         }
 
         /**
@@ -181,7 +162,22 @@ namespace llib {
          * @param il
          */
         constexpr string(std::initializer_list<char> il) {
-            *this = il;
+            assign(il);
+        }
+
+        /**
+         * Acquires the contents of str.
+         * str is left in an unspecified but valid state.
+         *
+         * @tparam OtherBufferSize
+         * @param str
+         */
+        template<
+            size_t OtherBufferSize,
+            typename = std::enable_if_t<BufferSize == OtherBufferSize>
+        >
+        constexpr string(string<OtherBufferSize> &&str) {
+            assign(str);
         }
 
         /**
@@ -206,10 +202,7 @@ namespace llib {
          * @return
          */
         constexpr string<BufferSize> &operator=(const char *value) {
-            buffer_length = str_len(value);
-            str_copy(buffer, value);
-
-            return *this;
+            return assign(value);
         }
 
         /**
@@ -219,15 +212,7 @@ namespace llib {
          * @return
          */
         constexpr string<BufferSize> &operator=(std::initializer_list<char> il) {
-            buffer_length = 0;
-
-            for (const char c : il) {
-                buffer[buffer_length++] = c;
-            }
-
-            buffer[buffer_length + 1] = '\0';
-
-            return *this;
+            return assign(il);
         }
 
         /**
@@ -242,8 +227,163 @@ namespace llib {
             typename = std::enable_if_t<BufferSize >= OtherBufferSize>
         >
         constexpr string<BufferSize> &operator=(const string<OtherBufferSize> &other) {
-            buffer_length = other.len();
-            str_copy(buffer, other.buffer);
+            return assign(other);
+        }
+
+        /**
+         * Copy the given string into this string.
+         *
+         * @tparam OtherBufferSize
+         * @param str
+         * @return
+         */
+        template<
+            size_t OtherBufferSize,
+            typename = std::enable_if_t<OtherBufferSize <= BufferSize>
+        >
+        constexpr string<BufferSize> &assign(const string<OtherBufferSize> &str) {
+            buffer_length = str.len();
+            str_copy(buffer, str.buffer);
+
+            return *this;
+        }
+
+        /**
+         * Copies the portion of str that begins at the character position subpos and
+         * spans sublen characters (or until the end of str, if either str is too short or
+         * if sublen is string::npos).
+         *
+         * @tparam OtherBufferSize
+         * @param str
+         * @param subpos
+         * @param sublen
+         * @return
+         */
+        template<size_t OtherBufferSize>
+        constexpr string &assign(const string<OtherBufferSize> &str, const size_t subpos, const size_t sublen) {
+            const auto length = sublen == npos
+                                ? str.len()
+                                : llib::max(str.len(), sublen);
+
+            for (size_t i = 0; i < length; i++) {
+                const auto pos = subpos + i;
+                buffer[pos] = str[i];
+            }
+
+            // Add a null terminator and change length if required
+            if (subpos + length > buffer_length) {
+                buffer_length = subpos + length;
+                buffer[buffer_length + 1] = '\0';
+            }
+
+            return *this;
+        }
+
+        /**
+         * Copies the null-terminated character sequence (C-string) pointed by value.
+         *
+         * @param value
+         * @return
+         */
+        constexpr string &assign(const char *value) {
+            buffer_length = str_len(value);
+            str_copy(buffer, value);
+
+            return *this;
+        }
+
+        /**
+         * Copies the first n characters from the array of characters pointed by value.
+         *
+         * @param value
+         * @param n
+         * @return
+         */
+        constexpr string &assign(const char *value, const size_t n) {
+            buffer_length = n;
+
+            for (size_t i = 0; i < n; i++) {
+                buffer[i] = value[i];
+            }
+
+            buffer[n + 1] = '\0';
+
+            return *this;
+        }
+
+        /**
+         * Replaces the current value by n consecutive copies of character value.
+         *
+         * @param value
+         * @param n
+         * @return
+         */
+        constexpr string &assign(const char value, const size_t n) {
+            buffer_length = n;
+
+            for (size_t i = 0; i < n; i++) {
+                buffer[i] = value;
+            }
+
+            buffer[buffer_length + 1] = '\0';
+
+            return *this;
+        }
+
+        /**
+         * Copies the sequence of characters in the range [first,last), in the same order.
+         *
+         * @tparam InputIterator
+         * @param first
+         * @param last
+         * @return
+         */
+        template<typename InputIterator>
+        constexpr string &assign(InputIterator first, InputIterator last) {
+            buffer_length = 0;
+
+            for (auto it = first; it != last; ++it) {
+                buffer[buffer_length++] = *it;
+            }
+
+            buffer[buffer_length + 1] = '\0';
+
+            return *this;
+        }
+
+        /**
+         * Copies each of the characters in il, in the same order.
+         *
+         * @param il
+         * @return
+         */
+        constexpr string &assign(std::initializer_list<char> il) {
+            buffer_length = 0;
+
+            for (const char c : il) {
+                buffer[buffer_length++] = c;
+            }
+
+            buffer[buffer_length + 1] = '\0';
+
+            return *this;
+        }
+
+        /**
+         * Acquires the contents of str.
+         * str is left in an unspecified but valid state.
+         *
+         * @tparam OtherBufferSize
+         * @param str
+         * @return
+         */
+        template<
+            size_t OtherBufferSize,
+            typename = std::enable_if_t<BufferSize == OtherBufferSize>
+        >
+        constexpr string<BufferSize> &assign(string<OtherBufferSize> &&str) noexcept {
+            buffer = std::move(str.buffer);
+            buffer_length = std::move(str.buffer_length);
 
             return *this;
         }
@@ -295,9 +435,17 @@ namespace llib {
         *
         * @param other
         */
-        constexpr void append(char other) {
-            buffer[buffer_length] = other;
+        constexpr void push_back(const char c) {
+            buffer[buffer_length] = c;
             buffer[++buffer_length] = '\0';
+        }
+
+        /**
+         * Erase the last character of this string buffer.
+         * @return
+         */
+        constexpr void pop_back() {
+            buffer[buffer_length] = '\0';
         }
 
         /**
@@ -345,7 +493,7 @@ namespace llib {
          */
         constexpr string<BufferSize + 1> operator+(char other) const {
             string<BufferSize + 1> buffer(c_str());
-            buffer.append(other);
+            buffer.push_back(other);
 
             return buffer;
         }
@@ -553,6 +701,21 @@ namespace llib {
 //            // Make space in the buffer for the required length
 //
 //        }
+
+        /**
+        *
+        * @tparam OtherBufferSize
+        * @param other
+        */
+        template<size_t OtherBufferSize>
+        constexpr void swap(string<OtherBufferSize> &other) {
+            // Swap pointers
+            char *temp = buffer;
+            buffer = &other.buffer;
+            other.buffer = temp;
+
+            std::swap(buffer_length, other.buffer_length);
+        }
 
         /**
          * Get an iterator to the character buffer.

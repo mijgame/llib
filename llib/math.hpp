@@ -208,20 +208,12 @@ namespace llib {
 
     template<typename T>
     constexpr T min(const T a, const T b) {
-        if constexpr(std::is_integral_v<T> && std::is_unsigned_v<T>) {
-            return b + ((a - b) & (a - b) >> (sizeof(T) * 8 - 1));
-        } else {
-            return (a > b) ? b : a;
-        }
+        return (a > b) ? b : a;
     }
 
     template<typename T>
     constexpr T max(const T a, const T b) {
-        if constexpr (std::is_integral_v<T> && std::is_unsigned_v<T>) {
-            return a - ((a - b) & (a - b) >> (sizeof(T) * 8 - 1));
-        } else {
-            return (a > b) ? a : b;
-        }
+        return (a > b) ? a : b;
     }
 
     template<typename T>
