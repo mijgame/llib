@@ -300,6 +300,10 @@ namespace llib {
         return str;
     }
 
+    inline void flot(char *p, double val) {
+
+    }
+
     /**
      * Output a double precision floating point
      * number.
@@ -311,9 +315,6 @@ namespace llib {
      */
     template<typename OutputStream>
     OutputStream operator<<(OutputStream str, double v) {
-//        constexpr double precision = 0.00000000000001;
-        constexpr double precision = 0.001;
-
         char buffer[32];
 
         if (std::isnan(v)) {
@@ -323,86 +324,34 @@ namespace llib {
         } else if (v == 0.0) {
             _strcopy(buffer, "0");
         } else {
-            int digit, m, m1;
-            char *c = buffer;
+            char *p = buffer;
+            int i = 0, k = 0;
 
-            int neg = (v < 0);
-
-            if (neg) {
-                v = -v;
+            while (static_cast<int>(v) > 0) {
+                v /= 10;
+                i++;
             }
 
-            // Calculate magnitude
-            m = llib::log10(v);
+            *(p + i) = '.';
 
-            int use_exp = (m >= 14 || (neg && m >= 9) || m <= -9);
+            v *= 10;
+            auto n = static_cast<int>(v);
+            v -= n;
 
-            if (neg) {
-                *(c++) = '-';
+            while ((n > 0) || (i > k)) {
+                if (k == i) {
+                    k++;
+                }
+
+                *(p + k) = '0' + n;
+                v *= 10;
+                n = static_cast<int>(v);
+                v -= n;
+                k++;
             }
 
-            // Set up for scientific notation
-            if (use_exp) {
-                if (m < 0) {
-                    m -= 1.0;
-                }
-
-                v /= llib::pow(10.0, m);
-                m1 = m;
-                m = 0;
-            }
-
-            if (m < 1.0) {
-                m = 0;
-            }
-
-            // Convert the number
-            while (v > precision || m >= 0) {
-                double weight = llib::pow(10.0, m);
-
-                llib::cout << weight << llib::endl;
-
-                if (weight > 0 && !std::isinf(weight)) {
-                    digit = llib::floor(v / weight);
-                    v -= (digit * weight);
-                    *(c++) = '0' + digit;
-                }
-
-                if (m == 0 && v > 0) {
-                    *(c++) = '.';
-                }
-
-                m--;
-            }
-
-            if (use_exp) {
-                // Convert the exponent
-                int i, j;
-                *(c++) = 'e';
-
-                if (m1 > 0) {
-                    *(c++) = '+';
-                } else {
-                    *(c++) = '-';
-                    m1 = -m1;
-                }
-
-                m = 0;
-                while (m1 > 0) {
-                    *(c++) = '0' + m1 % 10;
-                    m1 /= 10;
-                    m++;
-                }
-
-                c -= m;
-                for (i = 0, j = m - 1; i < j; i++, j--) {
-                    std::swap(c[i], c[j]);
-                }
-
-                c += m;
-            }
-
-            *(c) = '\0';
+            // Null-terminated string
+            *(p + k) = '\0';
         }
 
         str << buffer;
