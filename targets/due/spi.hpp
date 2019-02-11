@@ -49,7 +49,7 @@ namespace llib::due {
         private:
             template<typename PPin>
             static void configure_pin() {
-                // special cases sinds d10 and d4 have multiple pio's
+                // special cases since d10 and d4 have multiple pio's
                 if constexpr(std::is_same_v<PPin, pins::d10>){
                     return configure_pin<pins::cs0>();
                 }                
@@ -63,7 +63,7 @@ namespace llib::due {
 
             template<typename PPin>
             constexpr static uint8_t pin_to_spi() {
-                // special cases sinds d10 and d4 have multiple pio's
+                // special cases since d10 and d4 have multiple pio's
                 if constexpr (std::is_same_v<PPin, pins::d10>){
                     return pins::cs0::spi_number;
                 }
