@@ -140,7 +140,7 @@ namespace llib::due {
                     // set clock to pwm 
                     _set_frequency<frequency * 0xFF>();
 
-                    // write to cprd register sinds channel is still off
+                    // write to cprd register since channel is still off
                     PWM->PWM_CH_NUM[PWM_channel].PWM_CPRD = 0xFF;
 
                     // write duty cycle to cdty register

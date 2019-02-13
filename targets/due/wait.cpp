@@ -4,7 +4,7 @@
 
 namespace llib {
     uint64_t _ticks() {
-        // save data sinds we can only read the flag once
+        // save data since we can only read the flag once
         uint32_t SysTick_CTRL = SysTick->CTRL;
 
         if (!(SysTick_CTRL & SysTick_CTRL_ENABLE_Msk)) {
