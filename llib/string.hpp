@@ -55,7 +55,7 @@ namespace llib {
 
             dest[i] = '\0';
 
-            return i - 1;
+            return i;
         }
 
     public:
@@ -89,7 +89,7 @@ namespace llib {
          * @param n
          */
         constexpr string(const char value, const size_t n) {
-           assign(value, n);
+            assign(value, n);
         }
 
         /**
@@ -139,7 +139,7 @@ namespace llib {
             typename = std::enable_if_t<BufferSize >= OtherBufferSize>
         >
         constexpr string(const string<OtherBufferSize> &other, const size_t n) {
-            assign(other, 0, n);
+            assign(other.c_str(), n);
         }
 
         /**
@@ -177,7 +177,7 @@ namespace llib {
             typename = std::enable_if_t<BufferSize == OtherBufferSize>
         >
         constexpr string(string<OtherBufferSize> &&str) {
-            assign(str);
+            assign(std::move(str));
         }
 
         /**
@@ -242,7 +242,7 @@ namespace llib {
             typename = std::enable_if_t<OtherBufferSize <= BufferSize>
         >
         constexpr string<BufferSize> &assign(const string<OtherBufferSize> &str) {
-            buffer_length = str.len();
+            buffer_length = str.buffer_length;
             str_copy(buffer, str.buffer);
 
             return *this;
@@ -263,12 +263,13 @@ namespace llib {
         constexpr string &assign(const string<OtherBufferSize> &str, const size_t subpos, const size_t sublen) {
             const auto length = sublen == npos
                                 ? str.len()
-                                : llib::max(str.len(), sublen);
+                                : llib::min(str.len(), sublen);
 
-            for (size_t i = 0; i < length; i++) {
-                const auto pos = subpos + i;
-                buffer[pos] = str[i];
-            }
+            memcpy(
+                (void *) (buffer + subpos),
+                (void *) str.c_str(),
+                length
+            );
 
             // Add a null terminator and change length if required
             if (subpos + length > buffer_length) {
@@ -286,8 +287,7 @@ namespace llib {
          * @return
          */
         constexpr string &assign(const char *value) {
-            buffer_length = str_len(value);
-            str_copy(buffer, value);
+            buffer_length += str_copy(buffer, value);
 
             return *this;
         }
@@ -300,12 +300,13 @@ namespace llib {
          * @return
          */
         constexpr string &assign(const char *value, const size_t n) {
+            memcpy(
+                (void *) buffer,
+                (void *) value,
+                n
+            );
+
             buffer_length = n;
-
-            for (size_t i = 0; i < n; i++) {
-                buffer[i] = value[i];
-            }
-
             buffer[n + 1] = '\0';
 
             return *this;
@@ -389,6 +390,45 @@ namespace llib {
         }
 
         /**
+         * Insert additional characters before the character
+         * indicated by pos.
+         *
+         * @tparam OtherBufferSize
+         * @param pos
+         * @param str
+         * @return
+         */
+        template<
+            size_t OtherBufferSize,
+            typename = std::enable_if_t<BufferSize >= OtherBufferSize>
+        >
+        constexpr string<BufferSize> &insert(const size_t pos, const string<OtherBufferSize> &str) {
+            llib::cout << "BL: " << buffer_length << llib::endl;
+            llib::cout << "Other: '" << str << "', len: " << str.len() << llib::endl;
+
+            memmove(
+                (void *) (buffer + pos + str.len()),
+                (void *) (buffer + pos),
+                buffer_length - pos
+            );
+
+            llib::cout << buffer << llib::endl;
+
+            memcpy(
+                (void *) (buffer + pos),
+                (void *) str.c_str(),
+                str.len()
+            );
+
+            buffer_length += str.len();
+            buffer[buffer_length] = '\0';
+
+            llib::cout << "BL: " << buffer_length << llib::endl;
+
+            return *this;
+        };
+
+        /**
          * Get the length of the string.
          *
          * @return
@@ -445,7 +485,7 @@ namespace llib {
          * @return
          */
         constexpr void pop_back() {
-            buffer[buffer_length] = '\0';
+            buffer[buffer_length--] = '\0';
         }
 
         /**
@@ -671,38 +711,6 @@ namespace llib {
         }
 
         /**
-         * Replace the contents a pos for a length of len with the
-         * contents of the given string.
-         *
-         * @tparam OtherBufferSize
-         * @param pos
-         * @param len
-         * @param str
-         * @return
-         */
-//        template<size_t OtherBufferSize>
-//        constexpr string<BufferSize> &replace(const size_t pos, const size_t len, const string<OtherBufferSize> &str) {
-//            // If str.len() is equal to the len, simply replace
-//            if (len == str.len()) {
-//                for (size_t i = pos; i < pos + len; i++) {
-//                    buffer[i] = str[i - pos];
-//                }
-//
-//                return *this;
-//            }
-//
-//            // We need to make space
-//            if (len < str.len()) {
-//                const auto make_space_for = len - str.len();
-//            }
-//
-//            // We need to reclaim space
-//
-//            // Make space in the buffer for the required length
-//
-//        }
-
-        /**
         *
         * @tparam OtherBufferSize
         * @param other
@@ -710,10 +718,7 @@ namespace llib {
         template<size_t OtherBufferSize>
         constexpr void swap(string<OtherBufferSize> &other) {
             // Swap pointers
-            char *temp = buffer;
-            buffer = &other.buffer;
-            other.buffer = temp;
-
+            std::swap(buffer, other.buffer);
             std::swap(buffer_length, other.buffer_length);
         }
 
