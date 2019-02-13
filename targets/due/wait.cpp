@@ -3,37 +3,37 @@
 #include "base.hpp"
 
 namespace llib {
-    uint64_t _ticks() {
-        // save data since we can only read the flag once
-        uint32_t SysTick_CTRL = SysTick->CTRL;
-
-        if (!(SysTick_CTRL & SysTick_CTRL_ENABLE_Msk)) {
-            SysTick->CTRL = 0;          // Stop timer
-            SysTick->LOAD = 0xFFFFFF;   // 24-bit timer
-            SysTick->VAL = 0;           // Clear timer
-            SysTick->CTRL = 5;          // Start timer
-        }
-
-        static uint64_t high_counter = 0;
-
-        if (SysTick_CTRL & SysTick_CTRL_COUNTFLAG_Msk) {
-            // Rollover, increment
-            high_counter += 1ULL << 24;
-        }
-
-        uint32_t low_counter = 0xFFFFFF - (SysTick->VAL & 0xFFFFFF);
-
-        return (high_counter + low_counter);
-    }
-
-    uint64_t _ns() {
-        auto ticks = _ticks();
-        return ticks * 11 + (ticks / 10 * 9);
-    }
-
-    uint64_t _us() {
-        return _ticks() / 84;
-    }
+//    uint64_t _ticks() {
+//        // save data since we can only read the flag once
+//        uint32_t SysTick_CTRL = SysTick->CTRL;
+//
+//        if (!(SysTick_CTRL & SysTick_CTRL_ENABLE_Msk)) {
+//            SysTick->CTRL = 0;          // Stop timer
+//            SysTick->LOAD = 0xFFFFFF;   // 24-bit timer
+//            SysTick->VAL = 0;           // Clear timer
+//            SysTick->CTRL = 5;          // Start timer
+//        }
+//
+//        static uint64_t high_counter = 0;
+//
+//        if (SysTick_CTRL & SysTick_CTRL_COUNTFLAG_Msk) {
+//            // Rollover, increment
+//            high_counter += 1ULL << 24;
+//        }
+//
+//        uint32_t low_counter = 0xFFFFFF - (SysTick->VAL & 0xFFFFFF);
+//
+//        return (high_counter + low_counter);
+//    }
+//
+//    uint64_t _ns() {
+//        auto ticks = _ticks();
+//        return ticks * 11 + (ticks / 10 * 9);
+//    }
+//
+//    uint64_t _us() {
+//        return _ticks() / 84;
+//    }
 
     struct _timer {
         uint_fast32_t counter;
@@ -43,18 +43,22 @@ namespace llib {
             : counter(0), rollovers(0) {}
     };
 
-    void _advance_timer(_timer &timer) {
-        // Save register value since we can only read the flag once.
-        uint32_t SysTick_CTRL = SysTick->CTRL;
+    void _stop_systick() {
+        SysTick->CTRL = 0;
+    }
 
-        if (!(SysTick_CTRL & SysTick_CTRL_ENABLE_Msk)) {
+    void _reset_systick() {
+        if (!(SysTick->CTRL & SysTick_CTRL_ENABLE_Msk)) {
             SysTick->CTRL = 0;          // Stop timer
             SysTick->LOAD = 0xFFFFFF;   // 24-bit timer
-            SysTick->VAL = 0;           // Clear timer
             SysTick->CTRL = 5;          // Start timer
         }
 
-        if (SysTick_CTRL & SysTick_CTRL_COUNTFLAG_Msk) {
+        SysTick->VAL = 0;           // Clear timer
+    }
+
+    void _advance_timer(_timer &timer) {
+        if (SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk) {
             timer.rollovers += 1;
         }
 
@@ -70,6 +74,8 @@ namespace llib {
         const uint_fast32_t rollovers = total_ticks / ticks_per_rollover;
         const uint_fast32_t ticks = total_ticks - ticks_per_rollover * rollovers;
 
+        _reset_systick();
+
         while (timer.rollovers < rollovers) {
             _advance_timer(timer);
         }
@@ -78,6 +84,8 @@ namespace llib {
         while (timer.counter < ticks) {
             _advance_timer(timer);
         }
+
+        _stop_systick();
     }
 
 //    void wait_for(uint64_t ns) {
