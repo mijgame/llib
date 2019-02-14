@@ -3,38 +3,6 @@
 #include "base.hpp"
 
 namespace llib {
-//    uint64_t _ticks() {
-//        // save data since we can only read the flag once
-//        uint32_t SysTick_CTRL = SysTick->CTRL;
-//
-//        if (!(SysTick_CTRL & SysTick_CTRL_ENABLE_Msk)) {
-//            SysTick->CTRL = 0;          // Stop timer
-//            SysTick->LOAD = 0xFFFFFF;   // 24-bit timer
-//            SysTick->VAL = 0;           // Clear timer
-//            SysTick->CTRL = 5;          // Start timer
-//        }
-//
-//        static uint64_t high_counter = 0;
-//
-//        if (SysTick_CTRL & SysTick_CTRL_COUNTFLAG_Msk) {
-//            // Rollover, increment
-//            high_counter += 1ULL << 24;
-//        }
-//
-//        uint32_t low_counter = 0xFFFFFF - (SysTick->VAL & 0xFFFFFF);
-//
-//        return (high_counter + low_counter);
-//    }
-//
-//    uint64_t _ns() {
-//        auto ticks = _ticks();
-//        return ticks * 11 + (ticks / 10 * 9);
-//    }
-//
-//    uint64_t _us() {
-//        return _ticks() / 84;
-//    }
-
     struct _timer {
         uint_fast32_t counter;
         uint_fast32_t rollovers;
@@ -65,14 +33,8 @@ namespace llib {
         timer.counter = 0xFFFFFF - (SysTick->VAL & 0xFFFFFF);
     }
 
-    void wait_for(uint64_t ns) {
-        constexpr uint_fast32_t ticks_per_rollover = 16777216;
-
+    void _wait_for(const uint_fast32_t rollovers, const uint_fast32_t ticks) {
         _timer timer;
-
-        const uint64_t total_ticks = ns / 12;
-        const uint_fast32_t rollovers = total_ticks / ticks_per_rollover;
-        const uint_fast32_t ticks = total_ticks - ticks_per_rollover * rollovers;
 
         _reset_systick();
 
@@ -88,21 +50,53 @@ namespace llib {
         _stop_systick();
     }
 
-//    void wait_for(uint64_t ns) {
-//        // Due works on 84mhz, so a single tick is 11.9ns
-//        // for now only a us resolution is used.
-//        // TODO: support ns resolution
-//
-//        auto end = _ns() + ns;
-//
-//        while (_ns() < end);
-//    }
+    void wait_for(llib::ns ns) {
+        constexpr uint_fast32_t ticks_per_rollover = 16777216;
 
-    void sleep_for(uint64_t ns) {
-        // TODO: use timer
+        const uint_fast32_t total_ticks = ns.value / 12;
+        const uint_fast32_t rollovers = total_ticks / ticks_per_rollover;
+        const uint_fast32_t ticks = total_ticks - ticks_per_rollover * rollovers;
 
-        wait_for(ns);
+        _wait_for(rollovers, ticks);
     }
+
+    void wait_for(llib::us us) {
+        constexpr uint_fast32_t us_per_rollover = 1410;
+
+        const uint_fast32_t divider = us.value / us_per_rollover;
+        const uint_fast32_t rollovers = us.value / us_per_rollover;
+        const uint_fast32_t ticks = (us.value - us_per_rollover * divider) * 84;
+
+        _wait_for(rollovers, ticks);
+    }
+
+    void wait_for(llib::ms ms) {
+        constexpr uint_fast32_t us_per_rollover = 1410;
+
+        const uint_fast32_t total_us = ms.value * 1000;
+        const uint_fast32_t divider = total_us / us_per_rollover;
+        const uint_fast32_t rollovers = total_us / us_per_rollover;
+        const uint_fast32_t ticks = (total_us - us_per_rollover * divider) * 84;
+
+        _wait_for(rollovers, ticks);
+    }
+
+    void wait_for(llib::s s) {
+        constexpr uint_fast32_t us_per_rollover = 1410;
+
+        const uint_fast32_t total_us = s.value * 1000 * 1000;
+        const uint_fast32_t divider = total_us / us_per_rollover;
+        const uint_fast32_t rollovers = total_us / us_per_rollover;
+        const uint_fast32_t ticks = (total_us - us_per_rollover * divider) * 84;
+
+        _wait_for(rollovers, ticks);
+    }
+
+//    void sleep_for(uint64_t ns) {
+//        // TODO: use timer
+//
+//        wait_for(ns);
+//    }
 }
 
 extern "C" {
