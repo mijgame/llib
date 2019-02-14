@@ -52,8 +52,8 @@ void *memcpy(void *destination, const void *source, size_t num) {
         num -= 4;
     }
 
-    __uint8_t *ss = (__uint8_t *) ld;
-    __uint8_t *sd = (__uint8_t *) ls;
+    __uint8_t *ss = (__uint8_t *) ls;
+    __uint8_t *sd = (__uint8_t *) ld;
     while (num--) {
         *(sd++) = *(ss++);
     }
@@ -75,8 +75,8 @@ void *memmove(void *destination, const void *source, size_t num) {
             num -= 4;
         }
 
-        __uint8_t *ss = (__uint8_t *) ld;
-        __uint8_t *sd = (__uint8_t *) ls;
+        __uint8_t *ss = (__uint8_t *) ls;
+        __uint8_t *sd = (__uint8_t *) ld;
         while (num--) {
             *(sd--) = *(ss--);
         }
