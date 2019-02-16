@@ -403,14 +403,18 @@ namespace llib::due {
 
         struct dac0 {
             using port = piob;
+            using periph = pio_periph_a;
             constexpr static uint32_t number = 15;
             constexpr static uint32_t pwm_channel = 3;
+            constexpr static uint32_t dacc_channel = 0;
         };
 
         struct dac1 {
             using port = piob;
+            using periph = pio_periph_a;
             constexpr static uint32_t number = 16;
             constexpr static uint32_t pwm_channel = 0;
+            constexpr static uint32_t dacc_channel = 1;
         };
 
         struct cantx {
