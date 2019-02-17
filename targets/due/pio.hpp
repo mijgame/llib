@@ -55,6 +55,20 @@ namespace llib::due {
         enable_clock<P>();
         enable_clock<P2, Args...>();
     }
+
+    /**
+    * Returns the status of the clock on the peripheral.
+    *
+    * @tparam P
+    */
+    template<typename P>
+    bool clock_status(){
+        if constexpr (P::instance_id < 32){
+            return (PMC->PMC_PCSR0 & (1U << P::instance_id));
+        } else {
+            return PMC->PMC_PCSR1 & (1U << (P::instance_id - 32));
+        }
+    }
 }
 
 #endif //LLIB_DUE_PIO_HPP
