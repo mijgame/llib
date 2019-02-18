@@ -300,8 +300,50 @@ namespace llib {
         return str;
     }
 
-    inline void flot(char *p, double val) {
+    /**
+     * Helper struct that helps output C-style arrays to
+     * the the stream. This is meant for debugging, the output is formatted
+     * as follows: "{ A, B, C }" where A, B and C are outputted using their shift
+     * left operator overload.
+     *
+     * Usage example:
+     * @code
+     * int buff[] = {1,2,3};
+     * llib::cout << llib::array_values(buff, 3);
+     * @endcode
+     * @tparam T
+     */
+    template<typename T>
+    struct array_values {
+        T *arr;
+        size_t size;
 
+        constexpr array_values(T *arr, size_t size)
+            : arr(arr), size(size) {}
+    };
+
+    /**
+     * Output a array_values object.
+     *
+     * @tparam OutputStream
+     * @tparam T
+     * @param str
+     * @param values
+     * @return
+     */
+    template<typename OutputStream, typename T>
+    OutputStream operator<<(OutputStream str, const array_values<T> &values) {
+        llib::cout << "{ ";
+        for (size_t i = 0; i < values.size; ++i) {
+            str << values.arr[i];
+
+            if (i + 1 != values.size) {
+                str << ", ";
+            }
+        }
+        llib::cout << " }";
+
+        return str;
     }
 
     /**
