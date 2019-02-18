@@ -1,6 +1,11 @@
 #include <limits.h>
 #include <stdlib.h>
 
+int __attribute__((always_inline)) _is_aligned(const void *ptr) {
+    // The value is 32 bits aligned if the first 2 bits aren't set.
+    return ((__uint32_t)ptr & 3) == 0;
+}
+
 int memcmp(const void *ptr1, const void *ptr2, size_t num) {
     __uint8_t *a = (__uint8_t *) ptr1;
     __uint8_t *b = (__uint8_t *) ptr2;
@@ -21,7 +26,7 @@ void *memset(void *ptr, int value, size_t num) {
     // a unsigned char.
     __uint8_t v8 = (__uint8_t) value;
 
-    if ((__uint32_t) ptr % sizeof(__uint32_t) == 0) {
+    if (_is_aligned(ptr)) {
         /*
          * First, set 4 bytes at a time, then
          * set the remaining bytes.
@@ -49,8 +54,7 @@ void *memset(void *ptr, int value, size_t num) {
 }
 
 void *memcpy(void *destination, const void *source, size_t num) {
-    if ((__uint32_t) destination % sizeof(__uint32_t) == 0
-        && (__uint32_t) source % sizeof(__uint32_t) == 0) {
+    if (_is_aligned(destination) && _is_aligned(source)) {
         /*
          * First, copy 4 bytes at a time, then
          * set the remaining bytes.
@@ -85,8 +89,7 @@ void *memmove(void *destination, const void *source, size_t num) {
         memcpy(destination, source, num);
     } else {
         // Memory alignment
-        if ((__uint32_t) destination % sizeof(__uint32_t) == 0
-            && (__uint32_t) source % sizeof(__uint32_t) == 0) {
+        if (_is_aligned(destination) && _is_aligned(source)) {
             // Destination starts after source; copy backwards
             __uint32_t *ld = (__uint32_t *) destination + num - 1;
             __uint32_t *ls = (__uint32_t *) source + num - 1;
