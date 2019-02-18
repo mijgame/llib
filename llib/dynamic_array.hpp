@@ -24,7 +24,7 @@ namespace llib {
          * @param pos
          */
         void free_position(const size_t pos) {
-            for (size_t i = this->index; i != pos; --i) {
+            for (size_t i = this->index; i != pos - 1; --i) {
                 store[i + 1] = store[i];
             }
         }
@@ -519,6 +519,8 @@ namespace llib {
          */
         iterator insert(const_iterator &it, std::initializer_list<T> list) {
             insert(it, list.begin(), list.end());
+
+            return it;
         }
 
         /**
@@ -656,6 +658,16 @@ namespace llib {
         template<typename ...Args>
         void emplace_back(Args &&... args) {
             store[index++] = T(std::forward<Args>(args)...);
+        }
+
+        /**
+         * Remove the first element from
+         * the array.
+         * This destroys the removed element.
+         */
+        void pop_front() {
+            store[0].~T();
+            erase(begin());
         }
 
         /**
