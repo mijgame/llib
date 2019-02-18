@@ -2,7 +2,6 @@
 #define LLIB_DUE_PINS_HPP
 
 #include "pio.hpp"
-#include "error.hpp"
 #include <type_traits>
 
 namespace llib::due {
@@ -430,27 +429,27 @@ namespace llib::due {
         };
 
         struct scl {
-            using port = piob;
-            using periph = pio_periph_a;
-            constexpr static uint32_t number = 13;
-        };
-
-        struct sda {
-            using port = piob;
-            using periph = pio_periph_a;
-            constexpr static uint32_t number = 12;
-        };
-
-        struct scl1 {
             using port = pioa;
             using periph = pio_periph_a;
             constexpr static uint32_t number = 18;
         };
 
-        struct sda1 {
+        struct sda {
             using port = pioa;
             using periph = pio_periph_a;
             constexpr static uint32_t number = 17;
+        };
+
+        struct scl1 {
+            using port = piob;
+            using periph = pio_periph_a;
+            constexpr static uint32_t number = 13;
+        };
+
+        struct sda1 {
+            using port = piob;
+            using periph = pio_periph_a;
+            constexpr static uint32_t number = 12;
         };
 
         struct tx {
@@ -628,6 +627,7 @@ namespace llib::due {
 
     template<typename Pin>
     void set_peripheral() {
+        // Disable interrupts on the pin
         pins::port<typename Pin::port>->PIO_IDR = pins::mask<Pin>;
         uint32_t t = pins::port<typename Pin::port>->PIO_ABSR;
 
@@ -637,9 +637,6 @@ namespace llib::due {
         } else if constexpr (std::is_same_v<typename Pin::periph, pio_periph_b>) {
             pins::port<typename Pin::port>->PIO_ABSR = (pins::mask<Pin> | t);
         }
-
-        // Disable interrupts on the pin(s)
-        pins::port<typename Pin::port>->PIO_IDR = pins::mask<Pin>;
 
         // disable pull ups
         pins::port<typename Pin::port>->PIO_PUDR = pins::mask<Pin>;
