@@ -76,7 +76,6 @@ set(LLIB_HEADERS
         llib/bitset.hpp
         llib/dynamic_array.hpp
         llib/queue.hpp
-        llib/list.hpp
         llib/defines.hpp
         llib/math.hpp
         llib/wait.hpp
