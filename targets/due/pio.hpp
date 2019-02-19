@@ -62,7 +62,7 @@ namespace llib::due {
     * @tparam P
     */
     template<typename P>
-    bool clock_status(){
+    bool get_clock_status(){
         if constexpr (P::instance_id < 32){
             return (PMC->PMC_PCSR0 & (1U << P::instance_id));
         } else {

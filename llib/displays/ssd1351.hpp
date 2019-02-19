@@ -42,15 +42,15 @@ namespace llib::displays {
                 // display setup
                 reset.set(true);
                 // wait 10ms to make sure the screen is on
-                wait_for(10_ms);
+                wait_for(llib::ms{10});
                 // reset the display
                 reset.set(false);
                 // wait 10ms for the screen to completely reset
-                wait_for(10_ms);
+                wait_for(llib::ms{10});
                 // enable the screen again
                 reset.set(true);
                 // wait 10ms for the screen to startup
-                wait_for(10_ms);
+                wait_for(llib::ms{10});
 
                 // disable command lock
                 set_command_lock(0); 

@@ -147,7 +147,7 @@ namespace llib {
                 int rem = num % base;
 
                 if (rem > 9) {
-                    str[i++] = '0' + (rem - 10);
+                    str[i++] = 'A' + (rem - 10);
                 } else {
                     str[i++] = '0' + rem;
                 }
