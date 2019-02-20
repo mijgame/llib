@@ -80,6 +80,7 @@ set(LLIB_HEADERS
         llib/math.hpp
         llib/wait.hpp
         llib/string.hpp
+        llib/decorators.hpp
     )
 
 add_executable(llib ${BOOT_SOURCES} ${LLIB_HEADERS} ${TARGET_INCLUDE} ${TARGET_STARTUP} ${TARGET_SOURCES})

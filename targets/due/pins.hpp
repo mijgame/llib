@@ -593,6 +593,36 @@ namespace llib::due {
     };
 
     template<typename Pin>
+    class pin_in_out {
+    public:
+        using pin = Pin;
+
+        constexpr static bool get() {
+            pins::port<Pin>->PIO_ODR = pins::mask<Pin>;
+            return pin_in<Pin>::get();
+        }
+
+        constexpr static void pullup_enable() {
+            pin_in<Pin>::pullup_enable();
+        }
+
+        constexpr static void pullup_disable() {
+            pin_in<Pin>::pullup_disable();
+        }
+
+        template<bool val>
+        constexpr static void set() {
+            pins::port<Pin>->PIO_OER = pins::mask<Pin>;
+            pin_out<Pin>::template set<val>();
+        }
+
+        constexpr static void set(const bool val) {
+            pins::port<Pin>->PIO_OER = pins::mask<Pin>;
+            pin_out<Pin>::set(val);
+        }
+    };
+
+    template<typename Pin>
     class pin_oc {
     public:
         using pin = Pin;

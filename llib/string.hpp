@@ -261,13 +261,13 @@ namespace llib {
          */
         template<size_t OtherBufferSize>
         constexpr string &assign(const string<OtherBufferSize> &str, const size_t subpos, const size_t sublen) {
-            const auto length = sublen == npos
-                                ? str.len()
-                                : llib::min(str.len(), sublen);
+            constexpr auto length = sublen == npos
+                                    ? str.len() - subpos
+                                    : llib::min(str.len() - subpos, sublen);
 
             memcpy(
-                (void *) (buffer + subpos),
-                (void *) str.c_str(),
+                (void *) buffer,
+                (void *) (str.c_str() + subpos),
                 length
             );
 
@@ -403,16 +403,11 @@ namespace llib {
             typename = std::enable_if_t<BufferSize >= OtherBufferSize>
         >
         constexpr string<BufferSize> &insert(const size_t pos, const string<OtherBufferSize> &str) {
-            llib::cout << "BL: " << buffer_length << llib::endl;
-            llib::cout << "Other: '" << str << "', len: " << str.len() << llib::endl;
-
             memmove(
                 (void *) (buffer + pos + str.len()),
                 (void *) (buffer + pos),
                 buffer_length - pos
             );
-
-            llib::cout << buffer << llib::endl;
 
             memcpy(
                 (void *) (buffer + pos),
@@ -423,10 +418,54 @@ namespace llib {
             buffer_length += str.len();
             buffer[buffer_length] = '\0';
 
-            llib::cout << "BL: " << buffer_length << llib::endl;
+            return *this;
+        };
+
+        /**
+         * Inserts a copy of a substring of str.
+         * The substring is the portion of str that begins at the character position subpos
+         * and spans sublen characters (or until the end of str, if either str is
+         * too short or if sublen is npos).
+         *
+         * @tparam OtherBufferSize
+         * @param pos
+         * @param str
+         * @return
+         */
+        template<
+            size_t OtherBufferSize,
+            typename = std::enable_if_t<BufferSize >= OtherBufferSize>
+        >
+        constexpr string<BufferSize> &
+        insert(const size_t pos, const string<OtherBufferSize> &str, const size_t subpos, const size_t sublen = npos) {
+            constexpr auto length = sublen == npos
+                                    ? str.len() - subpos
+                                    : llib::min(str.len() - subpos, sublen);
+
+            memmove(
+                (void *) (buffer + pos + length),
+                (void *) (buffer + pos),
+                buffer_length - pos
+            );
+
+            memcpy(
+                (void *) (buffer + pos),
+                (void *) (str.c_str() + subpos),
+                length
+            );
+
+            buffer_length += length;
+            buffer[buffer_length] = '\0';
 
             return *this;
         };
+
+        template<size_t OtherBufferSize>
+        constexpr size_t find(const string<OtherBufferSize> &other, size_t pos = 0) const {
+            for (size_t i = pos; i < buffer_length; ++i) {
+                if ()
+            }
+        }
 
         /**
          * Get the length of the string.
@@ -756,6 +795,100 @@ namespace llib {
          */
         constexpr const char *end() const {
             return buffer + buffer_length + 1;
+        }
+
+        /**
+         * Check if the contents of the two strings
+         * are equal.
+         *
+         * @param other
+         * @return
+         */
+        constexpr bool operator==(const char c) const {
+            if (len() != 1) {
+                return false;
+            }
+
+            return buffer[0] == c;
+        }
+
+        /**
+         * Check if the contents of the two strings
+         * are not equal.
+         *
+         * @param other
+         * @return
+         */
+        constexpr bool operator!=(const char c) const {
+            return !operator==(c);
+        }
+
+        /**
+         * Check if the contents of the two strings
+         * are equal.
+         *
+         * @param other
+         * @return
+         */
+        constexpr bool operator==(const char *other) const {
+            if (len() != strlen(other)) {
+                return false;
+            }
+
+            for (size_t i = 0; i < buffer_length; ++i) {
+                if (buffer[i] != other[i]) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /**
+         * Check if the contents of the two strings are not
+         * equal.
+         *
+         * @param other
+         * @return
+         */
+        constexpr bool operator!=(const char *other) const {
+            return !operator==(other);
+        }
+
+        /**
+         * Check if the contents of the two strings are
+         * equal.
+         *
+         * @tparam OtherBufferSize
+         * @param other
+         * @return
+         */
+        template<size_t OtherBufferSize>
+        constexpr bool operator==(const string<OtherBufferSize> &other) const {
+            if (len() != other.len()) {
+                return false;
+            }
+
+            for (size_t i = 0; i < buffer_length; ++i) {
+                if (buffer[i] != other[i]) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /**
+         * Check if the contents of the two strings are not
+         * equal.
+         *
+         * @tparam OtherBufferSize
+         * @param other
+         * @return
+         */
+        template<size_t OtherBufferSize>
+        constexpr bool operator!=(const string<OtherBufferSize> &other) const {
+            return !operator==(other);
         }
     };
 
