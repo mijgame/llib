@@ -5,6 +5,7 @@
 #include <peripheral.hpp>
 #include <interrupt.hpp>
 #include <bitset.hpp>
+#include <ports.hpp>
 
 namespace llib::displays {
     template<typename RPort, typename GPort, typename BPort, typename AlphaPort, typename OE, typename LAT, typename CLK>
@@ -137,13 +138,21 @@ namespace llib::displays {
                 for (uint8_t z = 0; z < leds_per_page; z++) {
                     uint16_t tot = (curr_page * leds_per_page) + z;
 
-                    auto bits = llib::bitset<2>();
-                    bits.set(0, buffer_r1[tot] & (1 << curr_bit));
-                    bits.set(1, buffer_r2[tot] & (1 << curr_bit));
+                    auto r_bits = llib::bitset<2>();
+                    r_bits.set(0, buffer_r1[tot] & (1 << curr_bit));
+                    r_bits.set(1, buffer_r2[tot] & (1 << curr_bit));
 
-                    RPort::set(bits);
-                    GPort::set(bits);
-                    BPort::set(bits);
+                    auto g_bits = llib::bitset<2>();
+                    g_bits.set(0, buffer_g1[tot] & (1 << curr_bit));
+                    g_bits.set(1, buffer_g2[tot] & (1 << curr_bit));
+
+                    auto b_bits = llib::bitset<2>();
+                    b_bits.set(0, buffer_b1[tot] & (1 << curr_bit));
+                    b_bits.set(1, buffer_b2[tot] & (1 << curr_bit));                    
+
+                    RPort::set(r_bits);
+                    GPort::set(g_bits);
+                    BPort::set(b_bits);
 
                     CLK::template set<true>();
                     CLK::template set<false>();
