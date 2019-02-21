@@ -2,6 +2,7 @@
 #define LLIB_DUE_RTT_HPP
 
 #include "peripheral.hpp"
+#include "interrupt.hpp"
 
 namespace llib::due {
     class rtt {
@@ -62,6 +63,15 @@ namespace llib::due {
             return RTT->RTT_VR;
         }
     };
+}
+
+extern "C" {
+void __RTT_Handler(){
+    llib::due::_handle_isr<llib::due::rtt>(
+        RTT->RTT_SR,
+        0x3 // enable all interupts sinds the RTT doesnt have a interupt mask
+    );
+}
 }
 
 #endif //LLIB_DUE_RTT_HPP
