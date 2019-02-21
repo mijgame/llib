@@ -81,7 +81,9 @@ set(LLIB_HEADERS
         llib/wait.hpp
         llib/string.hpp
         llib/decorators.hpp
-    )
+        llib/ports.hpp
+        llib/displays/display_32x32.hpp
+)
 
 add_executable(llib ${BOOT_SOURCES} ${LLIB_HEADERS} ${TARGET_INCLUDE} ${TARGET_STARTUP} ${TARGET_SOURCES})
 add_custom_command(TARGET llib POST_BUILD COMMAND ${OBJCOPY} ARGS -O binary -R .bss llib llib.bin)
