@@ -3,7 +3,6 @@
 
 #include "base.hpp"
 #include "pins.hpp"
-#include "spi.hpp"
 
 namespace llib::due {
     enum class interrupt {
@@ -226,13 +225,6 @@ void __PIOD_Handler() {
     llib::due::_handle_isr<llib::due::piod>(
         llib::due::pins::port<llib::due::piod>->PIO_ISR,
         llib::due::pins::port<llib::due::piod>->PIO_IMR
-    );
-}
-
-void __SPI0_Handler() {
-    llib::due::_handle_isr<llib::due::spi::spi0>(
-        llib::due::spi::port<llib::due::spi::spi0>->SPI_SR,
-        llib::due::spi::port<llib::due::spi::spi0>->SPI_IMR
     );
 }
 }
