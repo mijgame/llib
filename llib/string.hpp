@@ -460,12 +460,12 @@ namespace llib {
             return *this;
         };
 
-        template<size_t OtherBufferSize>
-        constexpr size_t find(const string<OtherBufferSize> &other, size_t pos = 0) const {
-            for (size_t i = pos; i < buffer_length; ++i) {
-                if ()
-            }
-        }
+        // template<size_t OtherBufferSize>
+        // constexpr size_t find(const string<OtherBufferSize> &other, size_t pos = 0) const {
+        //     for (size_t i = pos; i < buffer_length; ++i) {
+        //         if ()
+        //     }
+        // }
 
         /**
          * Get the length of the string.
