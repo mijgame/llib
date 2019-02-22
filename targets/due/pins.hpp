@@ -160,29 +160,29 @@ namespace llib::due {
         };
 
         struct d25 {
-            using port = pioc;
+            using port = piod;
             constexpr static uint32_t number = 0;
         };
 
         struct d26 {
-            using port = pioc;
+            using port = piod;
             constexpr static uint32_t number = 1;
         };
 
         struct d27 {
-            using port = pioc;
+            using port = piod;
             constexpr static uint32_t number = 2;
             constexpr static uint32_t pwm_channel = 0;
         };
 
         struct d28 {
-            using port = pioc;
+            using port = piod;
             constexpr static uint32_t number = 3;
             constexpr static uint32_t pwm_channel = 0;
         };
 
         struct d29 {
-            using port = pioc;
+            using port = piod;
             constexpr static uint32_t number = 6;
             constexpr static uint32_t pwm_channel = 2;
         };
@@ -416,13 +416,13 @@ namespace llib::due {
             constexpr static uint32_t dacc_channel = 1;
         };
 
-        struct cantx {
+        struct canrx {
             using port = pioa;
             using periph = pio_periph_a;
             constexpr static uint32_t number = 1;
         };
 
-        struct canrx {
+        struct cantx {
             using port = pioa;
             using periph = pio_periph_a;
             constexpr static uint32_t number = 0;
