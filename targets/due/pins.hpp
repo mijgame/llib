@@ -163,6 +163,7 @@ namespace llib::due {
 
         struct d22 {
             using port = piob;
+            using periph = pio_periph_b;
             using timer = tc::tc0;
             constexpr static uint32_t number = 26;
             constexpr static uint32_t timer_channel = 0; // TC0, TCLK0
@@ -208,6 +209,7 @@ namespace llib::due {
 
         struct d30 {
             using port = piod;
+            using periph = pio_periph_b;
             using timer = tc::tc2;
             constexpr static uint32_t number = 9;
             constexpr static uint32_t timer_channel = 8; // TC2, TCLK8
@@ -215,6 +217,7 @@ namespace llib::due {
 
         struct d31 {
             using port = pioa;
+            using periph = pio_periph_a;
             using timer = tc::tc0;
             constexpr static uint32_t number = 7;
             constexpr static uint32_t timer_channel = 2; // TC0, TCLK2
@@ -359,6 +362,7 @@ namespace llib::due {
 
         struct a2 {
             using port = pioa;
+            using periph = pio_periph_b;
             using timer = tc::tc1;
             constexpr static uint32_t number = 23;
             constexpr static uint32_t adc_channel = 5;
@@ -367,6 +371,7 @@ namespace llib::due {
 
         struct a3 {
             using port = pioa;
+            using periph = pio_periph_b;
             using timer = tc::tc0;
             constexpr static uint32_t number = 22;
             constexpr static uint32_t adc_channel = 4;
@@ -375,6 +380,7 @@ namespace llib::due {
 
         struct a4 {
             using port = pioa;
+            using periph = pio_periph_a;
             using timer = tc::tc0;
             constexpr static uint32_t number = 6;
             constexpr static uint32_t adc_channel = 3;
@@ -383,6 +389,7 @@ namespace llib::due {
 
         struct a5 {
             using port = pioa;
+            using periph = pio_periph_a;
             using timer = tc::tc0;
             constexpr static uint32_t number = 4;
             constexpr static uint32_t adc_channel = 2;
@@ -391,6 +398,7 @@ namespace llib::due {
 
         struct a6 {
             using port = pioa;
+            using periph = pio_periph_a;
             using timer = tc::tc0;
             constexpr static uint32_t number = 3;
             constexpr static uint32_t adc_channel = 1;
@@ -400,6 +408,7 @@ namespace llib::due {
 
         struct a7 {
             using port = pioa;
+            using periph = pio_periph_a;
             using timer = tc::tc0;
             constexpr static uint32_t number = 2;
             constexpr static uint32_t adc_channel = 0;
