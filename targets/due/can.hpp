@@ -90,12 +90,12 @@ namespace llib::due::can {
         }
 
         struct _can_bit_timing_t {
-            uint8_t uc_tq;      //! CAN_BIT_SYNC + uc_prog + uc_phase1 + uc_phase2 = uc_tq, 8 <= uc_tq <= 25.
-            uint8_t uc_prog;    //! Propagation segment, (3-bits + 1), 1~8;
-            uint8_t uc_phase1;  //! Phase segment 1, (3-bits + 1), 1~8;
-            uint8_t uc_phase2;  //! Phase segment 2, (3-bits + 1), 1~8, CAN_BIT_IPT <= uc_phase2;
-            uint8_t uc_sjw;     //! Resynchronization jump width, (2-bits + 1), min(uc_phase1, 4);
-            uint8_t uc_sp;      //! Sample point value, 0~100 in percent.
+            uint8_t time_quantum;      //! CAN_BIT_SYNC + uc_prog + uc_phase1 + uc_phase2 = uc_tq, 8 <= uc_tq <= 25.
+            uint8_t propagation;    //! Propagation segment, (3-bits + 1), 1~8;
+            uint8_t phase1;  //! Phase segment 1, (3-bits + 1), 1~8;
+            uint8_t phase2;  //! Phase segment 2, (3-bits + 1), 1~8, CAN_BIT_IPT <= uc_phase2;
+            uint8_t sync_jump_width;     //! Resynchronization jump width, (2-bits + 1), min(uc_phase1, 4);
+            uint8_t sample_point;      //! Sample point value, 0~100 in percent.
         };
 
         /**
@@ -188,16 +188,16 @@ namespace llib::due::can {
             prescale = SystemCoreClock / (Baud * tq);
 
             // Get the right CAN bit timing group
-            auto *bit_time = (_can_bit_timing_t *) &_can_bit_time[tq - min_tq];
+            const auto bit_time = _can_bit_time[tq - min_tq];
 
             // Before modifying CANBR, disable CAN controller.
             detail::_disable_bus<Bus>();
 
             // Write to CAN baudrate register
-            Bus::get_bus()->CAN_BR = CAN_BR_PHASE2(bit_time->uc_phase2 - 1) |
-                                     CAN_BR_PHASE1(bit_time->uc_phase1 - 1) |
-                                     CAN_BR_PROPAG(bit_time->uc_prog - 1) |
-                                     CAN_BR_SJW(bit_time->uc_sjw - 1) |
+            Bus::get_bus()->CAN_BR = CAN_BR_PHASE2(bit_time.phase2 - 1) |
+                                     CAN_BR_PHASE1(bit_time.phase1 - 1) |
+                                     CAN_BR_PROPAG(bit_time.propagation - 1) |
+                                     CAN_BR_SJW(bit_time.sync_jump_width - 1) |
                                      CAN_BR_BRP(prescale - 1);
 
             return true;
