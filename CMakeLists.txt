@@ -82,6 +82,7 @@ set(LLIB_HEADERS
         llib/string.hpp
         llib/decorators.hpp
         llib/ports.hpp
+        llib/ringbuffer.hpp
         llib/displays/display_32x32.hpp
 )
 
