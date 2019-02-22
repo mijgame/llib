@@ -2,6 +2,7 @@
 #define LLIB_PORTS_HPP
 
 #include <bitset.hpp>
+#include <tuple>
 
 namespace llib {
     /**
@@ -12,9 +13,20 @@ namespace llib {
      */
     template<typename ... Pins>
     class port_in {
+    protected:
+        using pins = std::tuple<Pins...>;
+
+        template<size_t Index>
+        using pin = std::tuple_element_t<Index, pins>;
+
     public:
         constexpr static void init() {
             (Pins::init(), ...);
+        }
+
+        template<size_t Index>
+        constexpr static void init() {
+            pin<Index>::init();
         }
 
         constexpr static bitset<sizeof...(Pins)> get() {
@@ -26,12 +38,27 @@ namespace llib {
             return result;
         }
 
+        template<size_t Index>
+        constexpr static bool get() {
+            return pin<Index>::get();
+        }
+
         constexpr static void pullup_enable() {
             (Pins::pullup_enable(), ...);
         }
 
+        template<size_t Index>
+        constexpr static void pullup_enable() {
+            pin<Index>::pullup_enable();
+        }
+
         constexpr static void pullup_disable() {
             (Pins::pullup_disable(), ...);
+        }
+
+        template<size_t Index>
+        constexpr static void pullup_disable() {
+            pin<Index>::pullup_disable();
         }
     };
 
@@ -43,9 +70,20 @@ namespace llib {
      */
     template<typename ... Pins>
     class port_out {
+    protected:
+        using pins = std::tuple<Pins...>;
+
+        template<size_t Index>
+        using pin = std::tuple_element_t<Index, pins>;
+
     public:
         constexpr static void init() {
             (Pins::init(), ...);
+        }
+
+        template<size_t Index>
+        constexpr static void init() {
+            pin<Index>::init();
         }
 
         template <bool Val>
@@ -53,8 +91,18 @@ namespace llib {
             (Pins::template set<Val>(), ...);
         }
 
+        template<size_t Index, bool Val>
+        constexpr static void set() {
+            pin<Index>::template set<Val>();
+        }
+
         constexpr static void set(const bool val) {
             (Pins::set(val), ...);
+        }
+
+        template<size_t Index>
+        constexpr static void set(const bool val) {
+            pin<Index>::set(val);
         }
 
         constexpr static void set(const bitset<sizeof...(Pins)> &bits) {
