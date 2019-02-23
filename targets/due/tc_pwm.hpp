@@ -23,7 +23,7 @@ namespace llib::due{
                 tc::port<typename Pin::timer_channel::timer>->TC_WPMR = TC_WPMR_WPKEY_PASSWD;     
 
                 if constexpr (!std::is_same_v<typename Pin::timer_pin, tc::tclk>){
-                    if(!get_clock_status<typename Pin::timer_channel>()){
+                    if(!(T_ch->TC_SR & TC_SR_CLKSTA)){
                         // enable peripheral clock
                         enable_clock<typename Pin::timer_channel>();
 
