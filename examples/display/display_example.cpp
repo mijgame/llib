@@ -7,9 +7,9 @@
 
 using namespace llib::due;
 
-constexpr static int8_t sinetab[256];
+extern const int8_t sinetab[];
 
-constexpr static uint8_t t_gamma[256];
+extern const uint8_t t_gamma[];
 
 uint16_t ColorHSV(long hue, uint8_t sat, uint8_t val, bool gflag);
 
@@ -127,7 +127,7 @@ uint16_t ColorHSV(long hue, uint8_t sat, uint8_t val, bool gflag) {
     return ((r & 0xf) << 8) | ((g & 0xF)  << 4) | (b & 0xF);
 }
 
-constexpr static int8_t sinetab[256] = {
+const int8_t sinetab[256] = {
     0,   2,   5,   8,  11,  15,  18,  21,
     24,  27,  30,  33,  36,  39,  42,  45,
     48,  51,  54,  56,  59,  62,  65,  67,
@@ -162,7 +162,7 @@ constexpr static int8_t sinetab[256] = {
     -25, -22, -19, -16, -12,  -9,  -6,  -3
 };
 
-constexpr static uint8_t t_gamma[256] = {
+const uint8_t t_gamma[256] = {
     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
