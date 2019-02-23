@@ -14,35 +14,11 @@ namespace llib::due{
             constexpr static uint32_t variant_mck = CHIP_FREQ_CPU_MAX;
             static inline uint32_t freq = 0;
 
-            template<typename Ch>
-            constexpr static uint8_t get_channel_id(){
-                if constexpr(std::is_same_v<Ch, tc::channel_0>){
-                    return 0;
-                } else if (std::is_same_v<Ch, tc::channel_1>){
-                    return 1;
-                } else if (std::is_same_v<Ch, tc::channel_2>){
-                    return 2;
-                } else if (std::is_same_v<Ch, tc::channel_3>){
-                    return 0;
-                } else if (std::is_same_v<Ch, tc::channel_4>){
-                    return 1;
-                } else if (std::is_same_v<Ch, tc::channel_5>){
-                    return 2;
-                } else if (std::is_same_v<Ch, tc::channel_6>){
-                    return 0;
-                } else if (std::is_same_v<Ch, tc::channel_7>){
-                    return 1;
-                } else if (std::is_same_v<Ch, tc::channel_8>){
-                    return 2;
-                }
-                // not a channel
-            }
-
         public:
             template<uint32_t frequency = 10000>
             static void init(){
                 // create pointer to channel
-                TcChannel * T_ch = &(tc::port<typename Pin::timer_channel::timer>->TC_CHANNEL[get_channel_id<typename Pin::timer_channel>()]);
+                TcChannel * T_ch = &(tc::port<typename Pin::timer_channel::timer>->TC_CHANNEL[Pin::timer_channel::channel]);
 
                 // remove write protect from TC
                 tc::port<typename Pin::timer_channel::timer>->TC_WPMR = TC_WPMR_WPKEY_PASSWD;     
@@ -86,7 +62,7 @@ namespace llib::due{
             template<uint32_t frequency>
             static void set_frequency(){
                 tc::port<typename Pin::timer_channel::timer>->
-                    TC_CHANNEL[get_channel_id<typename Pin::timer_channel>()].TC_RC = (variant_mck / 2) / frequency;
+                    TC_CHANNEL[Pin::timer_channel::channel].TC_RC = (variant_mck / 2) / frequency;
 
                 // set frequency for set function
                 freq = (variant_mck / 2) / frequency;                
@@ -94,7 +70,7 @@ namespace llib::due{
 
             static void set_frequency(uint32_t frequency){
                 tc::port<typename Pin::timer_channel::timer>->
-                    TC_CHANNEL[get_channel_id<typename Pin::timer_channel>()].TC_RC = (variant_mck / 2) / frequency;
+                    TC_CHANNEL[Pin::timer_channel::channel].TC_RC = (variant_mck / 2) / frequency;
 
                 // set frequency for set function
                 freq = (variant_mck / 2) / frequency;
@@ -108,7 +84,7 @@ namespace llib::due{
                 }
                 
                 // create pointer to channel
-                TcChannel * T_ch = &(tc::port<typename Pin::timer_channel::timer>->TC_CHANNEL[get_channel_id<typename Pin::timer_channel>()]);
+                TcChannel * T_ch = &(tc::port<typename Pin::timer_channel::timer>->TC_CHANNEL[Pin::timer_channel::channel]);
 
                 if constexpr(std::is_same_v<typename Pin::timer_pin, tc::tioa>){
                     if constexpr (value){
@@ -135,7 +111,7 @@ namespace llib::due{
                 }
 
                 // create pointer to channel
-                TcChannel * T_ch = &(tc::port<typename Pin::timer_channel::timer>->TC_CHANNEL[get_channel_id<typename Pin::timer_channel>()]);
+                TcChannel * T_ch = &(tc::port<typename Pin::timer_channel::timer>->TC_CHANNEL[Pin::timer_channel::channel]);
 
                 if constexpr(std::is_same_v<typename Pin::timer_pin, tc::tioa>){
                     if (value){
