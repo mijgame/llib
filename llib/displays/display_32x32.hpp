@@ -61,7 +61,7 @@ namespace llib::displays {
         static inline uint8_t switch_bit = 0;
 
     public:
-        template<typename Tc_channel = llib::target::tc::channel_1, uint32_t Hz = 60>
+        template<typename Tc_channel = llib::target::tc::channel_1, uint32_t Hz = 50>
         static void init() {
             llib::port_out<RPort, GPort, BPort, AlphaPort>::init();
 
