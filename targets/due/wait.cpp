@@ -1,6 +1,5 @@
 #include <wait.hpp>
-
-#include "base.hpp"
+#include <base.hpp>
 
 namespace llib {
     struct _timer {
@@ -50,7 +49,7 @@ namespace llib {
         _stop_systick();
     }
 
-    void wait_for(llib::ns ns) {
+    void wait_for(const llib::ns ns) {
         constexpr uint_fast32_t ticks_per_rollover = 16777216;
 
         const uint_fast32_t total_ticks = ns.value / 12;
@@ -60,36 +59,27 @@ namespace llib {
         _wait_for(rollovers, ticks);
     }
 
-    void wait_for(llib::us us) {
-        constexpr uint_fast32_t us_per_rollover = 1410;
+    void wait_for(const llib::us us) {
+        constexpr uint_fast32_t us_per_rollover = 199649;
 
-        const uint_fast32_t divider = us.value / us_per_rollover;
         const uint_fast32_t rollovers = us.value / us_per_rollover;
-        const uint_fast32_t ticks = (us.value - us_per_rollover * divider) * 84;
+        const uint_fast32_t ticks = (us.value - us_per_rollover * rollovers) * 84;
 
         _wait_for(rollovers, ticks);
     }
 
-    void wait_for(llib::ms ms) {
-        constexpr uint_fast32_t us_per_rollover = 1410;
+    void wait_for(const llib::ms ms) {
+        constexpr uint_fast32_t ms_per_rollover = 199;
 
-        const uint_fast32_t total_us = ms.value * 1000;
-        const uint_fast32_t divider = total_us / us_per_rollover;
-        const uint_fast32_t rollovers = total_us / us_per_rollover;
-        const uint_fast32_t ticks = (total_us - us_per_rollover * divider) * 84;
+        const uint_fast32_t rollovers = ms.value / ms_per_rollover;
+        const uint_fast32_t excess_us = (ms.value % ms_per_rollover) * 1000;
 
-        _wait_for(rollovers, ticks);
+        _wait_for(rollovers, 0);
+        wait_for(us{excess_us});
     }
 
-    void wait_for(llib::s s) {
-        constexpr uint_fast32_t us_per_rollover = 1410;
-
-        const uint_fast32_t total_us = s.value * 1000 * 1000;
-        const uint_fast32_t divider = total_us / us_per_rollover;
-        const uint_fast32_t rollovers = total_us / us_per_rollover;
-        const uint_fast32_t ticks = (total_us - us_per_rollover * divider) * 84;
-
-        _wait_for(rollovers, ticks);
+    void wait_for(const llib::s s) {
+       wait_for(ms{s.value * 1000});
     }
 
 //    void sleep_for(uint64_t ns) {
