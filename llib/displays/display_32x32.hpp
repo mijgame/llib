@@ -6,6 +6,7 @@
 #include <interrupt.hpp>
 #include <bitset.hpp>
 #include <ports.hpp>
+#include <tc_interrupt.hpp>
 
 namespace llib::displays {
     template<typename RPort, typename GPort, typename BPort, typename AlphaPort, typename OE, typename LAT, typename CLK>
@@ -63,6 +64,7 @@ namespace llib::displays {
         static inline uint8_t switch_bit = 0;
 
     public:
+        template<typename Tc_channel = llib::target::tc::channel_1, uint32_t Hz = 60>
         static void init() {
             llib::port_out<RPort, GPort, BPort, AlphaPort>::init();
 
@@ -79,8 +81,9 @@ namespace llib::displays {
             OE::template set<true>();
             LAT::template set<true>();
             CLK::template set<false>();
-            // attatch update function to a interupt call TODO: add the timer
-            // llib::target::attach_interrupt<handler, mask>(&flush);
+            
+            // attatch update function to a interupt call do hz * 16 for refreshrate
+            llib::target::tc::controller<Tc_channel>::template init<Hz * 16>(flush);
         }
 
         static void set_pixel(uint32_t x, uint32_t y, uint8_t red, uint8_t green, uint8_t blue) {

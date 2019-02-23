@@ -110,8 +110,8 @@ namespace llib {
         }
 
         constexpr static void set(const bitset<sizeof...(Pins)> &bits) {
-            size_t i = sizeof...(Pins) - 1;
-            (Pins::set(bits[i--]), ...);
+            size_t i = 0;
+            (Pins::set(bits[i++]), ...);
         }
     };
 }
