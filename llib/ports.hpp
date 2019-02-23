@@ -20,6 +20,8 @@ namespace llib {
         using pin = std::tuple_element_t<Index, pins>;
 
     public:
+        constexpr static size_t pin_count = sizeof...(Pins);
+
         constexpr static void init() {
             (Pins::init(), ...);
         }
@@ -77,6 +79,8 @@ namespace llib {
         using pin = std::tuple_element_t<Index, pins>;
 
     public:
+        constexpr static size_t pin_count = sizeof...(Pins);
+
         constexpr static void init() {
             (Pins::init(), ...);
         }
