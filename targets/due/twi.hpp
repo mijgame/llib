@@ -85,12 +85,11 @@ namespace llib::due {
                 port<TWI>->TWI_CWGR = divider;
             }
 
-            template<twi_message Flag>
-            static twi_message _wait_for_status() {
+            static twi_message _wait_for_status(const twi_message flag) {
                 uint32_t status = port<TWI>->TWI_SR;
                 uint32_t timeout = xmit_timeout;
 
-                while (!(status & uint32_t(Flag))) {
+                while (!(status & uint32_t(flag))) {
                     status = port<TWI>->TWI_SR;
 
                     if (status & TWI_SR_NACK) {
@@ -104,7 +103,7 @@ namespace llib::due {
                     }
                 }
 
-                return Flag;
+                return flag;
             }
 
             template<bool Read>
@@ -131,7 +130,7 @@ namespace llib::due {
                         port<TWI>->TWI_CR = TWI_CR_STOP;
                     }
 
-                    auto res = _wait_for_status<twi_message::RXRDY>();
+                    auto res = _wait_for_status(twi_message::RXRDY);
                     if (res == twi_message::RXRDY) {
                         // Read data into array
                         data[i] = static_cast<uint8_t>(port<TWI>->TWI_RHR & 0xFF);
@@ -142,7 +141,7 @@ namespace llib::due {
                 }
 
                 // Wait until read is done
-                return _wait_for_status<twi_message::TXCOMP>();
+                return _wait_for_status(twi_message::TXCOMP);
             }
 
         public:
@@ -231,7 +230,7 @@ namespace llib::due {
                 // Stop write
                 port<TWI>->TWI_CR = TWI_CR_STOP;
 
-                return _wait_for_status<twi_message::TXCOMP>();
+                return _wait_for_status(twi_message::TXCOMP);
             }
 
             /**
@@ -246,7 +245,7 @@ namespace llib::due {
                     // Write data in twi register
                     port<TWI>->TWI_THR = data[i];
 
-                    auto res = _wait_for_status<twi_message::TXRDY>();
+                    auto res = _wait_for_status(twi_message::TXRDY);
                     if (res != twi_message::TXRDY) {
                         // Error
                         return res;
@@ -265,7 +264,7 @@ namespace llib::due {
                 // Write data in twi register
                 port<TWI>->TWI_THR = data;
 
-                auto res = _wait_for_status<twi_message::TXRDY>();
+                auto res = _wait_for_status(twi_message::TXRDY);
                 if (res != twi_message::TXRDY) {
                     // Error
                     return res;
