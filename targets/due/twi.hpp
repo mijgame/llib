@@ -236,7 +236,7 @@ namespace llib::due {
              * @param data
              * @param size
              */
-            static twi_message write(uint8_t *data, size_t size) {
+            static twi_message write(const uint8_t *data, size_t size) {
                 // write the amount of data to the twi interface and check if nothing wrong happens
                 for (size_t i = 0; i < size; i++) {
                     // write data in twi register
