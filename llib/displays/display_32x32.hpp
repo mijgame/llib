@@ -120,39 +120,30 @@ namespace llib::displays {
 
         static void flush() {
             for (uint_fast8_t curr_page = 0; curr_page < page_size; curr_page++) {
-                // // set page selection
-                auto alpha = llib::bitset<4>();
-
-                alpha.set(0, curr_page & (1 << 0));
-                alpha.set(1, curr_page & (1 << 1));
-                alpha.set(2, curr_page & (1 << 2));
-                alpha.set(3, curr_page & (1 << 3));
-
-                AlphaPort::set(alpha);
+                // set page selection
+                AlphaPort::template set<0>(curr_page & (1 << 0));
+                AlphaPort::template set<1>(curr_page & (1 << 1));
+                AlphaPort::template set<2>(curr_page & (1 << 2));
+                AlphaPort::template set<3>(curr_page & (1 << 3));
 
                 // disable output so we can change the values
                 OE::template set<false>();
                 LAT::template set<false>();
 
+                uint_fast16_t tot = (curr_page * leds_per_page);
+
                 // write leds_per_page bits at a time
-                for (uint8_t z = 0; z < leds_per_page; z++) {
-                    uint16_t tot = (curr_page * leds_per_page) + z;
+                for (uint_fast8_t z = 0; z < leds_per_page; z++) {
+                    uint_fast16_t t = tot + z;                  
 
-                    auto r_bits = llib::bitset<2>();
-                    r_bits.set(0, buffer_r1[tot] & (1 << curr_bit));
-                    r_bits.set(1, buffer_r2[tot] & (1 << curr_bit));
+                    RPort::template set<0>(buffer_r1[t] & (1 << curr_bit));
+                    RPort::template set<1>(buffer_r2[t] & (1 << curr_bit));
 
-                    auto g_bits = llib::bitset<2>();
-                    g_bits.set(0, buffer_g1[tot] & (1 << curr_bit));
-                    g_bits.set(1, buffer_g2[tot] & (1 << curr_bit));
-
-                    auto b_bits = llib::bitset<2>();
-                    b_bits.set(0, buffer_b1[tot] & (1 << curr_bit));
-                    b_bits.set(1, buffer_b2[tot] & (1 << curr_bit));                    
-
-                    RPort::set(r_bits);
-                    GPort::set(g_bits);
-                    BPort::set(b_bits);
+                    GPort::template set<0>(buffer_g1[t] & (1 << curr_bit));
+                    GPort::template set<1>(buffer_g2[t] & (1 << curr_bit));
+                    
+                    BPort::template set<0>(buffer_b1[t] & (1 << curr_bit));
+                    BPort::template set<1>(buffer_b2[t] & (1 << curr_bit));                                        
 
                     CLK::template set<true>();
                     CLK::template set<false>();
