@@ -301,7 +301,7 @@ namespace llib::due {
                 uint8_t InSize = sizeof(T),
                 typename = std::enable_if_t<sizeof(T) <= 2>
             >
-            static twi_message read(uint8_t address, T in_addr, uint8_t *data, size_t size) {
+            static twi_message read(const uint8_t address, const T in_addr, uint8_t *data, const size_t size) {
                 // Start a read with two or less InSize
                 _start<true>(address, uint32_t(in_addr & 0xFFFFFF), InSize);
 
@@ -321,7 +321,7 @@ namespace llib::due {
                 typename T,
                 typename = std::enable_if_t<(sizeof(T) > 2)>
             >
-            static twi_message read(uint8_t address, T in_addr, uint8_t *data, size_t size) {
+            static twi_message read(const uint8_t address, const T in_addr, uint8_t *data, const size_t size) {
                 // Start a read with more than two In_size
                 _start<true>(address, uint32_t(in_addr & 0xFFFFFF), 3);
 
