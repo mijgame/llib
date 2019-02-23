@@ -67,13 +67,13 @@ namespace llib::due {
             constexpr static uint32_t variant_mck = CHIP_FREQ_CPU_MAX;
             constexpr static uint32_t xmit_timeout = 100'000;
 
-            template<uint32_t frequency>
+            template<uint32_t Frequency>
             static void _set_clock() {
                 uint32_t divider = 0;
 
-                // calculate clock divider and clock low/high divider
+                // Calculate clock divider and clock low/high divider
                 for (uint8_t clk_div = 0; clk_div < 7; clk_div++) {
-                    divider = ((variant_mck / (2 * frequency)) - 4) / pow(2, clk_div);
+                    divider = ((variant_mck / (2 * Frequency)) - 4) / pow(2, clk_div);
 
                     if (divider <= 0xFF) {
                         divider = ((clk_div & 0x7) << 16) | ((divider & 0xFF) << 8) | (divider & 0xFF);
@@ -85,75 +85,77 @@ namespace llib::due {
                 port<TWI>->TWI_CWGR = divider;
             }
 
-            template<twi_message flag>
+            template<twi_message Flag>
             static twi_message _wait_for_status() {
                 uint32_t status = port<TWI>->TWI_SR;
                 uint32_t timeout = xmit_timeout;
 
-                while (!(status & uint32_t(flag))) {
+                while (!(status & uint32_t(Flag))) {
                     status = port<TWI>->TWI_SR;
 
                     if (status & TWI_SR_NACK) {
-                        // not ack received stop
+                        // Not ack received, stop
                         return twi_message::NACK;
                     }
 
                     if (--timeout == 0) {
-                        // tried for to long so stop
+                        // Tried for to long, stop
                         return twi_message::TIMEOUT;
                     }
                 }
-                return flag;
+
+                return Flag;
             }
 
-            template<bool read>
-            static void _start(uint8_t addr, uint32_t in_addr = 0, uint8_t in_addr_size = 0) {
+            template<bool Read>
+            static void _start(const uint8_t addr, const uint32_t in_addr = 0, const uint8_t in_addr_size = 0) {
                 // Setup addresses
                 port<TWI>->TWI_MMR = (uint32_t(addr & 0x7F) << 16) | ((in_addr_size & 0x3) << 8);
 
-                if constexpr (read) {
-                    // enable read mode
+                if constexpr (Read) {
+                    // Enable Read mode
                     port<TWI>->TWI_MMR |= TWI_MMR_MREAD;
                 }
 
-                // set the internal address / data after addr and before repeated start
+                // Set the internal address / data after addr and before repeated start
                 port<TWI>->TWI_IADR = in_addr & 0xFFFFFF;
             }
 
-            static twi_message _read(uint8_t *data, size_t size) {
-                // write a start
+            static twi_message _read(uint8_t *data, const size_t size) {
+                // Write a start
                 port<TWI>->TWI_CR = TWI_CR_START;
 
                 for (size_t i = 0; i < size; i++) {
                     if (i + 1 >= size) {
-                        // write stop on last byte we want to read
+                        // Write stop on last byte we want to read
                         port<TWI>->TWI_CR = TWI_CR_STOP;
                     }
 
                     auto res = _wait_for_status<twi_message::RXRDY>();
                     if (res == twi_message::RXRDY) {
-                        // read data into array
-                        data[i] = (port<TWI>->TWI_RHR & 0xFF);
+                        // Read data into array
+                        data[i] = static_cast<uint8_t>(port<TWI>->TWI_RHR & 0xFF);
                     } else {
-                        // return error
+                        // Return error
                         return res;
                     }
                 }
-                // wait until read is done
+
+                // Wait until read is done
                 return _wait_for_status<twi_message::TXCOMP>();
             }
 
         public:
-            template<uint32_t frequency = 100000>
+            template<uint32_t Frequency = 100000>
             static void init() {
-                // enable clock
+                // Enable clock
                 enable_clock<TWI>();
 
-                // change the multiplexer
+                // Change the multiplexer
                 set_peripheral<typename TWI::sda>();
                 set_peripheral<typename TWI::scl>();
 
-                // enable the pullups of the pins
+                // Enable the pullups of the pins
                 pin_in<typename TWI::sda>::pullup_enable();
                 pin_in<typename TWI::scl>::pullup_enable();
 
@@ -169,58 +171,60 @@ namespace llib::due {
                 port<TWI>->TWI_CR = TWI_CR_SWRST;
                 port<TWI>->TWI_RHR;
 
-                // wait for at least 10ms
+                // Wait for at least 10ms
                 wait_for(llib::ms{15});
 
                 // TWI Slave mode disabled, Twi master mode disabled
                 port<TWI>->TWI_CR = TWI_CR_SVDIS | TWI_CR_MSDIS;
 
                 if constexpr(Twm == mode::MASTER) {
-                    // enable master mode
+                    // Enable master mode
                     port<TWI>->TWI_CR = TWI_CR_MSEN;
 
-                    _set_clock<frequency>();
+                    _set_clock<Frequency>();
                 }
             }
 
-            template<uint32_t frequency = 100000>
-            static void init(uint8_t addr) {
-                // do a normal init
-                init<frequency>();
+            template<uint32_t Frequency = 100000>
+            static void init(const uint8_t addr) {
+                // Do a normal init
+                init<Frequency>();
 
-                if constexpr(Twm == mode::SLAVE) {
-                    // configure slave address
-                    port<TWI>->TWI_SMR = 0;
-                    port<TWI>->TWI_SMR = TWI_SMR_SADR(addr);
-
-                    // TWI Slave Mode Enabled
-                    port<TWI>->TWI_CR = TWI_CR_SVEN;
-
-                    // wait for at least 10ms
-                    wait_for(llib::ms{15});
-
-                    if ((port<TWI>->TWI_CR & TWI_CR_SVDIS) != TWI_CR_SVDIS) {
-                        // retry since twi is not in slave mode
-                        LLIB_WARNING("Failed setting twi in slave mode. Trying again");
-                        init<addr, frequency>();
-                    }
-
-                    _set_clock<frequency>();
+                if constexpr(Twm != mode::SLAVE) {
+                    return;
                 }
+
+                // Configure slave address
+                port<TWI>->TWI_SMR = 0;
+                port<TWI>->TWI_SMR = TWI_SMR_SADR(addr);
+
+                // TWI Slave Mode Enabled
+                port<TWI>->TWI_CR = TWI_CR_SVEN;
+
+                // Wait for at least 10ms
+                wait_for(llib::ms{15});
+
+                if ((port<TWI>->TWI_CR & TWI_CR_SVDIS) != TWI_CR_SVDIS) {
+                    // Retry since twi is not in slave mode
+                    LLIB_WARNING("Failed setting twi in slave mode. Trying again");
+                    init<addr, Frequency>();
+                }
+
+                _set_clock<Frequency>();
             }
 
             /**
-             * starts an write transmission
+             * Starts a write transmission.
              *
              * @param address
              */
-            static void start_transmission(uint8_t address) {
-                // start a write
+            static void start_transmission(const uint8_t address) {
+                // Start a write
                 _start<false>(address);
             }
 
             /**
-             * ends an transmission and checks for faults
+             * Ends a transmission and checks for errors.
              *
              */
             static twi_message end_transmission() {
@@ -231,15 +235,15 @@ namespace llib::due {
             }
 
             /**
-             * Writes an array of bytes to the twi interface
+             * Writes an array of bytes to the twi interface.
              *
              * @param data
              * @param size
              */
-            static twi_message write(const uint8_t *data, size_t size) {
-                // write the amount of data to the twi interface and check if nothing wrong happens
+            static twi_message write(const uint8_t *data, const size_t size) {
+                // Write the amount of data to the twi interface and check if nothing wrong happens
                 for (size_t i = 0; i < size; i++) {
-                    // write data in twi register
+                    // Write data in twi register
                     port<TWI>->TWI_THR = data[i];
 
                     auto res = _wait_for_status<twi_message::TXRDY>();
@@ -248,68 +252,83 @@ namespace llib::due {
                         return res;
                     }
                 }
+
                 return twi_message::OK;
             }
 
             /**
-             * Writes an single byte to the twi interface
+             * Writes an single byte to the twi interface.
              *
              * @param data
              */
-            static twi_message write(uint8_t data) {
-                return write(&data, 1);
+            static twi_message write(const uint8_t data) {
+                // Write data in twi register
+                port<TWI>->TWI_THR = data;
+
+                auto res = _wait_for_status<twi_message::TXRDY>();
+                if (res != twi_message::TXRDY) {
+                    // Error
+                    return res;
+                }
+
+                return twi_message::OK;
             }
 
             /**
-             * Tries to read a size amount of bytes from the twi interface
+             * Tries to read size amount of bytes from the twi interface.
              *
              * @param addres
              * @param data
              * @param size
              */
-            static twi_message read(uint8_t address, uint8_t *data, size_t size) {
-                // start a read
+            static twi_message read(const uint8_t address, uint8_t *data, const size_t size) {
+                // Start a read
                 _start<true>(address);
 
-                // read the data
+                // Read the data
                 return _read(data, size);
             }
 
             /**
-             * Tries to read a size amount of bytes from the twi interface
-             * This writes one or two bytes before the read to the twi interface
+             * Tries to read size amount of bytes from the twi interface.
+             * This writes one or two bytes before the read to the twi interface.
              *
-             * @param addres
+             * @param address
              * @param data
              * @param size
              */
-            template<typename T, uint8_t In_size = sizeof(T), typename std::enable_if<(sizeof(T) <=
-                                                                                       2)>::type * = nullptr>
+            template<
+                typename T,
+                uint8_t InSize = sizeof(T),
+                typename = std::enable_if_t<sizeof(T) <= 2>
+            >
             static twi_message read(uint8_t address, T in_addr, uint8_t *data, size_t size) {
-                // start a read with two or less In_size
-                _start<true>(address, uint32_t(in_addr & 0xFFFFFF), In_size);
+                // Start a read with two or less InSize
+                _start<true>(address, uint32_t(in_addr & 0xFFFFFF), InSize);
 
-                // read the data
+                // Read the data
                 return _read(data, size);
             }
 
             /**
-             * Tries to read a size amount of bytes from the twi interface
-             * This writes 3 bytes before the read to the twi interface
+             * Tries to read a size amount of bytes from the twi interface.
+             * This writes 3 bytes before the read to the twi interface.
              *
-             * @param addres
+             * @param address
              * @param data
              * @param size
              */
-            template<typename T, typename std::enable_if<(sizeof(T) > 2)>::type * = nullptr>
+            template<
+                typename T,
+                typename = std::enable_if_t<(sizeof(T) > 2)>
+            >
             static twi_message read(uint8_t address, T in_addr, uint8_t *data, size_t size) {
-                // start a read with more than two In_size
+                // Start a read with more than two In_size
                 _start<true>(address, uint32_t(in_addr & 0xFFFFFF), 3);
 
-                // read the data
+                // Read the data
                 return _read(data, size);
             }
-
         };
     }
 }
