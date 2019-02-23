@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <tc.hpp>
 #include <peripheral.hpp>
-#include <interrupt.hpp>
 #include <type_traits>
 
 namespace llib::due{
