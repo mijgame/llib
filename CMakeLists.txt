@@ -84,7 +84,7 @@ set(LLIB_HEADERS
         llib/ports.hpp
         llib/ringbuffer.hpp
         llib/displays/display_32x32.hpp
-)
+        llib/displays/ssd1306.hpp)
 
 add_executable(llib ${BOOT_SOURCES} ${LLIB_HEADERS} ${TARGET_INCLUDE} ${TARGET_STARTUP} ${TARGET_SOURCES})
 add_custom_command(TARGET llib POST_BUILD COMMAND ${OBJCOPY} ARGS -O binary -R .bss llib llib.bin)
