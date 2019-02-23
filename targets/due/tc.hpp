@@ -76,7 +76,7 @@ namespace llib::due{
 
         struct channel_8{
             using timer = tc2;
-            constexpr static uint32_t channel = 1;            
+            constexpr static uint32_t channel = 2;            
             constexpr static uint32_t instance_id = ID_TC8;
             constexpr static uint32_t irqn = static_cast<uint32_t>(TC8_IRQn);
         };
