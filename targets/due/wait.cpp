@@ -62,13 +62,13 @@ namespace llib {
     void wait_for(const llib::us us) {
         // Approx: rounded down from 199648,8704
         constexpr uint_fast32_t us_per_rollover = 199648;
-        constexpr uint_fast32_t ns_short_per_us = 129;
+        constexpr uint_fast32_t ns_short_per_rollover = 129;
 
         const uint_fast32_t rollovers = us.value / us_per_rollover;
         const uint_fast32_t ticks = (us.value - us_per_rollover * rollovers) * 84;
 
         _wait_for(rollovers, ticks);
-        wait_for(ns{rollovers * ns_short_per_us});
+        wait_for(ns{rollovers * ns_short_per_rollover});
     }
 
     void wait_for(const llib::ms ms) {
