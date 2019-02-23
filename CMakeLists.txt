@@ -50,7 +50,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 set(COMMON_FLAGS "-D__SAM3X8E__ -Os -g -mcpu=cortex-m3 -march=armv7-m -mthumb -Wall -Werror -Wno-maybe-uninitialized -Wno-unused-local-typedefs -Wno-unused-but-set-variable -Wno-unused-local-typedefs -Wno-unused-function -Wno-attributes -Werror -fno-exceptions -fno-non-call-exceptions -fno-common -ffunction-sections -fdata-sections -fno-exceptions -fno-asynchronous-unwind-tables -fomit-frame-pointer -fdata-sections -ffunction-sections -nostdlib")
 set(CXX_FLAGS "-std=c++17 -fno-rtti -fno-threadsafe-statics -fno-use-cxa-get-exception-ptr")
 set(C_FLAGS "-std=c11")
-set(LINKER_FLAGS "-I${AS_GCC} -T ${LINKERSCRIPT_PATH} -lm -lgcc -Wl,--gc-sections -Wl,-fatal-warnings -nostdlib -nodefaultlibs -nostartfiles") #
+set(LINKER_FLAGS "-I${AS_GCC} -T ${LINKERSCRIPT_PATH} -lm -lgcc -Wl,--gc-sections -Wl,-fatal-warnings -Wl,-Map=llib.map -nostdlib -nodefaultlibs -nostartfiles") #
 SET(ASM_FLAGS "-x assembler-with-cpp")
 
 project(llib)
