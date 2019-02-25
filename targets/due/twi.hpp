@@ -274,6 +274,30 @@ namespace llib::due {
             }
 
             /**
+             * Writes the given byte for count amount
+             * to the twi interface.
+             *
+             * @param data
+             * @param count
+             * @return
+             */
+            static twi_message write(const uint8_t data, const uint32_t count) {
+                // Write the amount of data to the twi interface and check if nothing wrong happens
+                for (size_t i = 0; i < count; i++) {
+                    // Write data in twi register
+                    port<TWI>->TWI_THR = data;
+
+                    auto res = _wait_for_status(twi_message::TXRDY);
+                    if (res != twi_message::TXRDY) {
+                        // Error
+                        return res;
+                    }
+                }
+
+                return twi_message::OK;
+            }
+
+            /**
              * Tries to read size amount of bytes from the twi interface.
              *
              * @param addres
