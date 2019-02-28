@@ -5,6 +5,7 @@
 #include "peripheral.hpp"
 #include "wait.hpp"
 #include "error.hpp"
+#include "interrupt.hpp"
 
 namespace llib::due {
     namespace twi {
@@ -354,6 +355,24 @@ namespace llib::due {
             }
         };
     }
+}
+
+extern "C" {
+void __TWI0_Handler(){
+    // hanlde twi 0 with twi 1 sinds the twi ports are reversed on the arduino due
+    llib::due::_handle_isr<llib::due::twi::twi1>(
+        llib::due::twi::port<llib::due::twi::twi1>->TWI_SR,
+        llib::due::twi::port<llib::due::twi::twi1>->TWI_IMR
+    );
+}
+
+void __TWI1_Handler(){
+    // hanlde twi 1 with twi 0 sinds the twi ports are reversed on the arduino due
+    llib::due::_handle_isr<llib::due::twi::twi0>(
+        llib::due::twi::port<llib::due::twi::twi0>->TWI_SR,
+        llib::due::twi::port<llib::due::twi::twi0>->TWI_IMR
+    );
+}
 }
 
 #endif
