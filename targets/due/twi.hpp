@@ -207,7 +207,7 @@ namespace llib::due {
                 if ((port<TWI>->TWI_CR & TWI_CR_SVDIS) != TWI_CR_SVDIS) {
                     // Retry since twi is not in slave mode
                     LLIB_WARNING("Failed setting twi in slave mode. Trying again");
-                    init<Frequency>();
+                    init<Frequency>(addr);
                 }
 
                 _set_clock<Frequency>();
