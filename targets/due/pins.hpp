@@ -475,27 +475,27 @@ namespace llib::due {
         };
 
         struct scl {
-            using port = pioa;
-            using periph = pio_periph_a;
-            constexpr static uint32_t number = 18;
-        };
-
-        struct sda {
-            using port = pioa;
-            using periph = pio_periph_a;
-            constexpr static uint32_t number = 17;
-        };
-
-        struct scl1 {
             using port = piob;
             using periph = pio_periph_a;
             constexpr static uint32_t number = 13;
         };
 
-        struct sda1 {
+        struct sda {
             using port = piob;
             using periph = pio_periph_a;
             constexpr static uint32_t number = 12;
+        };
+
+        struct scl1 {
+            using port = pioa;
+            using periph = pio_periph_a;
+            constexpr static uint32_t number = 18;
+        };
+
+        struct sda1 {
+            using port = pioa;
+            using periph = pio_periph_a;
+            constexpr static uint32_t number = 17;
         };
 
         struct tx {

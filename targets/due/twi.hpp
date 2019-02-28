@@ -14,8 +14,8 @@ namespace llib::due {
             constexpr static uint32_t instance_id = ID_TWI1;
             constexpr static uint32_t irqn = static_cast<uint32_t>(TWI1_IRQn);
 
-            using sda = pins::sda1;
-            using scl = pins::scl1;
+            using sda = pins::sda;
+            using scl = pins::scl;
         };
 
         struct twi1 {
@@ -23,8 +23,8 @@ namespace llib::due {
             constexpr static uint32_t instance_id = ID_TWI0;
             constexpr static uint32_t irqn = static_cast<uint32_t>(TWI0_IRQn);
 
-            using sda = pins::sda;
-            using scl = pins::scl;
+            using sda = pins::sda1;
+            using scl = pins::scl1;
         };
 
         enum class mode {
