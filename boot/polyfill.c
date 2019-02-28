@@ -26,28 +26,26 @@ void *memset(void *ptr, int value, size_t num) {
     // a unsigned char.
     __uint8_t v8 = (__uint8_t) value;
 
-    if (_is_aligned(ptr)) {
-        /*
-         * First, set 4 bytes at a time, then
-         * set the remaining bytes.
-         */
-        __uint32_t v32 = (v8 << 24 | v8 << 16 | v8 << 8 | v8);
+    while (!_is_aligned(ptr)) {
+        *((__uint8_t *) ptr++) = v8;
+        num--;
+    }
 
-        __uint32_t *lp = (__uint32_t *) ptr;
-        while ((num / 4) > 0) {
-            *(lp++) = v32;
-            num -= 4;
-        }
+    /*
+     * First, set 4 bytes at a time, then
+     * set the remaining bytes.
+     */
+    __uint32_t v32 = (v8 << 24 | v8 << 16 | v8 << 8 | v8);
 
-        __uint8_t *sp = (__uint8_t *) lp;
-        while (num--) {
-            *(sp++) = v8;
-        }
-    } else {
-        __uint8_t *sp = (__uint8_t *) ptr;
-        while (num--) {
-            *(sp++) = v8;
-        }
+    __uint32_t *lp = (__uint32_t *) ptr;
+    while ((num / 4) > 0) {
+        *(lp++) = v32;
+        num -= 4;
+    }
+
+    __uint8_t *sp = (__uint8_t *) lp;
+    while (num--) {
+        *(sp++) = v8;
     }
 
     return ptr;
