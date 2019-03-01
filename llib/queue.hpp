@@ -215,6 +215,14 @@ namespace llib {
         constexpr void swap(queue &other) noexcept {
             std::swap(store, other.store);
         }
+
+        /**
+         * Clears the queue
+         * 
+         */
+        constexpr void clear() {
+            store.clear();
+        }
     };
 }
 
