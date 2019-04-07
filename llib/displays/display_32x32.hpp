@@ -12,10 +12,10 @@ namespace llib::displays {
     template<typename RPort, typename GPort, typename BPort, typename AlphaPort, typename OE, typename LAT, typename CLK>
     class display_32x32 {
     private:
-        constexpr inline static uint8_t height = 32;
-        constexpr inline static uint8_t width = 32;
-        constexpr static uint8_t page_size = 8;
-        constexpr static uint8_t leds_per_page = 64;
+        constexpr inline static uint_fast8_t height = 32;
+        constexpr inline static uint_fast8_t width = 32;
+        constexpr static uint_fast8_t page_size = 8;
+        constexpr static uint_fast8_t leds_per_page = 64;
         constexpr static uint16_t lookup[512] = {448, 449, 450, 451, 452, 453, 454, 455, 456, 457, 458, 459, 460, 461, 462, 463,
                                                  496, 497, 498, 499, 500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511,
                                                  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
@@ -116,8 +116,7 @@ namespace llib::displays {
         }
 
         static void clear(uint8_t red, uint8_t green, uint8_t blue) {
-            // range on buffer array
-
+            // create variable to store in buffer
             uint8_t t_red = ((red & 0xF) << 4) | (red & 0xF);
             uint8_t t_green = ((green & 0xF) << 4) | (green & 0xF);
             uint8_t t_blue = ((blue & 0xF) << 4) | (blue & 0xF);
@@ -141,6 +140,7 @@ namespace llib::displays {
                 AlphaPort::template set<2>(curr_page & 0x4);
                 // AlphaPort::template set<3>(curr_page & 0x8); // the 32x32 display doesn't change this pin 64x32 display does 
 
+                // update latch to set data
                 LAT::template set<false>();
 
                 uint_fast16_t tot = (curr_page * leds_per_page);
@@ -164,14 +164,16 @@ namespace llib::displays {
                     BPort::template set<0>(blue & (1 << curr_bit));
                     BPort::template set<1>(blue & (1 << (curr_bit + 4)));                                        
 
+                    // send clock pulse
                     CLK::template set<true>();
                     CLK::template set<false>();
                 }
 
-                // enable output after update
+                // update latch to set data                
                 LAT::template set<true>();
             }
 
+            // enable output after update
             OE::template set<true>();
 
             // update pixel on importance on bit position
