@@ -13,12 +13,6 @@ namespace llib::due {
 
         template<unsigned int Baud = 115200>
         void init() {
-            static bool initialised = false;
-
-            if (initialised) {
-                return;
-            }
-
             // Enable clock on port A
             enable_clock<pioa>();
 
@@ -32,7 +26,8 @@ namespace llib::due {
             enable_clock<uart>();
 
             // Reset and disable receiver and transmitter
-            UART->UART_CR = UART_CR_RSTRX | UART_CR_RSTTX | UART_CR_RXDIS | UART_CR_TXDIS;
+            UART->UART_CR = UART_CR_RSTRX | UART_CR_RSTTX;
+            UART->UART_CR = UART_CR_RXDIS | UART_CR_TXDIS;
 
             // Baudrate to 115200
             UART->UART_BRGR = 5241600 / Baud;
@@ -45,8 +40,6 @@ namespace llib::due {
 
             // Enable the receiver and the transmitter
             UART->UART_CR = UART_CR_RXEN | UART_CR_TXEN;
-
-            initialised = true;
         }
 
         inline bool char_available() {
