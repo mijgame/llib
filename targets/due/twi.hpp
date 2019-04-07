@@ -333,6 +333,10 @@ namespace llib::due {
                 // Read the data
                 return _read(data, size);
             }
+
+            static bool is_valid(twi_message message){
+                return (message != twi_message::TIMEOUT && message != twi_message::NACK);
+            }
         };  
 
         template<typename TWI, size_t RxBuffer, size_t TxBuffer>
