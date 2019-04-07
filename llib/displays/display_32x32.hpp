@@ -49,12 +49,12 @@ namespace llib::displays {
                                                  400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415,
                                                  416, 417, 418, 419, 420, 421, 422, 423, 424, 425, 426, 427, 428, 429, 430, 431};
 
-        static inline uint8_t buffer_red[32 * 16] = {};
-        static inline uint8_t buffer_green[32 * 16] = {};
-        static inline uint8_t buffer_blue[32 * 16] = {};
+        static inline uint8_t buffer_red[32 * 16];
+        static inline uint8_t buffer_green[32 * 16];
+        static inline uint8_t buffer_blue[32 * 16];
 
-        static inline uint8_t curr_bit = 0;
-        static inline uint8_t switch_bit = 0;
+        static inline uint_fast8_t curr_bit = 0;
+        static inline uint_fast8_t switch_bit = 0;
 
     public:
         template<typename Tc_channel = llib::target::tc::channel_1, uint32_t Hz = 50>
@@ -131,15 +131,16 @@ namespace llib::displays {
         }
 
         static void flush() {
+            // disable output so we can change the values
+            OE::template set<false>();
+
             for (uint_fast8_t curr_page = 0; curr_page < page_size; curr_page++) {
                 // set page selection
-                AlphaPort::template set<0>(curr_page & (1 << 0));
-                AlphaPort::template set<1>(curr_page & (1 << 1));
-                AlphaPort::template set<2>(curr_page & (1 << 2));
-                AlphaPort::template set<3>(curr_page & (1 << 3));
+                AlphaPort::template set<0>(curr_page & 0x1);
+                AlphaPort::template set<1>(curr_page & 0x2);
+                AlphaPort::template set<2>(curr_page & 0x4);
+                // AlphaPort::template set<3>(curr_page & 0x8); // the 32x32 display doesn't change this pin 64x32 display does 
 
-                // disable output so we can change the values
-                OE::template set<false>();
                 LAT::template set<false>();
 
                 uint_fast16_t tot = (curr_page * leds_per_page);
@@ -148,23 +149,30 @@ namespace llib::displays {
                 for (uint_fast8_t z = 0; z < leds_per_page; z++) {
                     uint_fast16_t t = tot + z;                  
 
-                    RPort::template set<0>(buffer_red[t] & (1 << curr_bit));
-                    RPort::template set<1>(buffer_red[t] & (1 << (curr_bit + 4)));
+                    uint_fast8_t red = buffer_red[t];
 
-                    GPort::template set<0>(buffer_green[t] & (1 << curr_bit));
-                    GPort::template set<1>(buffer_green[t] & (1 << (curr_bit + 4)));
+                    RPort::template set<0>(red & (1 << curr_bit));
+                    RPort::template set<1>(red & (1 << (curr_bit + 4)));
+
+                    uint_fast8_t green = buffer_green[t];
+
+                    GPort::template set<0>(green & (1 << curr_bit));
+                    GPort::template set<1>(green & (1 << (curr_bit + 4)));
                     
-                    BPort::template set<0>(buffer_blue[t] & (1 << curr_bit));
-                    BPort::template set<1>(buffer_blue[t] & (1 << (curr_bit + 4)));                                        
+                    uint_fast8_t blue = buffer_blue[t];
+
+                    BPort::template set<0>(blue & (1 << curr_bit));
+                    BPort::template set<1>(blue & (1 << (curr_bit + 4)));                                        
 
                     CLK::template set<true>();
                     CLK::template set<false>();
                 }
 
                 // enable output after update
-                OE::template set<true>();
                 LAT::template set<true>();
             }
+
+            OE::template set<true>();
 
             // update pixel on importance on bit position
             if (switch_bit) {
