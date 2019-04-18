@@ -19,7 +19,7 @@ namespace llib {
      * @return
      */
     template<typename T>
-    constexpr T pow(T base, int_fast32_t exponent) {
+    constexpr T pow(const T base, const int_fast32_t exponent) {
         if (exponent == 0) {
             return 1;
         }
@@ -28,14 +28,9 @@ namespace llib {
             return base;
         }
 
-        if (exponent % 2 == 0) {
+        if ((exponent & 1) == 0) {
             T rest = pow(base, exponent / 2);
             return rest * rest;
-        }
-
-        if (exponent % 3 == 0) {
-            T rest = pow(base, exponent / 3);
-            return rest * rest * rest;
         }
 
         return base * pow(base, exponent - 1);

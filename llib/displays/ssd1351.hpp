@@ -4,53 +4,50 @@
 #include "peripheral.hpp"
 #include "base.hpp"
 #include "wait.hpp"
+#include "spi.hpp"
 
 // Todo: Code cleanup
 
 namespace llib::displays {
-    template<typename bs, typename dc, typename rs>
+    template<typename bus, typename data_command, typename reset>
     class ssd1351 {
         protected:
-            bs & bus;
-            dc & data_command;
-            rs & reset;
-
             void write_command(const uint8_t command){
                 // wait data is transfered before writing
-                while(bus.is_transfering());
+                while(bus::is_transfering());
 
-                data_command.set(false);
-                bus.write(command);
+                data_command::set(false);
+                bus::write(command);
             }
 
             void write_data(const uint8_t * data, const size_t size){
                 // wait data is transfered before writing
-                while(bus.is_transfering());
+                while(bus::is_transfering());
 
-                data_command.set(true);
+                data_command::set(true);
                 for(size_t i = 0; i < size; i++){
-                    bus.write(data[i]);
+                    bus::write(data[i]);
                 }
             }
 
         public:
-            ssd1351(bs bus, dc data_command, rs reset):
-                bus(bus), data_command(data_command), reset(reset)   
-            {}
+            static void init(){
+                // init pins
+                data_command::init();
+                reset::init();
 
-            void init(){
                 // display setup
-                reset.set(true);
+                reset::set(true);
                 // wait 10ms to make sure the screen is on
-                wait_for(llib::ms{10});
+                llib::wait_for(llib::ms{10});
                 // reset the display
-                reset.set(false);
+                reset::set(false);
                 // wait 10ms for the screen to completely reset
-                wait_for(llib::ms{10});
+                llib::wait_for(llib::ms{10});
                 // enable the screen again
-                reset.set(true);
+                reset::set(true);
                 // wait 10ms for the screen to startup
-                wait_for(llib::ms{10});
+                llib::wait_for(llib::ms{10});
 
                 // disable command lock
                 set_command_lock(0); 
@@ -94,13 +91,13 @@ namespace llib::displays {
                 set_row_address(0, 127);                
             }
 
-            void set_clock_divider(const uint8_t divider){
+            static void set_clock_divider(const uint8_t divider){
                 // 0xB3 = command for changing the front clock divider
                 write_command(0xB3);
                 write_data(&divider, 1);
             } 
 
-            void set_gpio(uint8_t gpio) {
+            static void set_gpio(uint8_t gpio) {
                 // 0xA2 = command for setting gpio
                 gpio &= 0x0F;
 
@@ -108,7 +105,7 @@ namespace llib::displays {
                 write_data(&gpio, 1);
             }
 
-            void set_display_offset(uint8_t offset) {
+            static void set_display_offset(uint8_t offset) {
                 // 0xA2 = command for display offset
                 // For this command you need to enable the power options
                 offset &= 0x7F;
@@ -116,14 +113,14 @@ namespace llib::displays {
                 write_data(&offset, 1);
             }
 
-            void set_display_startline(uint8_t startline) {
+            static void set_display_startline(uint8_t startline) {
                 // 0xA1 = command for setting the starting line
                 startline &= 0x7F;
                 write_command(0xA1);
                 write_data(&startline, 1);
             }
 
-            void set_interface_reg(bool r, uint8_t interface) {
+            static void set_interface_reg(bool r, uint8_t interface) {
                 // 0xAB = command to set the interface type and to enable and disable the internal regulator during sleep
                 // A0 = 0b0 = Disable internal regulator during sleep
                 // A0 = 0b1 = Enable internal regulator
@@ -136,7 +133,7 @@ namespace llib::displays {
                 write_data(&interface, 1);
             }
 
-            void set_command_lock(bool c) {
+            static void set_command_lock(bool c) {
                 // 0xFD = command for setting command lock without this unlocked the SSD1351 wont respond to commands and doesn't give memory access
                 // 0x12 = disable command lock
                 // 0x16 = enable command lock
@@ -146,7 +143,7 @@ namespace llib::displays {
                 write_data(&data, 1);
             }
 
-            void set_phases(uint8_t c, uint8_t r) {
+            static void set_phases(uint8_t c, uint8_t r) {
                 // 0xFD = command for changing phase periods
                 // A0:A3 = Phase 1 clocks
                 // A4:A7 = Phase 2 clocks
@@ -158,7 +155,7 @@ namespace llib::displays {
                 write_data(&data, 1);
             }
 
-            void enable_power_options(bool o) {
+            static void enable_power_options(bool o) {
                 // Normaly you dont need these commands use with caution
                 // enable to use commands 0xA2, 0xB1, 0xB3, 0xBB, 0xBE, 0xC1 these commands are necessary certain operations look at the datasheet for more info
                 // 0xFD = command for setting command lock without this unlocked the SSD1351 wont respond to commands and doesn't give memory access
@@ -170,7 +167,7 @@ namespace llib::displays {
                 write_data(&data, 1);
             }
 
-            void set_color_contrast(uint8_t A, uint8_t B, uint8_t C) {
+            static void set_color_contrast(uint8_t A, uint8_t B, uint8_t C) {
                 // 0xC1 = command for setting color contrast
                 // For this command you need to enable the power options
                 uint8_t data[] = {A, B, C};
@@ -179,7 +176,7 @@ namespace llib::displays {
                 write_data(data, 3);
             }
 
-            void set_master_contrast(uint8_t M) {
+            static void set_master_contrast(uint8_t M) {
                 // 0xC7 = command for setting master contrast
                 // the higher M is the more the output current is limited
                 // 0x00 = reduce output currents for all color to 1/16
@@ -192,7 +189,7 @@ namespace llib::displays {
                 write_data(&M, 1);
             }
 
-            void set_mux_ratio(uint8_t m) {
+            static void set_mux_ratio(uint8_t m) {
                 // 0xCA = command for mux ratio setting
                 m &= 0x7F;
 
@@ -200,7 +197,7 @@ namespace llib::displays {
                 write_data(&m, 1);
             }
 
-            void set_column_address(uint8_t start, uint8_t end) {
+            static void set_column_address(uint8_t start, uint8_t end) {
                 // 0x15 = command for setting the column 
                 // second byte is start adress
                 // third byte is end adress
@@ -213,7 +210,7 @@ namespace llib::displays {
                 write_data(data, 2);
             }
 
-            void set_row_address(uint8_t start, uint8_t end) {
+            static void set_row_address(uint8_t start, uint8_t end) {
                 // 0x75 = command for setting the row
                 // second byte is start adress
                 // third byte is end adress
@@ -226,7 +223,7 @@ namespace llib::displays {
                 write_data(data, 2);
             }
 
-            void set_display_mode(uint8_t mode) {
+            static void set_display_mode(uint8_t mode) {
                 // 0xA4:0xA7 = commands for the display modes
                 // 0xA4 = All off
                 // 0xA5 = All on
@@ -236,7 +233,7 @@ namespace llib::displays {
                 write_command(mode);
             }
 
-            void set_sleep_mode(bool s) {
+            static void set_sleep_mode(bool s) {
                 // 0xAE:0xAF = command for sleep state
                 // 0xAE = Sleep mode on
                 // 0xAF = Sleep mode off
@@ -244,7 +241,7 @@ namespace llib::displays {
                 write_command(command);
             }
 
-            void set_re_co(bool increment, bool map, bool sequence, bool scan, bool split,
+            static void set_re_co(bool increment, bool map, bool sequence, bool scan, bool split,
                                     uint8_t depth) {
                 // Set Remap/ Color depth
                 // A0 = 0b0 = Horizontal address increment
@@ -275,7 +272,7 @@ namespace llib::displays {
                 write_data(&data, 1);
             }
 
-            void set_external_vsl(uint8_t v) {
+            static void set_external_vsl(uint8_t v) {
                 // Set VSL
                 // 0xB4 = command for vsl
                 // 0b00 = External VSL [reset]
@@ -290,7 +287,7 @@ namespace llib::displays {
                 write_data(data, 3);
             }
 
-            void set_com_deselect_voltage(uint8_t s) {
+            static void set_com_deselect_voltage(uint8_t s) {
                 // set com deselect voltage
                 // 0xBE = com deselect voltage command
                 // 0b000 = 0x00 = 0.72 x VCC\n
@@ -302,7 +299,7 @@ namespace llib::displays {
                 write_data(&s, 1);
             }
 
-            void set_second_precharge(uint8_t p) {
+            static void set_second_precharge(uint8_t p) {
                 // set second pre-charge period
                 // 0xB6 = second pre-charge period command
                 // 0b0000 = invalid\n
@@ -315,11 +312,11 @@ namespace llib::displays {
                 write_data(&p, 1);
             }
 
-            void start_write() {
+            static void start_write() {
                 write_command(0x5C);
             }
 
-            void write_color(uint16_t color) {
+            static void write_color(uint16_t color) {
                 uint8_t arr[] = {
                         static_cast<uint8_t>(color >> 8),
                         static_cast<uint8_t>(color & 0xFF)

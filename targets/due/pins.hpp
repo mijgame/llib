@@ -2,6 +2,7 @@
 #define LLIB_DUE_PINS_HPP
 
 #include "pio.hpp"
+#include "tc.hpp"
 #include <type_traits>
 
 namespace llib::due {
@@ -23,24 +24,32 @@ namespace llib::due {
         struct d2 {
             using port = piob;
             using periph = pio_periph_b;
-            constexpr static uint32_t number = 25;
+            using timer_channel = tc::channel_0; 
+            using timer_pin = tc::tioa; // TC0, TIOA0
+            constexpr static uint32_t number = 25;            
         };
 
         struct d3 {
             using port = pioc;
             using periph = pio_periph_b;
+            using timer_channel = tc::channel_7;
+            using timer_pin = tc::tioa; // TC2, TIOA7
             constexpr static uint32_t number = 28;
         };
 
         struct d4 {
             using port = pioc;
             using periph = pio_periph_b;
+            using timer_channel = tc::channel_6;
+            using timer_pin = tc::tiob; // TC2, TIOB6
             constexpr static uint32_t number = 26;
         };
 
         struct d5 {
             using port = pioc;
             using periph = pio_periph_b;
+            using timer_channel = tc::channel_6;
+            using timer_pin = tc::tioa; // TC2, TIOA6
             constexpr static uint32_t number = 25;
         };
 
@@ -71,24 +80,32 @@ namespace llib::due {
         struct d10 {
             using port = pioc;
             using periph = pio_periph_b;
+            using timer_channel = tc::channel_7;
+            using timer_pin = tc::tiob; // TC2, TIOB7      
             constexpr static uint32_t number = 29;
         };
 
         struct d11 {
             using port = piod;
             using periph = pio_periph_b;
+            using timer_channel = tc::channel_8;
+            using timer_pin = tc::tioa; // TC2, TIOA8        
             constexpr static uint32_t number = 7;
         };
 
         struct d12 {
             using port = piod;
             using periph = pio_periph_b;
+            using timer_channel = tc::channel_8;
+            using timer_pin = tc::tiob; // TC2, TIOB8
             constexpr static uint32_t number = 8;
         };
 
         struct d13 {
             using port = piob;
             using periph = pio_periph_b;
+            using timer_channel = tc::channel_0;
+            using timer_pin = tc::tiob; // TC0, TIOB0
             constexpr static uint32_t number = 27;
         };
 
@@ -146,6 +163,9 @@ namespace llib::due {
 
         struct d22 {
             using port = piob;
+            using periph = pio_periph_b;
+            using timer_channel = tc::channel_0;
+            using timer_pin = tc::tclk; // TC0, TCLK0
             constexpr static uint32_t number = 26;
         };
 
@@ -160,40 +180,46 @@ namespace llib::due {
         };
 
         struct d25 {
-            using port = pioc;
+            using port = piod;
             constexpr static uint32_t number = 0;
         };
 
         struct d26 {
-            using port = pioc;
+            using port = piod;
             constexpr static uint32_t number = 1;
         };
 
         struct d27 {
-            using port = pioc;
+            using port = piod;
             constexpr static uint32_t number = 2;
             constexpr static uint32_t pwm_channel = 0;
         };
 
         struct d28 {
-            using port = pioc;
+            using port = piod;
             constexpr static uint32_t number = 3;
             constexpr static uint32_t pwm_channel = 0;
         };
 
         struct d29 {
-            using port = pioc;
+            using port = piod;
             constexpr static uint32_t number = 6;
             constexpr static uint32_t pwm_channel = 2;
         };
 
         struct d30 {
             using port = piod;
+            using periph = pio_periph_b;
+            using timer_channel = tc::channel_8;
+            using timer_pin = tc::tclk; // TC2, TCLK8
             constexpr static uint32_t number = 9;
         };
 
         struct d31 {
             using port = pioa;
+            using periph = pio_periph_a;
+            using timer_channel = tc::channel_2;
+            using timer_pin = tc::tclk; // TC0, TCLK2
             constexpr static uint32_t number = 7;
         };
 
@@ -336,30 +362,45 @@ namespace llib::due {
 
         struct a2 {
             using port = pioa;
+            using periph = pio_periph_b;
+            using timer_channel = tc::channel_4;
+            using timer_pin = tc::tclk; // TC1, TCLK4
             constexpr static uint32_t number = 23;
             constexpr static uint32_t adc_channel = 5;
         };
 
         struct a3 {
             using port = pioa;
+            using periph = pio_periph_b;
+            using timer_channel = tc::channel_3;
+            using timer_pin = tc::tclk; // TC1, TCLK3
             constexpr static uint32_t number = 22;
             constexpr static uint32_t adc_channel = 4;
         };
 
         struct a4 {
             using port = pioa;
+            using periph = pio_periph_a;
+            using timer_channel = tc::channel_2;
+            using timer_pin = tc::tiob; // TC0, TIOB2
             constexpr static uint32_t number = 6;
             constexpr static uint32_t adc_channel = 3;
         };
 
         struct a5 {
             using port = pioa;
+            using periph = pio_periph_a;
+            using timer_channel = tc::channel_1; 
+            using timer_pin = tc::tclk; // TC0, TCLK1
             constexpr static uint32_t number = 4;
             constexpr static uint32_t adc_channel = 2;
         };
 
         struct a6 {
             using port = pioa;
+            using periph = pio_periph_a;
+            using timer_channel = tc::channel_1;
+            using timer_pin = tc::tiob; // TC0, TIOB1
             constexpr static uint32_t number = 3;
             constexpr static uint32_t adc_channel = 1;
             constexpr static uint32_t pwm_channel = 1;
@@ -367,6 +408,9 @@ namespace llib::due {
 
         struct a7 {
             using port = pioa;
+            using periph = pio_periph_a;
+            using timer_channel = tc::channel_1; 
+            using timer_pin = tc::tioa; // TC0, TIOA1
             constexpr static uint32_t number = 2;
             constexpr static uint32_t adc_channel = 0;
         };
@@ -411,45 +455,47 @@ namespace llib::due {
         struct dac1 {
             using port = piob;
             using periph = pio_periph_a;
+            using timer_channel = tc::channel_5;
+            using timer_pin = tc::tclk; // TC1, TCLK5
             constexpr static uint32_t number = 16;
             constexpr static uint32_t pwm_channel = 0;
             constexpr static uint32_t dacc_channel = 1;
         };
 
-        struct cantx {
+        struct canrx {
             using port = pioa;
             using periph = pio_periph_a;
             constexpr static uint32_t number = 1;
         };
 
-        struct canrx {
+        struct cantx {
             using port = pioa;
             using periph = pio_periph_a;
             constexpr static uint32_t number = 0;
         };
 
         struct scl {
-            using port = pioa;
-            using periph = pio_periph_a;
-            constexpr static uint32_t number = 18;
-        };
-
-        struct sda {
-            using port = pioa;
-            using periph = pio_periph_a;
-            constexpr static uint32_t number = 17;
-        };
-
-        struct scl1 {
             using port = piob;
             using periph = pio_periph_a;
             constexpr static uint32_t number = 13;
         };
 
-        struct sda1 {
+        struct sda {
             using port = piob;
             using periph = pio_periph_a;
             constexpr static uint32_t number = 12;
+        };
+
+        struct scl1 {
+            using port = pioa;
+            using periph = pio_periph_a;
+            constexpr static uint32_t number = 18;
+        };
+
+        struct sda1 {
+            using port = pioa;
+            using periph = pio_periph_a;
+            constexpr static uint32_t number = 17;
         };
 
         struct tx {
@@ -467,6 +513,8 @@ namespace llib::due {
         struct led {
             using port = piob;
             using periph = pio_periph_b;
+            using timer_channel = tc::channel_0; 
+            using timer_pin = tc::tiob; // TC0, TIOB0
             constexpr static uint32_t number = 27;
         };
 
@@ -515,6 +563,18 @@ namespace llib::due {
             using periph = pio_periph_b;
             constexpr static uint32_t number = 21;
             constexpr static uint32_t spi_number = 2;
+        };
+
+        struct uotg_vbof{
+            using port = piob;
+            using periph = pio_periph_a;
+            constexpr static uint32_t number = 10;
+        };             
+
+        struct uotg_id{
+            using port = piob;
+            using periph = pio_periph_a;
+            constexpr static uint32_t number = 11;
         };
 
         template<typename Pin>

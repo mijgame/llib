@@ -47,11 +47,11 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
-set(COMMON_FLAGS "-D__SAM3X8E__ -Os -mcpu=cortex-m3 -march=armv7-m -mthumb -Wall -Werror -Wno-maybe-uninitialized -Wno-unused-local-typedefs -Wno-unused-but-set-variable -Wno-unused-local-typedefs -Wno-unused-function -Wno-attributes -Werror -fno-exceptions -fno-non-call-exceptions -fno-common -ffunction-sections -fdata-sections -fno-exceptions -fno-asynchronous-unwind-tables -fomit-frame-pointer -fdata-sections -ffunction-sections -nostdlib")
+set(COMMON_FLAGS "-D__SAM3X8E__ -Os -g -mcpu=cortex-m3 -march=armv7-m -mthumb -Wall -Werror -Wno-maybe-uninitialized -Wno-unused-local-typedefs -Wno-unused-but-set-variable -Wno-unused-local-typedefs -Wno-unused-function -Wno-attributes -Werror -fno-exceptions -fno-non-call-exceptions -fno-common -ffunction-sections -fdata-sections -fno-exceptions -fno-asynchronous-unwind-tables -fomit-frame-pointer -fdata-sections -ffunction-sections -nostdlib")
 set(CXX_FLAGS "-std=c++17 -fno-rtti -fno-threadsafe-statics -fno-use-cxa-get-exception-ptr")
 set(C_FLAGS "-std=c11")
-set(LINKER_FLAGS "-I${AS_GCC} -T ${LINKERSCRIPT_PATH} -lgcc -Wl,--gc-sections -Wl,-fatal-warnings -nostdlib -nodefaultlibs -nostartfiles") #
-SET(ASM_FLAGS "-x assembler-with-cpp")
+set(LINKER_FLAGS "-I${AS_GCC} -T ${LINKERSCRIPT_PATH} -lm -lgcc -Wl,--gc-sections -Wl,-fatal-warnings -Wl,-Map=llib.map -nostdlib -nodefaultlibs -nostartfiles") #
+set(ASM_FLAGS "-x assembler-with-cpp")
 
 project(llib)
 
@@ -81,11 +81,16 @@ set(LLIB_HEADERS
         llib/wait.hpp
         llib/string.hpp
         llib/decorators.hpp
-    )
+        llib/ports.hpp
+        llib/ringbuffer.hpp
+        llib/displays/display_32x32.hpp
+        llib/displays/ssd1306.hpp
+        llib/displays/strategy.hpp)
 
 add_executable(llib ${BOOT_SOURCES} ${LLIB_HEADERS} ${TARGET_INCLUDE} ${TARGET_STARTUP} ${TARGET_SOURCES})
 add_custom_command(TARGET llib POST_BUILD COMMAND ${OBJCOPY} ARGS -O binary -R .bss llib llib.bin)
 
+target_link_libraries(llib "m")
 target_link_libraries(llib "gcc")
 target_include_directories(llib PRIVATE ${CORTEX_INCLUDE})
 target_include_directories(llib PRIVATE ${TARGET_INCLUDE})

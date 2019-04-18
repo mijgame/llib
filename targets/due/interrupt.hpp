@@ -3,7 +3,6 @@
 
 #include "base.hpp"
 #include "pins.hpp"
-#include "spi.hpp"
 
 namespace llib::due {
     enum class interrupt {
@@ -134,7 +133,7 @@ namespace llib::due {
                 auto bit = static_cast<uint8_t>(trailing_zeros);
 
                 // set the function on the positions of the bits in the mask
-                llib::due::_callbacks<Handler>::callbacks[bit] = NULL;
+                llib::due::_callbacks<Handler>::callbacks[bit] = nullptr;
             
                 mask &= (~(1 << bit));
             }
@@ -183,7 +182,7 @@ namespace llib::due {
         // check if any of the callbacks is used 
         // Todo: Change to check if the interupt mask register is set
         for(auto i = 0; i < 32; i++){
-            if(llib::due::_callbacks<Handler>::callbacks[i] != NULL){
+            if(llib::due::_callbacks<Handler>::callbacks[i] != nullptr){
                 return;
             }
         }
@@ -226,13 +225,6 @@ void __PIOD_Handler() {
     llib::due::_handle_isr<llib::due::piod>(
         llib::due::pins::port<llib::due::piod>->PIO_ISR,
         llib::due::pins::port<llib::due::piod>->PIO_IMR
-    );
-}
-
-void __SPI0_Handler() {
-    llib::due::_handle_isr<llib::due::spi::spi0>(
-        llib::due::spi::port<llib::due::spi::spi0>->SPI_SR,
-        llib::due::spi::port<llib::due::spi::spi0>->SPI_IMR
     );
 }
 }
