@@ -5,3 +5,4 @@ main.cpp
 *.cbp
 .vscode/*
 llib.lss
+llib/.DS_Store
