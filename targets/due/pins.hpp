@@ -565,6 +565,18 @@ namespace llib::due {
             constexpr static uint32_t spi_number = 2;
         };
 
+        struct uotg_vbof{
+            using port = piob;
+            using periph = pio_periph_a;
+            constexpr static uint32_t number = 10;
+        };             
+
+        struct uotg_id{
+            using port = piob;
+            using periph = pio_periph_a;
+            constexpr static uint32_t number = 11;
+        };
+
         template<typename Pin>
         constexpr uint32_t mask = 1U << Pin::number;
 

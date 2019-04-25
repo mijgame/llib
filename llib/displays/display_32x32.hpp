@@ -12,10 +12,10 @@ namespace llib::displays {
     template<typename RPort, typename GPort, typename BPort, typename AlphaPort, typename OE, typename LAT, typename CLK>
     class display_32x32 {
     private:
-        constexpr inline static uint8_t height = 32;
-        constexpr inline static uint8_t width = 32;
-        constexpr static uint8_t page_size = 8;
-        constexpr static uint8_t leds_per_page = 64;
+        constexpr inline static uint_fast8_t height = 32;
+        constexpr inline static uint_fast8_t width = 32;
+        constexpr static uint_fast8_t page_size = 8;
+        constexpr static uint_fast8_t leds_per_page = 64;
         constexpr static uint16_t lookup[512] = {448, 449, 450, 451, 452, 453, 454, 455, 456, 457, 458, 459, 460, 461, 462, 463,
                                                  496, 497, 498, 499, 500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511,
                                                  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
@@ -49,20 +49,16 @@ namespace llib::displays {
                                                  400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415,
                                                  416, 417, 418, 419, 420, 421, 422, 423, 424, 425, 426, 427, 428, 429, 430, 431};
 
-        static inline uint8_t buffer_r1[32 * 16];
-        static inline uint8_t buffer_g1[32 * 16];
-        static inline uint8_t buffer_b1[32 * 16];
+        static inline uint8_t buffer_red[32 * 16];
+        static inline uint8_t buffer_green[32 * 16];
+        static inline uint8_t buffer_blue[32 * 16];
 
-        static inline uint8_t buffer_r2[32 * 16];
-        static inline uint8_t buffer_g2[32 * 16];
-        static inline uint8_t buffer_b2[32 * 16];
-
-        static inline uint8_t curr_bit = 0;
-        static inline uint8_t switch_bit = 0;
+        static inline uint_fast8_t curr_bit = 0;
+        static inline uint_fast8_t switch_bit = 0;
 
     public:
         template<typename Tc_channel = llib::target::tc::channel_1, uint32_t Hz = 50>
-        static void init() {
+        static void init() {           
             llib::port_out<RPort, GPort, BPort, AlphaPort>::init();
 
             OE::init();
@@ -91,43 +87,60 @@ namespace llib::displays {
 
             // check if position is in top or bottom half of the screen
             if (y <= 0xF) {
-                uint16_t position = y * width + x;
-                buffer_r1[lookup[position]] = red;
-                buffer_g1[lookup[position]] = green;
-                buffer_b1[lookup[position]] = blue;
-            } else {
-                uint16_t position = (y - 16) * width + x;
-                buffer_r2[lookup[position]] = red;
-                buffer_g2[lookup[position]] = green;
-                buffer_b2[lookup[position]] = blue;
+                uint16_t position = lookup[y * width + x];
+
+                // remove old value on pixel position and set new color
+                buffer_red[position] &= 0xF0;
+                buffer_red[position] |= red & 0xF;
+
+                buffer_green[position] &= 0xF0;
+                buffer_green[position] |= green & 0xF;
+
+                buffer_blue[position] &= 0xF0;
+                buffer_blue[position] |= blue & 0xF;
+
+            } 
+            else {
+                uint16_t position = lookup[(y - 16) * width + x];
+
+                // remove old value on pixel position and set new color
+                buffer_red[position] &= 0x0F;
+                buffer_red[position] |= (red & 0xF) << 4;
+
+                buffer_green[position] &= 0x0F;
+                buffer_green[position] |= (green & 0xF) << 4;
+
+                buffer_blue[position] &= 0x0F;
+                buffer_blue[position] |= (blue & 0xF) << 4;
             }
         }
 
         static void clear(uint8_t red, uint8_t green, uint8_t blue) {
-            // range on buffer array
-            for (uint16_t i = 0; i < (32 * 16); i++) {
-                // set color on top half of the screen
-                buffer_r1[i] = red;
-                buffer_g1[i] = green;
-                buffer_b1[i] = blue;
+            // create variable to store in buffer
+            uint8_t t_red = ((red & 0xF) << 4) | (red & 0xF);
+            uint8_t t_green = ((green & 0xF) << 4) | (green & 0xF);
+            uint8_t t_blue = ((blue & 0xF) << 4) | (blue & 0xF);
 
-                // set color on bottom half of the screen
-                buffer_r2[i] = red;
-                buffer_g2[i] = green;
-                buffer_b2[i] = blue;
+            for (uint16_t i = 0; i < (32 * 16); i++) {
+                // set color on top half and bottom half of the screen
+                buffer_red[i] = t_red;
+                buffer_green[i] = t_green;
+                buffer_blue[i] = t_blue;
             }
         }
 
         static void flush() {
+            // disable output so we can change the values
+            OE::template set<false>();
+
             for (uint_fast8_t curr_page = 0; curr_page < page_size; curr_page++) {
                 // set page selection
-                AlphaPort::template set<0>(curr_page & (1 << 0));
-                AlphaPort::template set<1>(curr_page & (1 << 1));
-                AlphaPort::template set<2>(curr_page & (1 << 2));
-                AlphaPort::template set<3>(curr_page & (1 << 3));
+                AlphaPort::template set<0>(curr_page & 0x1);
+                AlphaPort::template set<1>(curr_page & 0x2);
+                AlphaPort::template set<2>(curr_page & 0x4);
+                // AlphaPort::template set<3>(curr_page & 0x8); // the 32x32 display doesn't change this pin 64x32 display does 
 
-                // disable output so we can change the values
-                OE::template set<false>();
+                // update latch to set data
                 LAT::template set<false>();
 
                 uint_fast16_t tot = (curr_page * leds_per_page);
@@ -136,23 +149,32 @@ namespace llib::displays {
                 for (uint_fast8_t z = 0; z < leds_per_page; z++) {
                     uint_fast16_t t = tot + z;                  
 
-                    RPort::template set<0>(buffer_r1[t] & (1 << curr_bit));
-                    RPort::template set<1>(buffer_r2[t] & (1 << curr_bit));
+                    uint_fast8_t red = buffer_red[t];
 
-                    GPort::template set<0>(buffer_g1[t] & (1 << curr_bit));
-                    GPort::template set<1>(buffer_g2[t] & (1 << curr_bit));
+                    RPort::template set<0>(red & (1 << curr_bit));
+                    RPort::template set<1>(red & (1 << (curr_bit + 4)));
+
+                    uint_fast8_t green = buffer_green[t];
+
+                    GPort::template set<0>(green & (1 << curr_bit));
+                    GPort::template set<1>(green & (1 << (curr_bit + 4)));
                     
-                    BPort::template set<0>(buffer_b1[t] & (1 << curr_bit));
-                    BPort::template set<1>(buffer_b2[t] & (1 << curr_bit));                                        
+                    uint_fast8_t blue = buffer_blue[t];
 
+                    BPort::template set<0>(blue & (1 << curr_bit));
+                    BPort::template set<1>(blue & (1 << (curr_bit + 4)));                                        
+
+                    // send clock pulse
                     CLK::template set<true>();
                     CLK::template set<false>();
                 }
 
-                // enable output after update
-                OE::template set<true>();
+                // update latch to set data                
                 LAT::template set<true>();
             }
+
+            // enable output after update
+            OE::template set<true>();
 
             // update pixel on importance on bit position
             if (switch_bit) {
