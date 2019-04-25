@@ -16,11 +16,19 @@ namespace llib {
     InputStream operator>>(InputStream str, int &val) {
         // Currently, a decimal base is assumed
         char buf[11] = {};
+
         int result = 0;
+
+        bool negative = false;
 
         for (size_t i = 0; i < 10; i++) {
             char c;
             str >> c;
+
+            if (i == 0 && c == '-') {
+                negative = true;
+                continue;
+            }
 
             if (c == '\n' || c == ' ' || c == '\0') {
                 buf[i] = '\0';
@@ -30,9 +38,13 @@ namespace llib {
             buf[i] = c;
         }
 
-        char *ptr = buf;
+        char *ptr = buf + negative;
         while (*ptr != '\0') {
             result *= 10 + (*(ptr++) - '0');
+        }
+
+        if (negative) {
+            result *= -1;
         }
 
         val = result;
