@@ -6,7 +6,7 @@ namespace llib::displays {
     class buffered;
 
     template<typename T>
-    class unbuffered;
+    class direct_write;
 }
 
 #endif //LLIB_STRATEGY_HPP

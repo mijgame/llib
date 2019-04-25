@@ -9,20 +9,15 @@ namespace llib {
     class servo {
     protected:
         constexpr static LLIB_FORCE_INLINE uint8_t _to_dutycyle(const uint32_t Pos) {
-            // old method but division is slower
-            // (Pos * (MaxPulse - MinPulse) / 180 + MinPulse) / (((1'000'000 / Hz) / 255));
-
-            // returns an duty cycle corresponding to the position and frequency
-            return static_cast<uint8_t>(
-                ((17 * Hz) * (Pos * (MaxPulse - MinPulse) + 180 * MinPulse)) / 12000000
-            );
+            // Returns an duty cycle corresponding to the position and frequency
+            return (Pos * (MaxPulse - MinPulse) / 180 + MinPulse) / (((1'000'000 / Hz) / 255));
         }
 
     public:
         using pin = Pin;
 
         template<uint8_t Pos = 127>
-        static void init() {
+        constexpr static void init() {
             llib::target::pin_pwm<pin>::template init<Hz, _to_dutycyle(Pos)>();
         }
 

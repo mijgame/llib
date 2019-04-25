@@ -54,10 +54,10 @@ namespace llib::displays {
             detail::_cmd_mode, detail::_set_display_clock_div, 0x80,
             detail::_cmd_mode, detail::_set_multiplex, 0x3F,
             detail::_cmd_mode, detail::_set_display_offset, 0x00,
-            detail::_cmd_mode, detail::_set_startline | 0x00,
+            detail::_cmd_mode, detail::_set_startline | 0x00U,
             detail::_cmd_mode, detail::_charge_pump, 0x14,
             detail::_cmd_mode, detail::_memory_mode, 0x00,
-            detail::_cmd_mode, detail::_segre_map | 0x01,
+            detail::_cmd_mode, detail::_segre_map | 0x01U,
             detail::_cmd_mode, detail::_com_scan_dec,
             detail::_cmd_mode, detail::_com_scan_inc, 0x12,
             detail::_cmd_mode, detail::_set_contrast, 0xCF,
@@ -103,12 +103,12 @@ namespace llib::displays {
         using buffer_t = uint8_t[128 * 64 / 8];
 
         // Buffered pixel data
-        buffer_t buffer;
+        buffer_t buffer = {};
 
         // Address of the display on the bus
         uint8_t address;
 
-        buffered(uint8_t address)
+        explicit buffered(uint8_t address)
             : address(address) {}
 
         template<typename I2C>
@@ -121,9 +121,9 @@ namespace llib::displays {
             const size_t buffer_pos = x + (y / 8) * 128;
 
             if (on) {
-                buffer[buffer_pos] |= (0x01 << (y % 8));
+                buffer[buffer_pos] |= (0x01U << (y % 8));
             } else {
-                buffer[buffer_pos] &= ~(0x01 << (y % 8));
+                buffer[buffer_pos] &= ~(0x01U << (y % 8));
             }
         }
 
@@ -142,14 +142,19 @@ namespace llib::displays {
     };
 
     template<>
-    class unbuffered<detail::_ssd1306> {
+    class direct_write<detail::_ssd1306> {
     protected:
+        using buffer_t = uint8_t[128 * 64 / 8];
+
+        // Buffered pixel data
+        buffer_t buffer = {};
+
         // Address of the display on the bus
         uint8_t address;
 
         uint8_t cursor_x, cursor_y;
 
-        unbuffered(uint8_t address)
+        explicit direct_write(uint8_t address)
             : address(address), cursor_x(0), cursor_y(0) {}
 
         template<typename I2C>
@@ -166,6 +171,14 @@ namespace llib::displays {
 
         template<typename I2C>
         void write(const size_t x, const size_t y, const bool on) {
+            const size_t buffer_pos = x + (y / 8) * 128;
+
+            if (on) {
+                buffer[buffer_pos] |= (0x01 << (y % 8));
+            } else {
+                buffer[buffer_pos] &= ~(0x01 << (y % 8));
+            }
+
             if (x != cursor_x || y != cursor_y) {
                 detail::_command<I2C>(detail::_column_addr, x, 127);
                 detail::_command<I2C>(detail::_page_addr, y, 7);
@@ -176,13 +189,15 @@ namespace llib::displays {
 
             I2C::start_transmission(address);
             I2C::write(detail::_data_mode);
-//            I2C::write()
+            I2C::write(buffer[buffer_pos]);
             I2C::end_transmission();
+
+            cursor_x++;
         }
 
         template<typename I2C>
         void flush() {
-            // ...
+           // ...
         }
     };
 
