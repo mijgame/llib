@@ -6,6 +6,7 @@
 namespace llib::due {
     namespace detail {
         void write_impl(char c);
+        char read_impl();
     }
 
     template<base B = _default_base, bool Boolalpha = _default_boolalpha>
@@ -15,6 +16,14 @@ namespace llib::due {
 
         void write_impl(char c) {
             detail::write_impl(c);
+        }
+    };
+
+    struct cin : public istream {
+        using instance = cin;
+
+        char read_impl() {
+            return detail::read_impl();
         }
     };
 }

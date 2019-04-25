@@ -24,7 +24,10 @@ namespace llib {
         using instance = ostream<IB, IBoolalpha>;
     };
 
-    struct istream {};
+    class istream {
+    public:
+        using instance = istream;
+    };
 }
 
 #endif //LLIB_STREAM_BASE_HPP
