@@ -8,7 +8,7 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/toolchains/toolchain.cmake")
         message("Using Toolchain file")
         include("${CMAKE_CURRENT_SOURCE_DIR}/toolchains/toolchain.cmake")
 else()
-        message( FATAL_ERROR "Please Create the toolchains/Toolchain.cmake file" )
+        message( FATAL_ERROR "Please Create the toolchains/toolchain.cmake file" )
 endif ()
 
 # Cortex header files include directory
