@@ -35,7 +35,7 @@ set(TARGET_STARTUP "${CMAKE_CURRENT_SOURCE_DIR}/targets/due/startup.c")
 set(LINKERSCRIPT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/boot/linkerscript.ld")
 
 # Startup & system options
-set(BOOT_SOURCES boot/startup.c main.cpp boot/stack.c boot/polyfill.c)
+set(BOOT_SOURCES boot/startup.c main.cpp boot/polyfill.c)
 set(STACK_SIZE 73728)
 
 # Supress Error when trying to test the compiler
