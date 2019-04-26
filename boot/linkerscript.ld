@@ -82,9 +82,9 @@ SECTIONS
 		. = ALIGN(4);
 		__text_start = .;
 		KEEP(*(.vectors .vectors.*))
-		*(.text .text.* .gnu.linkonce.t.*);
-		*(.glue_7t .glue_7);
-		*(.rodata .rodata.* .gnu.linkonce.r.*);
+		*(.text .text.* .gnu.linkonce.t.*); /* text segment */
+		*(.glue_7t .glue_7); /* glue arm to tumb code, glue tumb to arm code*/
+		*(.rodata .rodata.* .gnu.linkonce.r.*); /* Constands, strings, etc */
 		*(.ARM.extab* .gnu.linkonce.armextab.*); /* exception unwinding information */
 
         /* Support C constructors, and C destructors in both user code
@@ -131,7 +131,7 @@ SECTIONS
 		*(.eh_frame); /* information used for stack unwinding during exception */
 		. = ALIGN(4);
 		__text_end = .;
-	} > rom AT > rom
+	} > rom
 
 	. = ALIGN(4);
 	__exidx_start = .;
@@ -185,6 +185,16 @@ SECTIONS
 		. = ALIGN(4);
 		__heap_end = __ram_end;
 	} > ram
+
+    /* Remove information from the standard libraries */
+    /DISCARD/ :
+    {
+        libc.a ( * )
+        libm.a ( * )
+        libgcc.a ( * )
+    }
+
+    .ARM.attributes 0 : { *(.ARM.attributes) }
 
 	.stab 0 (NOLOAD) : { *(.stab) }
 	.stabstr 0 (NOLOAD) : { *(.stabstr) }
