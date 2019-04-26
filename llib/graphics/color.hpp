@@ -78,7 +78,7 @@ namespace llib::graphics {
         constexpr uint32_t to_rgb() const {
             return (static_cast< uint_fast32_t >(r) << 16U)
                    | (static_cast< uint_fast32_t >(g) << 8U)
-                   | static_cast< uint_fast32_t >( b );
+                   | static_cast< uint_fast32_t >(b);
         }
 
         /**
