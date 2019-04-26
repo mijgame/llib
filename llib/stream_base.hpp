@@ -22,11 +22,19 @@ namespace llib {
 
         template<llib::base IB, bool IBoolalpha>
         using instance = ostream<IB, IBoolalpha>;
+
+        // Defined by child implementation
+        // Note: no pure abstract or virtual!
+        void putc(char c);
     };
 
     class istream {
     public:
         using instance = istream;
+
+        // Defined by child implementation
+        // Note: no pure abstract or virtual!
+        char getc();
     };
 }
 

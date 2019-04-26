@@ -7,7 +7,14 @@ namespace llib {
 
     template<typename InputStream>
     InputStream operator>>(InputStream str, char &c) {
-        c = str.read_impl();
+        c = str.getc();
+
+        return str;
+    }
+
+    template<typename InputStream>
+    InputStream operator>>(InputStream str, unsigned char &c) {
+        c = str.getc();
 
         return str;
     }

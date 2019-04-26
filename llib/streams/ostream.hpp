@@ -213,7 +213,7 @@ namespace llib {
 
     template<typename OutputStream>
     OutputStream operator<<(OutputStream str, char c) {
-        str.write_impl(c);
+        str.putc(c);
 
         return str;
     }
