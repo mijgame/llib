@@ -11,10 +11,6 @@ namespace llib::due::can {
 
         using tx = pins::cantx;
         using rx = pins::canrx;
-
-        static Can *get_bus() {
-            return CAN0;
-        }
     };
 
     struct can1 {
@@ -25,11 +21,16 @@ namespace llib::due::can {
         // https://copperhilltech.com/blog/arduino-due-can-bus-controller-area-network-interfaces/
         using tx = pins::d53;
         using rx = pins::dac0;
-
-        static Can *get_bus() {
-            return CAN1;
-        }
     };
+
+    template<typename CAN>
+    Can *const port = nullptr;
+
+    template<>
+    Can *const port<can0> = CAN0;
+
+    template<>
+    Can *const port<can1> = CAN1;
 
     enum mailbox_mode {
         DISABLE = 0,
@@ -70,21 +71,17 @@ namespace llib::due::can {
          */
         template<typename Bus>
         void _disable_bus() {
-            auto *bus = Bus::get_bus();
-
             // Disable CAN hardware if previously enabled
-            bus->CAN_MR &= ~CAN_MR_CANEN;
+            port<Bus>->CAN_MR &= ~CAN_MR_CANEN;
 
             // Read status register to be sure it's cleaned out
-            (void) bus->CAN_SR;
+            (void) port<Bus>->CAN_SR;
         }
 
         template<typename Bus>
         void _enable_bus() {
-            auto *bus = Bus::get_bus();
-
             // Enable CAN hardware
-            bus->CAN_MR |= CAN_MR_CANEN;
+            port<Bus>->CAN_MR |= CAN_MR_CANEN;
 
             // TODO: enablePin stuff?
         }
@@ -194,7 +191,7 @@ namespace llib::due::can {
             detail::_disable_bus<Bus>();
 
             // Write to CAN baudrate register
-            Bus::get_bus()->CAN_BR = CAN_BR_PHASE2(bit_time.phase2 - 1) |
+            port<Bus>->CAN_BR = CAN_BR_PHASE2(bit_time.phase2 - 1) |
                                      CAN_BR_PHASE1(bit_time.phase1 - 1) |
                                      CAN_BR_PROPAG(bit_time.propagation - 1) |
                                      CAN_BR_SJW(bit_time.sync_jump_width - 1) |
@@ -204,28 +201,28 @@ namespace llib::due::can {
         }
     }
 
+    template<typename Bus>
     class controller {
-        template<typename Bus, baudrate Baud = BPS_1000K>
+    public:
+        template<baudrate Baud = BPS_1000K>
         static bool init() {
             constexpr uint32_t can_timeout = 100000;
 
             // Init bus clock
             enable_clock<Bus>();
 
-            auto *bus = Bus::get_bus();
-
             // Change multiplexers on tx/rx pins to CAN
-            set_peripheral<Bus::tx>();
-            set_peripheral<Bus::rx>();
+            set_peripheral<typename Bus::tx>();
+            set_peripheral<typename Bus::rx>();
 
-            if (!detail::_set_baudrate<Bus>()) {
+            if (!detail::_set_baudrate<Bus, Baud>()) {
                 return false;
             }
 
             // TODO: mailbox stuf?
 
             // Disable all CAN interrupts by default
-            bus->CAN_IDR = 0xffffffff;
+            port<Bus>->CAN_IDR = 0xffffffff;
 
             detail::_enable_bus<Bus>();
 
@@ -233,7 +230,7 @@ namespace llib::due::can {
             uint32_t tick = 0;
 
             do {
-                flag = bus->CAN_SR;
+                flag = port<Bus>->CAN_SR;
                 ++tick;
             } while (! (flag & CAN_SR_WAKEUP) && (tick < can_timeout));
 
