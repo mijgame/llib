@@ -125,10 +125,6 @@ namespace llib::due {
 
         template<uint32_t frequency = 82031, uint8_t dutycycle = 127>
         static void init() {
-            for (auto &available_clock : available_clocks) {
-                available_clock = 0;
-            }
-
             // enable pwm clock
             enable_clock<pin_pwm>();
 
