@@ -11,7 +11,7 @@ namespace llib::due {
         private:
             constexpr static uint32_t variant_mck = CHIP_FREQ_CPU_MAX;
             constexpr static uint8_t clock_amount = 2;
-            static inline uint16_t available_clocks[2] = {0, 0};
+            static inline uint16_t available_clocks[clock_amount] = {0, 0};
 
             template<typename PPin>
             static void _set_pio_b_peripheral(){
