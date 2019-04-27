@@ -16,7 +16,8 @@ namespace llib::displays {
         constexpr static int8_t line_width = char_width * chars_on_term;
 
         // TODO: make this adjustable at runtime
-        constexpr static llib::graphics::color color = llib::graphics::white;
+        constexpr static llib::graphics::color foreground = llib::graphics::white;
+        constexpr static llib::graphics::color background = llib::graphics::black;
 
         Display &display;
 
@@ -49,20 +50,14 @@ namespace llib::displays {
                 newline();
             }
 
-            const auto &sequence = font[c];
+            const auto &image = font[c];
 
-            for (size_t row = 0; row < 8; row++) {
-                for (size_t bit = 0; bit < 8; bit++) {
-                    const bool set = sequence[row] & (1U << bit);
-
-                    if (!set) {
-                        continue;
-                    }
-
+            for (uint_fast8_t im_x = 0; im_x < 8; im_x++) {
+                for (uint_fast8_t im_y = 0; im_y < 8; im_y++) {
                     display.write(
-                        x + bit,
-                        y + row,
-                        color
+                        x + im_x,
+                        y + im_y,
+                        image(x, y)
                     );
                 }
             }

@@ -5,9 +5,15 @@
 
 namespace llib::graphics {
     struct color {
-        uint8_t r;
-        uint8_t g;
-        uint8_t b;
+        union {
+            struct {
+                uint8_t r;
+                uint8_t g;
+                uint8_t b;
+            };
+
+            uint8_t values[3];
+        };
 
         /**
          * Default constructor, black.
@@ -93,6 +99,20 @@ namespace llib::graphics {
                    | (static_cast<uint16_t>(b) * 0x1FU / 0xFFU);
         }
     };
+
+    /**
+     * Outputstream operator for a color.
+     *
+     * @tparam OutputStream
+     * @param str
+     * @param c
+     * @return
+     */
+    template<typename OutputStream>
+    OutputStream &operator<<(OutputStream &str, const color c) {
+        str << array_values(c.values, 3);
+        return str;
+    }
 
     constexpr color black = color(0, 0, 0);
     constexpr color white = color(0xFF, 0xFF, 0xFF);

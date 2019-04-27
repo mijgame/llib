@@ -60,7 +60,7 @@ namespace llib::displays {
             detail::_cmd_mode, detail::_memory_mode, 0x00,
             detail::_cmd_mode, detail::_segre_map | 0x01U,
             detail::_cmd_mode, detail::_com_scan_dec,
-            detail::_cmd_mode, detail::_com_scan_inc, 0x12,
+            detail::_cmd_mode, detail::_set_compins, 0x12,
             detail::_cmd_mode, detail::_set_contrast, 0xCF,
             detail::_cmd_mode, detail::_set_precharge, 0xF1,
             detail::_cmd_mode, detail::_set_vcom_detect, 0x40,
