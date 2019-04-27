@@ -83,7 +83,7 @@ SECTIONS
 		__text_start = .;
 		KEEP(*(.vectors .vectors.*))
 		*(.text .text.* .gnu.linkonce.t.*); /* text segment */
-		*(.glue_7t .glue_7); /* glue arm to tumb code, glue tumb to arm code*/
+		*(.glue_7t .glue_7); /* glue arm to thumb code, glue thumb to arm code*/
 		*(.rodata .rodata.* .gnu.linkonce.r.*); /* Constands, strings, etc */
 		*(.ARM.extab* .gnu.linkonce.armextab.*); /* exception unwinding information */
 
