@@ -14,7 +14,7 @@ addons:
 
 cache:
   directories:
-    - $HOME/cmake/3.11.1       
+    - $HOME/cmake/3.11.1
 
 install:
   - ./tools/travis-ci/install_cmake.sh 3.11.1
@@ -28,7 +28,12 @@ script:
   - ln -s /usr/bin/arm-none-eabi-objcopy $HOME/opt/gcc-arm-none-eabi-7-2018-q2-update/bin/arm-none-eabi-objcopy
   - ln -s /usr/bin/arm-none-eabi-objdump $HOME/opt/gcc-arm-none-eabi-7-2018-q2-update/bin/arm-none-eabi-objdump
   - ln -s /usr/bin/arm-none-eabi-size $HOME/opt/gcc-arm-none-eabi-7-2018-q2-update/bin/arm-none-eabi-size
+
   # Check versions of gcc, g++ and cmake
   - gcc -v && g++ -v && cmake --version
+
+  # create a main
+  - echo -e "include <pins.hpp>\n\nint main(){}" > main.cpp
+
   # Run your build commands next
   - $HOME/cmake/3.11.1/bin/cmake CMakeLists.txt
