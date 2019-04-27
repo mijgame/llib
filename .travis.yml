@@ -11,6 +11,19 @@ addons:
       - g++-8
       - cmake
       - g++-arm-linux-gnueabi
+    env:
+      - CMAKE_VERSION="3.11.1"
+      - GENERATOR="Unix Makefiles"
+      - BUILDFLAGS="VERBOSE=1"   
+
+cache:
+  directories:
+    - $HOME/cmake/3.11.1       
+
+install:
+  - ./travis-ci/install_cmake.sh
+  - export PATH=$HOME/cmake/$CMAKE_VERSION/bin${PATH:+:$PATH}
+
 script:
   # Link gcc and g++ to their standard commands
   - ln -s /usr/bin/gcc-8 /usr/local/bin/gcc
