@@ -7,6 +7,9 @@ namespace llib::due {
 
     class watchdog {
     public:
+        constexpr static uint32_t instance_id = ID_WDT;
+        constexpr static uint32_t irqn = static_cast<uint32_t>(WDT_IRQn);
+
         static void disable() {
             // Disable the watchdog timer
             WDT->WDT_MR = WDT_MR_WDDIS;

@@ -11,6 +11,7 @@ namespace llib::due {
     namespace spi {
         struct spi0 {
             constexpr static uint32_t instance_id = ID_SPI0;
+            constexpr static uint32_t irqn = static_cast<uint32_t>(SPI0_IRQn);
         };
 
         enum class mode {
@@ -43,32 +44,31 @@ namespace llib::due {
             BIT_16 = 8
         };
 
-        template<typename SPI, typename Pin = pins::d10_multi>
+        template<typename SPI, typename Pin = pins::d10>
         class bus {
         private:
             template<typename PPin>
             static void configure_pin() {
-                // special cases sinds d10 and d4 have multiple pio's
-                if(std::is_same_v<PPin, pins::d10>){
-                    return configure_pin<pins::d10_multi>();
+                // special cases since d10 and d4 have multiple pio's
+                if constexpr(std::is_same_v<PPin, pins::d10>){
+                    return configure_pin<pins::cs0>();
                 }                
-                if(std::is_same_v<PPin, pins::d4>){
-                    return configure_pin<pins::d4_multi>();
+                else if(std::is_same_v<PPin, pins::d4>){
+                    return configure_pin<pins::cs1>();
                 }         
-                                   
-                pins::port<typename PPin::port>->PIO_IDR = pins::mask<PPin>;
 
+                // change the peripheral multiplexer to the other port
                 set_peripheral<PPin>();
             }
 
             template<typename PPin>
             constexpr static uint8_t pin_to_spi() {
-                // special cases sinds d10 and d4 have multiple pio's
+                // special cases since d10 and d4 have multiple pio's
                 if constexpr (std::is_same_v<PPin, pins::d10>){
-                    return pins::d10_multi::spi_number;
+                    return pins::cs0::spi_number;
                 }
                 else if (std::is_same_v<PPin, pins::d4>){
-                    return pins::d4_multi::spi_number;
+                    return pins::cs1::spi_number;
                 }
                 else{
                     return PPin::spi_number;
@@ -80,7 +80,7 @@ namespace llib::due {
             }
 
         public:
-            template<mode M, spi_mode Spm, uint32_t Divider, bits B>
+            template<spi_mode Spm = spi_mode::MODE_0, uint32_t Divider = 20, mode M = mode::MASTER, bits B = bits::BIT_8>
             void static init() {
                 // disable write protection spi
                 REG_SPI0_WPMR = 0x53504900;
@@ -128,9 +128,13 @@ namespace llib::due {
             }
 
             static void write(uint16_t Data) {
-                while ((spi::port<SPI>->SPI_SR & SPI_SR_TXEMPTY) == 0);
+                while (is_transfering());
                 spi::port<SPI>->SPI_TDR = Data | SPI_PCS(static_cast<uint32_t>(pin_to_spi<Pin>()));
                 while ((spi::port<SPI>->SPI_SR & SPI_SR_TDRE) == 0);
+            }
+
+            static bool is_transfering(){
+                return (spi::port<SPI>->SPI_SR & SPI_SR_TXEMPTY) == 0;
             }
         };
     }

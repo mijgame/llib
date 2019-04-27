@@ -3,48 +3,31 @@
 
 #include <cstdint>
 
-/**
- * Literal for nanoseconds. Nanoseconds
- * are the base unit for timing things like waits.
- *
- * @param value
- * @return
- */
-constexpr uint64_t operator"" _ns(unsigned long long value) {
-    return value;
-}
-
-/**
- * Literal for microseconds.
- *
- * @param value
- * @return
- */
-constexpr uint64_t operator"" _us(unsigned long long value) {
-    return operator""_ns(value) * 1000;
-}
-
-/**
- * Literal for milliseconds.
- *
- * @param value
- * @return
- */
-constexpr uint64_t operator"" _ms(unsigned long long value) {
-    return operator""_us(value) * 1000;
-}
-
-/**
- * Literal for seconds.
- *
- * @param value
- * @return
- */
-constexpr uint64_t operator"" _s(unsigned long long value) {
-    return operator""_ms(value) * 1000;
-}
-
 namespace llib {
+    struct ns {
+        uint32_t value;
+    };
+
+    struct us {
+        uint32_t value;
+    };
+
+    struct ms {
+        uint32_t value;
+    };
+
+    struct s {
+        uint32_t value;
+    };
+
+    void wait_for(llib::ns ns);
+
+    void wait_for(llib::us us);
+
+    void wait_for(llib::ms ms);
+
+    void wait_for(llib::s s);
+
     /**
      * Wait for the given amount of nanoseconds.
      * The implementation of this function is left to the
@@ -54,6 +37,15 @@ namespace llib {
      * @param ns
      */
     void wait_for(uint64_t ns);
+
+    /**
+     * Sleep for the given amount of nanoseconds.
+     * The implementation of this function is left to the
+     * target and accuracy might very.
+     *
+     * Likely, this function is most accurate in the microsecond range.
+     */
+    void sleep_for(uint64_t);
 }
 
 #endif //LLIB_WAIT_HPP

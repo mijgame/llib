@@ -24,6 +24,10 @@ namespace llib::due {
         constexpr static uint32_t irqn = static_cast<uint32_t>(PIOD_IRQn);
     };
 
+    struct pio_periph_a {};
+
+    struct pio_periph_b {};
+
     /**
     * Enable the clock on the peripheral.
     *
@@ -50,6 +54,20 @@ namespace llib::due {
     void enable_clock() {
         enable_clock<P>();
         enable_clock<P2, Args...>();
+    }
+
+    /**
+    * Returns the status of the clock on the peripheral.
+    *
+    * @tparam P
+    */
+    template<typename P>
+    bool get_clock_status(){
+        if constexpr (P::instance_id < 32){
+            return (PMC->PMC_PCSR0 & (1U << P::instance_id));
+        } else {
+            return PMC->PMC_PCSR1 & (1U << (P::instance_id - 32));
+        }
     }
 }
 

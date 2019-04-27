@@ -23,8 +23,8 @@ namespace llib {
          *
          * @param pos
          */
-        void free_position(const size_t pos) {
-            for (size_t i = this->index; i != pos; --i) {
+        constexpr void free_position(const size_t pos) {
+            for (size_t i = this->index; i != pos - 1; --i) {
                 store[i + 1] = store[i];
             }
         }
@@ -33,14 +33,14 @@ namespace llib {
         /**
          * Default constructor.
          */
-        dynamic_array() = default;
+        constexpr dynamic_array() = default;
 
         /**
          * Construct from a initializer list.
          *
          * @param list
          */
-        dynamic_array(std::initializer_list<T> list)
+        constexpr dynamic_array(std::initializer_list<T> list)
                 : dynamic_array(list.begin(), list.end()) {}
 
         /**
@@ -51,7 +51,7 @@ namespace llib {
          * @param last
          */
         template<typename InputIterator>
-        dynamic_array(InputIterator first, InputIterator last) {
+        constexpr dynamic_array(InputIterator first, InputIterator last) {
             for (auto it = first; it != last; ++it) {
                 push_back(*it);
             }
@@ -62,7 +62,7 @@ namespace llib {
          *
          * @param x
          */
-        dynamic_array(const dynamic_array &x) {
+        constexpr dynamic_array(const dynamic_array &x) {
             for (size_t i = 0; i < x.size(); i++) {
                 push_back(x[i]);
             }
@@ -73,7 +73,7 @@ namespace llib {
          *
          * @param other
          */
-        dynamic_array(dynamic_array &&other) : dynamic_array() {
+        constexpr dynamic_array(dynamic_array &&other) : dynamic_array() {
             swap(*this, other);
         }
 
@@ -83,7 +83,7 @@ namespace llib {
          * @param other
          * @return
          */
-        dynamic_array &operator=(dynamic_array other) {
+        constexpr dynamic_array &operator=(dynamic_array other) {
             swap(*this, other);
 
             return *this;
@@ -96,7 +96,7 @@ namespace llib {
          * @param list
          * @return
          */
-        dynamic_array &operator=(std::initializer_list<T> list) {
+        constexpr dynamic_array &operator=(std::initializer_list<T> list) {
             index = 0;
 
             for (const auto &item : list) {
@@ -126,28 +126,32 @@ namespace llib {
             using reference = value_type &;
             using iterator_category = std::bidirectional_iterator_tag;
 
-            random_access_iterator(dynamic_array<T, Size> &subject)
+            constexpr random_access_iterator(dynamic_array<T, Size> &subject)
                     : subject(subject), at(0) {}
 
-            random_access_iterator(dynamic_array<T, Size> &subject, size_t start)
+            constexpr random_access_iterator(dynamic_array<T, Size> &subject, size_t start)
                     : subject(subject), at(start) {}
 
-            random_access_iterator(const random_access_iterator &rhs)
+            constexpr random_access_iterator(const random_access_iterator &rhs)
                     : subject(rhs.subject), at(rhs.at) {}
 
-            random_access_iterator(random_access_iterator &&rhs) {
+            constexpr random_access_iterator(random_access_iterator &&rhs) {
                 subject = rhs.subject;
                 at = rhs.at;
             }
 
-            random_access_iterator &operator=(const random_access_iterator &rhs) {
+            constexpr random_access_iterator &operator=(const random_access_iterator &rhs) {
                 subject = rhs.subject;
                 at = rhs.at;
+
+                return *this;
             }
 
-            random_access_iterator &operator=(random_access_iterator &&rhs) {
+            constexpr random_access_iterator &operator=(random_access_iterator &&rhs) {
                 subject = rhs.subject;
                 at = rhs.at;
+
+                return *this;
             }
 
             /**
@@ -156,7 +160,7 @@ namespace llib {
              * @param rhs
              * @return
              */
-            bool operator==(const random_access_iterator &rhs) {
+            constexpr bool operator==(const random_access_iterator &rhs) const {
                 return at == rhs.at
                        && std::addressof(subject) == std::addressof(rhs.subject);
             }
@@ -167,23 +171,23 @@ namespace llib {
              * @param rhs
              * @return
              */
-            bool operator!=(const random_access_iterator &rhs) {
+            constexpr bool operator!=(const random_access_iterator &rhs) {
                 return !operator==(rhs);
             }
 
-            reference operator*() {
+            constexpr reference operator*() {
                 return subject[at];
             }
 
-            value_type operator*() const {
+            constexpr value_type operator*() const {
                 return subject[at];
             }
 
-            pointer operator->() {
+            constexpr pointer operator->() {
                 return &subject[at];
             }
 
-            const_pointer operator->() const {
+            constexpr const_pointer operator->() const {
                 return &subject[at];
             }
 
@@ -192,7 +196,7 @@ namespace llib {
              *
              * @return
              */
-            random_access_iterator &operator++() {
+            constexpr random_access_iterator &operator++() {
                 at++;
                 return *this;
             }
@@ -202,18 +206,18 @@ namespace llib {
              *
              * @return
              */
-            const random_access_iterator operator++(int) {
+            constexpr const random_access_iterator operator++(int) {
                 random_access_iterator temp(*this);
                 operator++();
                 return temp;
             }
 
-            random_access_iterator &operator--() {
+            constexpr random_access_iterator &operator--() {
                 at--;
                 return *this;
             }
 
-            const random_access_iterator operator--(int) {
+            constexpr const random_access_iterator operator--(int) {
                 random_access_iterator temp(*this);
                 operator--();
                 return temp;
@@ -225,7 +229,7 @@ namespace llib {
              * @param n
              * @return
              */
-            random_access_iterator operator+(const size_t n) const {
+            constexpr random_access_iterator operator+(const size_t n) const {
                 return random_access_iterator(subject, at + n);
             }
 
@@ -236,7 +240,7 @@ namespace llib {
              * @param it
              * @return
              */
-            friend random_access_iterator operator+(const size_t n, const random_access_iterator &it) {
+            constexpr friend random_access_iterator operator+(const size_t n, const random_access_iterator &it) {
                 return it + n;
             }
 
@@ -246,7 +250,7 @@ namespace llib {
              * @param n
              * @return
              */
-            random_access_iterator operator-(const size_t n) const {
+            constexpr random_access_iterator operator-(const size_t n) const {
                 return random_access_iterator(subject, at - n);
             }
 
@@ -256,7 +260,7 @@ namespace llib {
              * @param other
              * @return
              */
-            random_access_iterator operator-(const random_access_iterator &other) const {
+            constexpr random_access_iterator operator-(const random_access_iterator &other) const {
                 return random_access_iterator(subject, at - other.at);
             }
 
@@ -266,7 +270,7 @@ namespace llib {
              * @param other
              * @return
              */
-            random_access_iterator operator<(const random_access_iterator &other) const {
+            constexpr random_access_iterator operator<(const random_access_iterator &other) const {
                 return at < other.at;
             }
 
@@ -276,7 +280,7 @@ namespace llib {
              * @param other
              * @return
              */
-            random_access_iterator operator>(const random_access_iterator &other) const {
+            constexpr random_access_iterator operator>(const random_access_iterator &other) const {
                 return at > other.at;
             }
 
@@ -286,7 +290,7 @@ namespace llib {
              * @param other
              * @return
              */
-            random_access_iterator operator<=(const random_access_iterator &other) const {
+            constexpr random_access_iterator operator<=(const random_access_iterator &other) const {
                 return operator<(other) || operator==(other);
             }
 
@@ -296,7 +300,7 @@ namespace llib {
              * @param other
              * @return
              */
-            random_access_iterator operator>=(const random_access_iterator &other) const {
+            constexpr random_access_iterator operator>=(const random_access_iterator &other) const {
                 return operator>(other) || operator==(other);
             }
 
@@ -306,8 +310,9 @@ namespace llib {
              * @param n
              * @return
              */
-            random_access_iterator operator+=(const size_t n) {
+            constexpr random_access_iterator operator+=(const size_t n) {
                 at += n;
+                return *this;
             }
 
             /**
@@ -316,8 +321,9 @@ namespace llib {
              * @param n
              * @return
              */
-            random_access_iterator operator-=(const size_t n) {
+            constexpr random_access_iterator operator-=(const size_t n) {
                 at -= n;
+                return *this;
             }
 
             /**
@@ -326,7 +332,7 @@ namespace llib {
              * @param n
              * @return
              */
-            reference operator[](const size_t n) {
+            constexpr reference operator[](const size_t n) {
                 return subject[n];
             }
         };
@@ -338,7 +344,7 @@ namespace llib {
          *
          * @return
          */
-        T &front() {
+        constexpr T &front() {
             return store[0];
         }
 
@@ -349,7 +355,7 @@ namespace llib {
          *
          * @return
          */
-        const T &front() const {
+        constexpr const T &front() const {
             return store[0];
         }
 
@@ -360,7 +366,7 @@ namespace llib {
          *
          * @return
          */
-        T &back() {
+        constexpr T &back() {
             return store[index - 1];
         }
 
@@ -371,7 +377,7 @@ namespace llib {
          *
          * @return
          */
-        const T &back() const {
+        constexpr const T &back() const {
             return store[index - 1];
         }
 
@@ -381,7 +387,7 @@ namespace llib {
          *
          * @return
          */
-        T *data() {
+        constexpr T *data() {
             return store;
         }
 
@@ -391,7 +397,7 @@ namespace llib {
          *
          * @return
          */
-        const T *data() const {
+        constexpr const T *data() const {
             return store;
         }
 
@@ -401,7 +407,7 @@ namespace llib {
          *
          * @return
          */
-        bool empty() const {
+        constexpr bool empty() const {
             return size() == 0;
         }
 
@@ -411,7 +417,7 @@ namespace llib {
          *
          * @return
          */
-        size_t size() const {
+        constexpr size_t size() const {
             return index;
         }
 
@@ -429,7 +435,7 @@ namespace llib {
          * Remove all elements from the array.
          * These elements are destroyed.
          */
-        void clear() {
+        constexpr void clear() {
             // Destruct elements.
             for (size_t i = 0; i < index; i++) {
                 store[i].~T();
@@ -449,7 +455,7 @@ namespace llib {
          * @param value
          * @return
          */
-        iterator insert(const_iterator &it, const T &value) {
+        constexpr  iterator insert(const_iterator &it, const T &value) {
             free_position(it.at);
             store[it.at] = value;
             index++;
@@ -466,7 +472,7 @@ namespace llib {
          * @param value
          * @return
          */
-        iterator insert(const_iterator &it, size_t n, const T &value) {
+        constexpr iterator insert(const_iterator &it, size_t n, const T &value) {
             for (size_t i = 0; i < n; i++) {
                 insert(it + i, value);
             }
@@ -485,7 +491,7 @@ namespace llib {
          * @return
          */
         template<typename InputIterator>
-        iterator insert(const_iterator &it, InputIterator first, InputIterator last) {
+        constexpr iterator insert(const_iterator &it, InputIterator first, InputIterator last) {
             size_t i = 0;
 
             for (auto iit = first; iit != last; ++i, ++iit) {
@@ -503,7 +509,7 @@ namespace llib {
          * @param value
          * @return
          */
-        iterator insert(const_iterator &it, T &&value) {
+        constexpr iterator insert(const_iterator &it, T &&value) {
             insert(it, std::move(value));
 
             return it;
@@ -517,8 +523,10 @@ namespace llib {
          * @param list
          * @return
          */
-        iterator insert(const_iterator &it, std::initializer_list<T> list) {
+        constexpr iterator insert(const_iterator &it, std::initializer_list<T> list) {
             insert(it, list.begin(), list.end());
+
+            return it;
         }
 
         /**
@@ -529,7 +537,7 @@ namespace llib {
          * @param args
          */
         template<typename ...Args>
-        void emplace(const size_t pos, Args &&... args) {
+        constexpr void emplace(const size_t pos, Args &&... args) {
             free_position(pos);
             store[pos] = T(std::forward<Args>(args)...);
             index++;
@@ -543,7 +551,7 @@ namespace llib {
          * @param args
          */
         template<typename ...Args>
-        void emplace(const_iterator &it, Args &&... args) {
+        constexpr void emplace(const_iterator &it, Args &&... args) {
             emplace(it.at, std::forward<Args>(args)...);
         }
 
@@ -552,7 +560,7 @@ namespace llib {
          *
          * @param pos
          */
-        void erase(const_iterator &it) {
+        constexpr void erase(const_iterator &it) {
             if (it.at == this->index - 1) {
                 this->index--;
                 return;
@@ -575,7 +583,7 @@ namespace llib {
          * @param start
          * @param end
          */
-        void erase(const_iterator &start, const_iterator &end) {
+        constexpr void erase(const_iterator &start, const_iterator &end) {
             for (auto it = start; it != end; ++it) {
                 erase(it);
             }
@@ -591,7 +599,7 @@ namespace llib {
          * @param last
          */
         template<typename InputIterator>
-        void assign(InputIterator first, InputIterator last) {
+        constexpr void assign(InputIterator first, InputIterator last) {
             clear();
 
             for (auto it = first; it != last; ++it) {
@@ -607,7 +615,7 @@ namespace llib {
          * @param n
          * @param val
          */
-        void assign(size_t n, const T &val) {
+        constexpr void assign(size_t n, const T &val) {
             clear();
 
             for (size_t i = 0; i < n; i++) {
@@ -622,7 +630,7 @@ namespace llib {
          *
          * @param list
          */
-        void assign(std::initializer_list<T> list) {
+        constexpr void assign(std::initializer_list<T> list) {
             assign(list.begin(), list.end());
         }
 
@@ -632,7 +640,7 @@ namespace llib {
          *
          * @param entry
          */
-        void push_back(const T &entry) {
+        constexpr void push_back(const T &entry) {
             store[index++] = entry;
         }
 
@@ -642,7 +650,7 @@ namespace llib {
          *
          * @param entry
          */
-        void push_back(T &&entry) {
+        constexpr void push_back(T &&entry) {
             store[index++] = entry;
         }
 
@@ -654,8 +662,18 @@ namespace llib {
          * @param args
          */
         template<typename ...Args>
-        void emplace_back(Args &&... args) {
+        constexpr void emplace_back(Args &&... args) {
             store[index++] = T(std::forward<Args>(args)...);
+        }
+
+        /**
+         * Remove the first element from
+         * the array.
+         * This destroys the removed element.
+         */
+        constexpr void pop_front() {
+            store[0].~T();
+            erase(begin());
         }
 
         /**
@@ -663,7 +681,7 @@ namespace llib {
          * reducing the array size by one.
          * This destroys the removed element.
          */
-        void pop_back() {
+        constexpr void pop_back() {
             store[index--].~T();
         }
 
@@ -673,7 +691,7 @@ namespace llib {
          * @param first
          * @param second
          */
-        friend void swap(dynamic_array &first, dynamic_array &second) {
+        constexpr friend void swap(dynamic_array &first, dynamic_array &second) {
             using std::swap;
 
             swap(first.store, second.store);
@@ -687,7 +705,7 @@ namespace llib {
          * @param index
          * @return
          */
-        T &operator[](const size_t index) {
+        constexpr T &operator[](const size_t index) {
             return store[index];
         }
 
@@ -698,7 +716,7 @@ namespace llib {
          * @param index
          * @return
          */
-        T operator[](const size_t index) const {
+        constexpr T operator[](const size_t index) const {
             return store[index];
         }
 
@@ -708,7 +726,7 @@ namespace llib {
          *
          * @return
          */
-        iterator begin() {
+        constexpr iterator begin() {
             return iterator(*this);
         }
 
@@ -718,7 +736,7 @@ namespace llib {
          *
          * @return
          */
-        const_iterator begin() const {
+        constexpr const_iterator begin() const {
             return iterator(*this);
         }
 
@@ -728,7 +746,7 @@ namespace llib {
          *
          * @return
          */
-        iterator end() {
+        constexpr iterator end() {
             return iterator(*this, index);
         }
 
@@ -738,7 +756,7 @@ namespace llib {
          *
          * @return
          */
-        const_iterator end() const {
+        constexpr const_iterator end() const {
             return const_iterator(*this, index);
         }
     };
@@ -753,7 +771,7 @@ namespace llib {
      * @return
      */
     template<typename T, size_t Size>
-    bool operator==(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
+    constexpr bool operator==(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
         for (size_t i = 0; i < Size; i++) {
             if (lhs[i] != rhs[i]) {
                 return false;
@@ -775,7 +793,7 @@ namespace llib {
      * @return
      */
     template<typename T, size_t Size>
-    bool operator!=(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
+    constexpr bool operator!=(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
         return !operator==(lhs, rhs);
     }
 
@@ -792,7 +810,7 @@ namespace llib {
      * @return
      */
     template<typename T, size_t Size>
-    bool operator<(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
+    constexpr bool operator<(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
         for (size_t i = 0; i < Size; i++) {
             if (!(lhs[i] < rhs[i])) {
                 return false;
@@ -815,7 +833,7 @@ namespace llib {
      * @return
      */
     template<typename T, size_t Size>
-    bool operator<=(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
+    constexpr bool operator<=(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
         return !(lhs < rhs);
     }
 
@@ -832,7 +850,7 @@ namespace llib {
      * @return
      */
     template<typename T, size_t Size>
-    bool operator>(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
+    constexpr bool operator>(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
         return !(lhs < rhs);
     }
 
@@ -849,7 +867,7 @@ namespace llib {
      * @return
      */
     template<typename T, size_t Size>
-    bool operator>=(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
+    constexpr bool operator>=(const dynamic_array<T, Size> &lhs, const dynamic_array<T, Size> &rhs) {
         return !(lhs < rhs);
     }
 }

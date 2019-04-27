@@ -2,11 +2,13 @@
 #define LLIB_DUE_RTT_HPP
 
 #include "peripheral.hpp"
+#include "interrupt.hpp"
 
 namespace llib::due {
     class rtt {
     public:
         constexpr static uint32_t instance_id = ID_RTT;
+        constexpr static uint32_t irqn = static_cast<uint32_t>(RTT_IRQn);
 
         template<uint16_t Prescaler = 0x00008000, bool AlarmInterrupt = true, bool IncrementInterrupt = true>
         void static init() {
@@ -61,6 +63,15 @@ namespace llib::due {
             return RTT->RTT_VR;
         }
     };
+}
+
+extern "C" {
+void __RTT_Handler(){
+    llib::due::_handle_isr<llib::due::rtt>(
+        RTT->RTT_SR,
+        0x3 // enable all interupts sinds the RTT doesnt have a interupt mask
+    );
+}
 }
 
 #endif //LLIB_DUE_RTT_HPP

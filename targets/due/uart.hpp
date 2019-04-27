@@ -8,16 +8,11 @@ namespace llib::due {
     namespace uart {
         struct uart {
             constexpr static uint32_t instance_id = ID_UART;
+            constexpr static uint32_t irqn = static_cast<uint32_t>(UART_IRQn);
         };
 
         template<unsigned int Baud = 115200>
         void init() {
-            static bool initialised = false;
-
-            if (initialised) {
-                return;
-            }
-
             // Enable clock on port A
             enable_clock<pioa>();
 
@@ -31,7 +26,8 @@ namespace llib::due {
             enable_clock<uart>();
 
             // Reset and disable receiver and transmitter
-            UART->UART_CR = UART_CR_RSTRX | UART_CR_RSTTX | UART_CR_RXDIS | UART_CR_TXDIS;
+            UART->UART_CR = UART_CR_RSTRX | UART_CR_RSTTX;
+            UART->UART_CR = UART_CR_RXDIS | UART_CR_TXDIS;
 
             // Baudrate to 115200
             UART->UART_BRGR = 5241600 / Baud;
@@ -44,21 +40,19 @@ namespace llib::due {
 
             // Enable the receiver and the transmitter
             UART->UART_CR = UART_CR_RXEN | UART_CR_TXEN;
-
-            initialised = true;
         }
 
-        bool char_available() {
+        inline bool char_available() {
             return (UART->UART_SR & 1) != 0;
         }
 
-        char get_char() {
+        inline char get_char() {
             while (!char_available());
 
             return UART->UART_RHR;
         }
 
-        void put_char(const char c) {
+        inline void put_char(const char c) {
             while ((UART->UART_SR & 2) == 0);
             UART->UART_THR = c;
         }

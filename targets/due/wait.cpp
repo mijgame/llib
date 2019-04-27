@@ -1,49 +1,99 @@
 #include <wait.hpp>
-
-#include "base.hpp"
+#include <base.hpp>
 
 namespace llib {
-    uint_fast64_t _ticks() {
-        static bool initialized = false;
+    struct _timer {
+        uint_fast32_t counter;
+        uint_fast32_t rollovers;
 
-        if (!initialized) {
-            EFC0->EEFC_FMR = EEFC_FMR_FWS(4);
-            EFC1->EEFC_FMR = EEFC_FMR_FWS(4);
+        _timer()
+            : counter(0), rollovers(0) {}
+    };
 
+    void _stop_systick() {
+        SysTick->CTRL = 0;
+    }
+
+    void _reset_systick() {
+        if (!(SysTick->CTRL & SysTick_CTRL_ENABLE_Msk)) {
             SysTick->CTRL = 0;          // Stop timer
             SysTick->LOAD = 0xFFFFFF;   // 24-bit timer
-            SysTick->VAL = 0;           // Clear timer
             SysTick->CTRL = 5;          // Start timer
-
-            initialized = true;
         }
 
-        static uint32_t last_low = 0;
-        static uint64_t high = 0;
+        SysTick->VAL = 0;           // Clear timer
+    }
 
-        uint32_t low = 0xFFFFFF - (SysTick->VAL & 0xFFFFFF);
-
-        if (low < last_low) {
-            // Rollover, increment
-            high += 0x1ULL << 24;
+    void _advance_timer(_timer &timer) {
+        if (SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk) {
+            timer.rollovers += 1;
         }
 
-        last_low = low;
-
-        return (low | high);
+        timer.counter = 0xFFFFFF - (SysTick->VAL & 0xFFFFFF);
     }
 
-    uint64_t _us() {
-        return _ticks() / 84;
+    void _wait_for(const uint_fast32_t rollovers, const uint_fast32_t ticks) {
+        _timer timer;
+
+        _reset_systick();
+
+        while (timer.rollovers < rollovers) {
+            _advance_timer(timer);
+        }
+
+        // TODO: can a rollover occur without us knowing here?
+        while (timer.counter < ticks) {
+            _advance_timer(timer);
+        }
+
+        _stop_systick();
     }
 
-    void wait_for(uint64_t ns) {
-        // Due works on 84mhz, so a single tick is 11.9ns
-        // for now only a us resolution is used.
-        // TODO: support ns resolution
+    void wait_for(const llib::ns ns) {
+        constexpr uint_fast32_t ticks_per_rollover = 16777216;
 
-        auto end = _us() + (ns / 1000);
+        const uint_fast32_t total_ticks = ns.value / 12;
+        const uint_fast32_t rollovers = total_ticks / ticks_per_rollover;
+        const uint_fast32_t ticks = total_ticks - ticks_per_rollover * rollovers;
 
-        while (_us() < end);
+        _wait_for(rollovers, ticks);
     }
+
+    void wait_for(const llib::us us) {
+        // Approx: rounded down from 199648,8704
+        constexpr uint_fast32_t us_per_rollover = 199648;
+        constexpr uint_fast32_t ns_short_per_rollover = 129;
+
+        const uint_fast32_t rollovers = us.value / us_per_rollover;
+        const uint_fast32_t ticks = (us.value - us_per_rollover * rollovers) * 84;
+
+        _wait_for(rollovers, ticks);
+        wait_for(ns{rollovers * ns_short_per_rollover});
+    }
+
+    void wait_for(const llib::ms ms) {
+        constexpr uint_fast32_t ms_per_rollover = 199;
+
+        const uint_fast32_t rollovers = ms.value / ms_per_rollover;
+        const uint_fast32_t excess_us = (ms.value % ms_per_rollover) * 1000;
+
+        _wait_for(rollovers, 0);
+        wait_for(us{excess_us});
+    }
+
+    void wait_for(const llib::s s) {
+       wait_for(ms{s.value * 1000});
+    }
+
+//    void sleep_for(uint64_t ns) {
+//        // TODO: use timer
+//
+//        wait_for(ns);
+//    }
+}
+
+extern "C" {
+void __systick_handler() {
+    // do nothing
+}
 }
