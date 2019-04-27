@@ -12,7 +12,6 @@ addons:
       - cmake
       - g++-arm-linux-gnueabi
     env:
-      - CMAKE_VERSION="3.11.1"
       - GENERATOR="Unix Makefiles"
       - BUILDFLAGS="VERBOSE=1"   
 
@@ -21,7 +20,7 @@ cache:
     - $HOME/cmake/3.11.1       
 
 install:
-  - ./tools/travis-ci/install_cmake.sh $CMAKE_VERSION
+  - ./tools/travis-ci/install_cmake.sh 3.11.1
   - export PATH=$HOME/cmake/$CMAKE_VERSION/bin${PATH:+:$PATH}
 
 script:
