@@ -2,17 +2,22 @@
 #define LLIB_DUE_PWM_HPP
 
 #include <math.hpp>
-#
+
 #include "peripheral.hpp"
 
 namespace llib::due {
-    template<typename Pin, uint32_t PWM_channel = Pin::pwm_channel>
-    class pin_pwm {
-    private:
-        constexpr static uint32_t variant_mck = CHIP_FREQ_CPU_MAX;
-        constexpr static uint8_t clock_amount = 2;
-        static inline uint16_t available_clocks[clock_amount] = {};
+    namespace detail{
+        class pwm_clocks{
+        protected:
+            constexpr static uint32_t variant_mck = CHIP_FREQ_CPU_MAX;
+            constexpr static uint8_t clock_amount = 2;
+            static inline uint16_t available_clocks[clock_amount] = {};
+        };
+    }
 
+    template<typename Pin, uint32_t PWM_channel = Pin::pwm_channel>
+    class pin_pwm : detail::pwm_clocks {
+    private:
         template<typename PPin>
         static void _set_pio_b_peripheral() {
             pins::port<typename Pin::port>->PIO_IDR = pins::mask<Pin>;
@@ -167,6 +172,5 @@ namespace llib::due {
         }
     };
 }
-
 
 #endif //LLIB_DUE_PWM_HPP
