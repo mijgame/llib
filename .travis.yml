@@ -21,7 +21,7 @@ cache:
     - $HOME/cmake/3.11.1       
 
 install:
-  - ./travis-ci/install_cmake.sh
+  - ./tools/travis-ci/install_cmake.sh
   - export PATH=$HOME/cmake/$CMAKE_VERSION/bin${PATH:+:$PATH}
 
 script:
