@@ -30,7 +30,7 @@ script:
   - ln -s /usr/bin/arm-none-eabi-size $HOME/opt/gcc-arm-none-eabi-7-2018-q2-update/bin/arm-none-eabi-size
 
   # Check versions of gcc, g++ and cmake
-  - gcc -v && g++ -v && cmake --version
+  - arm-none-eabi-gcc -v && arm-none-eabi-g++ -v && $HOME/cmake/3.11.1/bin/cmake --version
 
   # create a main
   - echo -e "include <pins.hpp>\n\nint main(){}" > main.cpp
