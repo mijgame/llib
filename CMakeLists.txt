@@ -5,10 +5,12 @@ set(CMAKE_SYSTEM_VERSION 1)
 set(CMAKE_SYSTEM_PROCESSOR cortex-m3)
 
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/toolchains/toolchain.cmake")
-        message("Using Toolchain file")
+        message("Using Custom Toolchain file")
         include("${CMAKE_CURRENT_SOURCE_DIR}/toolchains/toolchain.cmake")
 else()
-        message( FATAL_ERROR "Please Create the toolchains/toolchain.cmake file" )
+        string(TOLOWER ${CMAKE_HOST_SYSTEM_NAME} llib_host)
+        message("Using example toolchain file for Host: ${llib_host}" )
+        include("${CMAKE_CURRENT_SOURCE_DIR}/toolchains/example_${llib_host}.cmake")
 endif ()
 
 # Cortex header files include directory
