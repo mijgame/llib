@@ -6,3 +6,4 @@ main.cpp
 .vscode/*
 llib.lss
 llib/.DS_Store
+toolchains/toolchain.cmake

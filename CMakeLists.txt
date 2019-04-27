@@ -4,22 +4,13 @@ set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1)
 set(CMAKE_SYSTEM_PROCESSOR cortex-m3)
 
-set(SERIAL_PORT /dev/ttyACM0)
-
-if (WIN32)
-    set(OBJCOPY "C:/SysGCC/arm-eabi/bin/arm-eabi-objcopy")
-    set(CMAKE_C_COMPILER C:/SysGCC/arm-eabi/bin/arm-eabi-gcc.exe)
-    set(CMAKE_CXX_COMPILER C:/SysGCC/arm-eabi/bin/arm-eabi-g++.exe)
-elseif(APPLE)
-    set(OBJCOPY "/opt/arm-none-eabi/bin/arm-none-eabi-objcopy")
-    set(CMAKE_C_COMPILER "/opt/arm-none-eabi/bin/arm-none-eabi-gcc")
-    set(CMAKE_CXX_COMPILER "/opt/arm-none-eabi/bin/arm-none-eabi-g++")
-else ()
-    set(OBJCOPY "$ENV{HOME}/opt/gcc-arm-none-eabi-7-2018-q2-update/bin/arm-none-eabi-objcopy")
-    set(CMAKE_C_COMPILER "$ENV{HOME}/opt/gcc-arm-none-eabi-7-2018-q2-update/bin/arm-none-eabi-gcc")
-    set(CMAKE_CXX_COMPILER "$ENV{HOME}/opt/gcc-arm-none-eabi-7-2018-q2-update/bin/arm-none-eabi-g++")
-    set(TERMINAL "${CMAKE_CURRENT_SOURCE_DIR}/tools/lpc21isp_197/lpc21isp_hr_linux")
-    set(BOSSAC "bossac")
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/toolchains/toolchain.cmake")
+        message("Using Custom Toolchain file")
+        include("${CMAKE_CURRENT_SOURCE_DIR}/toolchains/toolchain.cmake")
+else()
+        string(TOLOWER ${CMAKE_HOST_SYSTEM_NAME} llib_host)
+        message("Using example toolchain file for Host: ${llib_host}" )
+        include("${CMAKE_CURRENT_SOURCE_DIR}/toolchains/example_${llib_host}.cmake")
 endif ()
 
 # Cortex header files include directory
@@ -82,13 +73,14 @@ set(LLIB_HEADERS
         llib/decorators.hpp
         llib/ports.hpp
         llib/ringbuffer.hpp
-        llib/displays/display_32x32.hpp
-        llib/displays/ssd1306.hpp
-        llib/displays/strategy.hpp
-        llib/graphics/color.hpp)
+        llib/displays/display_32x32.hpp llib/displays/ssd1306.hpp llib/displays/strategy.hpp llib/displays/display_ostream.hpp 
+        llib/graphics/color.hpp llib/graphics/font.hpp llib/graphics/image.hpp
+        llib/vector2.hpp)
 
 add_executable(llib ${BOOT_SOURCES} ${LLIB_HEADERS} ${TARGET_INCLUDE} ${TARGET_STARTUP} ${TARGET_SOURCES})
-add_custom_command(TARGET llib POST_BUILD COMMAND ${OBJCOPY} ARGS -O binary -R .bss llib llib.bin)
+add_custom_command(TARGET llib POST_BUILD COMMAND ${ARM_EABI_OBJCOPY} ARGS -O binary -R .bss llib llib.bin)
+add_custom_command(TARGET llib POST_BUILD COMMAND ${ARM_EABI_OBJDUMP} ARGS -S llib > llib.lss)
+add_custom_command(TARGET llib POST_BUILD COMMAND ${ARM_EABI_SIZE} ARGS -A llib -x)
 
 target_link_libraries(llib "m")
 target_link_libraries(llib "gcc")

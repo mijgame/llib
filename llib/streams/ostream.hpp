@@ -2,6 +2,8 @@
 #define LLIB_OSTREAM_HPP
 
 #include <type_traits>
+#include <array>
+
 #include <stdio.h>
 #include "base.hpp"
 #include "math.hpp"
@@ -293,7 +295,7 @@ namespace llib {
     }
 
     /**
-     * Helper struct that helps output C-style arrays to
+     * Helper struct that helps output C-style arrays or a std::array to
      * the the stream. This is meant for debugging, the output is formatted
      * as follows: "{ A, B, C }" where A, B and C are outputted using their shift
      * left operator overload.
@@ -307,11 +309,28 @@ namespace llib {
      */
     template<typename T>
     struct array_values {
-        T *arr;
+        const T *arr;
         size_t size;
 
-        constexpr array_values(T *arr, size_t size)
+        /**
+         * Construct the values helper from a C-style
+         * array.
+         *
+         * @param arr
+         * @param size
+         */
+        constexpr array_values(const T *arr, size_t size)
             : arr(arr), size(size) {}
+
+        /**
+         * Construct the values helper from a std::array.
+         *
+         * @tparam Size
+         * @param arr
+         */
+        template<size_t Size>
+        constexpr array_values(const std::array<T, Size> &arr)
+            : arr(arr.data()), size(Size) {}
     };
 
     /**
