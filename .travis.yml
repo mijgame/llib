@@ -20,7 +20,7 @@ cache:
 
 install:
   - ./tools/travis-ci/install_cmake.sh 3.11.1
-  - export PATH=$HOME/cmake/$CMAKE_VERSION/bin${PATH:+:$PATH}
+  - export PATH=$HOME/cmake/3.11.1/bin${PATH:+:$PATH}
 
 script:
   # Link gcc and g++ to their standard commands
@@ -32,4 +32,4 @@ script:
   # Check versions of gcc, g++ and cmake
   - gcc -v && g++ -v && cmake --version
   # Run your build commands next
-  - cmake CMakeLists.txt
+  - $HOME/cmake/3.11.1/bin/cmake CMakeLists.txt
