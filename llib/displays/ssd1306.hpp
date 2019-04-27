@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstring>
 
+#include "display.hpp"
 #include "strategy.hpp"
 
 namespace llib::displays {
@@ -197,13 +198,13 @@ namespace llib::displays {
 
         template<typename I2C>
         void flush() {
-           // ...
+            // ...
         }
     };
 
 
     template<typename I2C, template<typename> typename Strategy = buffered>
-    class ssd1306 : public Strategy<detail::_ssd1306> {
+    class ssd1306 : public Strategy<detail::_ssd1306>, public display {
     protected:
         using base = Strategy<detail::_ssd1306>;
 
@@ -235,8 +236,10 @@ namespace llib::displays {
          * @param y
          * @param on
          */
-        LLIB_FORCE_INLINE void write(const size_t x, const size_t y, const bool on) {
-            base::template write<I2C>(x, y, on);
+        LLIB_FORCE_INLINE void write(const size_t x, const size_t y, const graphics::color color) {
+            base::template write<I2C>(
+                x, y, color != graphics::black
+            );
         }
 
         /**

@@ -29,7 +29,7 @@ int main() {
     for (;;) {
         for (int i = 0; i < 128; i++) {
             display.clear();
-            display.write(i, 32, true);
+            display.write(i, 32, llib::graphics::white);
             display.flush();
         }
     }
