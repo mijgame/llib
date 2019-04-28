@@ -1,6 +1,8 @@
 #ifndef LLIB_STREAM_BASE_HPP
 #define LLIB_STREAM_BASE_HPP
 
+#include <vector2.hpp>
+
 namespace llib {
     enum class base {
         HEX,
@@ -26,6 +28,8 @@ namespace llib {
         // Defined by child implementation
         // Note: no pure abstract or virtual!
         void putc(char c);
+
+        void setpos(const vector2u &pos) {}
     };
 
     class istream {

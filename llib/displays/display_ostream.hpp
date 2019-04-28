@@ -23,12 +23,11 @@ namespace llib::displays {
 
         llib::graphics::font font;
 
-        size_t x = 1;
-        size_t y = 1;
+        vector2u pos;
 
         void newline() {
-            x = 1;
-            y += line_height;
+            pos.x = 1;
+            pos.y += line_height;
         }
 
     public:
@@ -42,11 +41,11 @@ namespace llib::displays {
             }
 
             if (c == '\t') {
-                x += tab_width * char_width;
+                pos.x += tab_width * char_width;
                 return;
             }
 
-            if (x + char_width > line_width + 1) {
+            if (pos.x + char_width > line_width + 1) {
                 newline();
             }
 
@@ -55,20 +54,22 @@ namespace llib::displays {
             for (uint_fast8_t im_x = 0; im_x < 8; im_x++) {
                 for (uint_fast8_t im_y = 0; im_y < 8; im_y++) {
                     display.write(
-                        x + im_x,
-                        y + im_y,
-                        image(x, y)
+                        pos.x + im_x,
+                        pos.y + im_y,
+                        image[pos]
                     );
                 }
             }
 
-            x += char_width;
+            pos.x += char_width;
+        }
+
+        void setpos(const vector2u &pos) {
+            this->pos = pos;
         }
 
         void flush() {
-            x = 1;
-            y = 1;
-
+            pos = 1;
             display.flush();
         }
     };

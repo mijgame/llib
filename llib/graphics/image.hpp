@@ -64,7 +64,7 @@ namespace llib::graphics {
          * @return
          */
         constexpr color operator[](const vector2u &pos) const {
-            return *this(pos.x, pos.y);
+            return operator()(pos.x, pos.y);
         }
     };
 

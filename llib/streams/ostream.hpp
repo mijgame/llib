@@ -42,6 +42,16 @@ namespace llib {
 
     namespace {
         /**
+         * Helper struct for the setpos
+         * function.
+         *
+         * @internal
+         */
+        struct _setpos {
+            vector2u pos;
+        };
+
+        /**
          * Copy the given string into the buffer.
          *
          * @internal
@@ -211,6 +221,36 @@ namespace llib {
 
             *p = '\0';
         }
+    }
+
+    /**
+     * Set output stream position with the given
+     * x and y.
+     *
+     * @param x
+     * @param y
+     * @return
+     */
+    _setpos setpos(const uint32_t x, const uint32_t y) {
+        return _setpos{{x, y}};
+    }
+
+    /**
+     * Set the given stream position with the
+     * given vector.
+     *
+     * @param pos
+     * @return
+     */
+    _setpos setpos(const vector2u &pos) {
+        return _setpos{pos};
+    }
+
+    template<typename OutputStream>
+    OutputStream operator<<(OutputStream str, const _setpos &s) {
+        str.setpos(s.pos);
+
+        return str;
     }
 
     template<typename OutputStream>
