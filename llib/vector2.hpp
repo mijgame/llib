@@ -190,6 +190,21 @@ namespace llib {
 
             return *this;
         }
+
+        /**
+         * Helper function for casting a
+         * vector to another vector.
+         *
+         * @tparam U
+         * @return
+         */
+        template<typename U>
+        constexpr vector2<U> cast() const {
+            return vector2<U>(
+                static_cast<U>(x),
+                static_cast<U>(y)
+            );
+        }
     };
 
     // some nice aliases
