@@ -240,6 +240,11 @@ namespace llib {
         return log(n) / ln10;
     }
 
+    template<typename T, typename G = T>
+    constexpr T map(const T x, const G in_min, const G in_max, const G out_min, const G out_max){
+        return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+    }
+
 }
 
 #endif //LLIB_MATH_HPP
