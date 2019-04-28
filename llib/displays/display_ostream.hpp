@@ -57,7 +57,7 @@ namespace llib::displays {
 
                     display.write(
                         tmp.x, tmp.y,
-                        image[tmp]
+                        image[llib::vector2u(im_x, im_y)]
                     );
                 }
             }
