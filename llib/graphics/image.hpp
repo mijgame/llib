@@ -17,7 +17,9 @@ namespace llib::graphics {
      */
     template<size_t W, size_t H>
     struct image {
-        uint8_t data[W * H / 8] = {};
+        constexpr static size_t count = W * H / 8;
+
+        uint8_t data[count] = {};
 
         /**
          * Default constructor, everything
@@ -33,8 +35,13 @@ namespace llib::graphics {
          * @param bytes
          */
         template<typename ...Bytes>
-        constexpr image(Bytes... bytes)
-            : data{static_cast<uint8_t>(bytes)...} {}
+        constexpr image(Bytes... bytes) {
+            const uint8_t b[] = {static_cast<uint8_t>(bytes)...};
+
+            for (size_t i = 0; i < count; i++) {
+                data[i] = b[i];
+            }
+        }
 
         /**
          * Operator to get the pixel value at
@@ -45,8 +52,8 @@ namespace llib::graphics {
          */
         constexpr color operator()(const uint_fast32_t x, const uint_fast32_t y) const {
             return (data[y] & (0x01U << x)) == 0
-                   ? white
-                   : black;
+                   ? black
+                   : white;
         }
 
         /**
@@ -57,7 +64,7 @@ namespace llib::graphics {
          * @return
          */
         constexpr color operator[](const vector2u &pos) const {
-            return *this(pos.x, pos.y);
+            return operator()(pos.x, pos.y);
         }
     };
 
@@ -73,8 +80,8 @@ namespace llib::graphics {
      */
     template<typename OutputStream, size_t W, size_t H>
     OutputStream &operator<<(OutputStream &str, const image<W, H> &im) {
-        for (size_t y = 0; y < W; y++) {
-            for (size_t x = 0; x < H; x++) {
+        for (size_t y = 0; y < H; y++) {
+            for (size_t x = 0; x < W; x++) {
                 str << (im(x, y) == white ? '1' : '0');
             }
 

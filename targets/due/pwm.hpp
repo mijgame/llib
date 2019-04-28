@@ -7,16 +7,18 @@
 
 namespace llib::due {
     namespace detail{
-        class pwm_clocks{
-        protected:
-            constexpr static uint32_t variant_mck = CHIP_FREQ_CPU_MAX;
-            constexpr static uint8_t clock_amount = 2;
-            static inline uint16_t available_clocks[clock_amount] = {};
-        };
+        // master clock of the sam3x8e
+        constexpr static uint32_t variant_mck = CHIP_FREQ_CPU_MAX;
+
+        // the amount of extra pwm dividers
+        constexpr static uint8_t clock_amount = 2;
+
+        // the clocks used and what they are used for
+        static inline uint16_t available_clocks[clock_amount] = {};
     }
 
     template<typename Pin, uint32_t PWM_channel = Pin::pwm_channel>
-    class pin_pwm : detail::pwm_clocks {
+    class pin_pwm {
     private:
         template<typename PPin>
         static void _set_pio_b_peripheral() {
@@ -39,12 +41,12 @@ namespace llib::due {
         static uint8_t _check_clocks(uint16_t div) {
             uint8_t unused_clocks = 0;
             // check if we have the same value in the current clocks
-            for (auto i = 0; i < clock_amount; i++) {
-                if (available_clocks[i] == 0) {
+            for (auto i = 0; i < detail::clock_amount; i++) {
+                if (detail::available_clocks[i] == 0) {
                     unused_clocks++;
                     continue;
                 }
-                if (available_clocks[i] == div) {
+                if (detail::available_clocks[i] == div) {
                     // we have a clock that is the same
                     return i + 1;
                 }
@@ -63,13 +65,13 @@ namespace llib::due {
         }
 
         static void _setup_clock(uint8_t id, uint32_t div) {
-            if (id > clock_amount) {
+            if (id > detail::clock_amount) {
                 return;
             }
             // check if clock is already set
-            if (!available_clocks[id]) {
+            if (!detail::available_clocks[id]) {
                 // set clock in array
-                available_clocks[id] = div;
+                detail::available_clocks[id] = div;
                 // clear data in empty clock
                 PWM->PWM_CLK &= (0xFFF << (16 * id));
                 // write new clock values in the clock
@@ -80,7 +82,7 @@ namespace llib::due {
         template<uint32_t frequency>
         static void _set_frequency() {
             // get the nearest master clock frequency
-            if (frequency > variant_mck) {
+            if (frequency > detail::variant_mck) {
                 // set master clock as clock
                 PWM->PWM_CH_NUM[PWM_channel].PWM_CMR = PWM_CMR_CPRE_MCK;
             }
@@ -89,7 +91,7 @@ namespace llib::due {
 
             // caluculate prescaler and clock divider
             for (uint8_t clk_div = 0; clk_div < 11; ++clk_div) {
-                divider = ((variant_mck / frequency) / pow(2, clk_div));
+                divider = ((detail::variant_mck / frequency) / pow(2, clk_div));
 
                 if (divider <= 0xFF) {
                     divider |= (clk_div << 8);
