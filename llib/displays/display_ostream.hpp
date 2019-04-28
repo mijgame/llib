@@ -53,10 +53,11 @@ namespace llib::displays {
 
             for (uint_fast8_t im_x = 0; im_x < 8; im_x++) {
                 for (uint_fast8_t im_y = 0; im_y < 8; im_y++) {
+                    auto tmp = pos + llib::vector2u(im_x, im_y);
+
                     display.write(
-                        pos.x + im_x,
-                        pos.y + im_y,
-                        image[pos]
+                        tmp.x, tmp.y,
+                        image[tmp]
                     );
                 }
             }
@@ -69,7 +70,7 @@ namespace llib::displays {
         }
 
         void flush() {
-            pos = 1;
+            pos = vector2u(1, 1);
             display.flush();
         }
     };
