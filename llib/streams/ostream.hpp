@@ -247,21 +247,21 @@ namespace llib {
     }
 
     template<typename OutputStream>
-    OutputStream operator<<(OutputStream str, const _setpos &s) {
+    OutputStream &operator<<(OutputStream &str, const _setpos &s) {
         str.setpos(s.pos);
 
         return str;
     }
 
     template<typename OutputStream>
-    OutputStream operator<<(OutputStream str, char c) {
+    OutputStream &operator<<(OutputStream &str, char c) {
         str.putc(c);
 
         return str;
     }
 
     template<typename OutputStream>
-    OutputStream operator<<(OutputStream str, bool v) {
+    OutputStream &operator<<(OutputStream &str, bool v) {
         if constexpr (OutputStream::boolalpha) {
             str << (v ? "true" : "false");
         } else {
@@ -272,7 +272,7 @@ namespace llib {
     }
 
     template<typename OutputStream>
-    OutputStream operator<<(OutputStream str, char *s) {
+    OutputStream &operator<<(OutputStream &str, char *s) {
         for (char *p = s; *p != '\0'; p++) {
             str << *p;
         }
@@ -281,7 +281,7 @@ namespace llib {
     }
 
     template<typename OutputStream>
-    OutputStream operator<<(OutputStream str, const char *s) {
+    OutputStream &operator<<(OutputStream &str, const char *s) {
         for (const char *p = s; *p != '\0'; p++) {
             str << *p;
         }
@@ -294,7 +294,7 @@ namespace llib {
         typename OutputStream,
         typename = std::enable_if_t<std::is_integral_v<T>>
     >
-    OutputStream operator<<(OutputStream str, T v) {
+    OutputStream &operator<<(OutputStream &str, T v) {
         if constexpr(OutputStream::base == base::HEX) {
             /*
              * A single hex char describes a nibble, so
@@ -383,7 +383,7 @@ namespace llib {
      * @return
      */
     template<typename OutputStream, typename T>
-    OutputStream operator<<(OutputStream str, const array_values<T> &values) {
+    OutputStream &operator<<(OutputStream &str, const array_values<T> &values) {
         llib::cout << "{ ";
         for (size_t i = 0; i < values.size; ++i) {
             str << values.arr[i];
@@ -407,7 +407,7 @@ namespace llib {
      * @return
      */
     template<typename OutputStream>
-    OutputStream operator<<(OutputStream str, double v) {
+    OutputStream &operator<<(OutputStream &str, double v) {
         char buffer[32];
 
         if (std::isnan(v)) {
@@ -461,7 +461,7 @@ namespace llib {
      * @return
      */
     template<typename OutputStream>
-    OutputStream operator<<(OutputStream str, float v) {
+    OutputStream &operator<<(OutputStream &str, float v) {
         str << static_cast<double>(v);
         return str;
     }
@@ -474,7 +474,7 @@ namespace llib {
      * @return
      */
     template<typename OutputStream>
-    auto operator<<(OutputStream, _hex) {
+    auto &operator<<(OutputStream&, _hex) {
         return typename OutputStream::template instance<base::HEX, OutputStream::boolalpha>();
     }
 
@@ -486,7 +486,7 @@ namespace llib {
      * @return
      */
     template<typename OutputStream>
-    auto operator<<(OutputStream, _dec) {
+    auto &operator<<(OutputStream&, _dec) {
         return typename OutputStream::template instance<base::DEC, OutputStream::boolalpha>();
     }
 
@@ -498,7 +498,7 @@ namespace llib {
      * @return
      */
     template<typename OutputStream>
-    auto operator<<(OutputStream, _oct) {
+    auto &operator<<(OutputStream&, _oct) {
         return typename OutputStream::template instance<base::OCT, OutputStream::boolalpha>();
     }
 
@@ -510,7 +510,7 @@ namespace llib {
      * @return
      */
     template<typename OutputStream>
-    auto operator<<(OutputStream, _bin) {
+    auto &operator<<(OutputStream&, _bin) {
         return typename OutputStream::template instance<base::BIN, OutputStream::boolalpha>();
     }
 
@@ -522,7 +522,7 @@ namespace llib {
      * @return
      */
     template<typename OutputStream>
-    auto operator<<(OutputStream, _boolalpha) {
+    auto &operator<<(OutputStream&, _boolalpha) {
         return typename OutputStream::template instance<OutputStream::base, true>();
     }
 }
