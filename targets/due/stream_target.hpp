@@ -19,11 +19,21 @@ namespace llib::due {
         }
     };
 
-    struct cin : public istream {
+    class cin : public istream {
+    protected:
+        bool good_bit = true;
+
+    public:
         using instance = cin;
 
-        char getc() const {
-            return detail::read_impl();
+        operator bool() const {
+            return good_bit;
+        }
+
+        char getc() {
+            char c = detail::read_impl();
+            good_bit = !(c == '\n' || c == '\0' || c == ' ');
+            return c;
         }
     };
 }
