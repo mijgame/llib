@@ -14,7 +14,7 @@ namespace llib::due {
         template<llib::base IB, bool IBoolalpha>
         using instance = cout<IB, IBoolalpha>;
 
-        void putc(char c) {
+        void putc(char c) const {
             detail::write_impl(c);
         }
     };
@@ -22,7 +22,7 @@ namespace llib::due {
     struct cin : public istream {
         using instance = cin;
 
-        char getc() {
+        char getc() const {
             return detail::read_impl();
         }
     };

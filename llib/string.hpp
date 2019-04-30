@@ -716,6 +716,18 @@ namespace llib {
         }
 
         /**
+         * Whether this string is full.
+         * Full means that the length is equal
+         * to the size of the buffer.
+         *
+         * @return
+         */
+        constexpr bool full() const {
+            // -1 for the null terminator
+            return buffer_length == BufferSize - 1;
+        }
+
+        /**
          * Copy the current buffer into a new string container,
          * allowing for a smaller size. This function exists to allow
          * the user of the container to make it explicit that the string
@@ -902,8 +914,43 @@ namespace llib {
      * @return
      */
     template<typename OutputStream, size_t BufferSize>
-    constexpr OutputStream operator<<(OutputStream str, const string<BufferSize> &data) {
+    constexpr OutputStream &operator<<(OutputStream &str, const string<BufferSize> &data) {
         str << data.c_str();
+        return str;
+    }
+
+    /**
+     * Input stream overload for string.
+     * Will read until one of the following things are true:
+     *  - The string buffer is full
+     *  - A space is found
+     *  - A tab is found
+     *  - A newline is found
+     *
+     * @tparam InputStream
+     * @tparam BufferSize
+     * @param str
+     * @param data
+     * @return
+     */
+    template<typename InputStream, size_t BufferSize>
+    InputStream &operator>>(InputStream &str, string<BufferSize> &data) {
+        char c = 0;
+
+        for (;;) {
+            if (data.full()) {
+                break;
+            }
+
+            str >> c;
+
+            if (c == ' ' || c == '\t' || c == '\n') {
+                break;
+            }
+
+            data.push_back(c);
+        }
+
         return str;
     }
 }
