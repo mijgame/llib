@@ -942,9 +942,7 @@ namespace llib {
                 break;
             }
 
-            str >> c;
-
-            if (c == ' ' || c == '\t' || c == '\n') {
+            if (!(str >> c)) {
                 break;
             }
 
