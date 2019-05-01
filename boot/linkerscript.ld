@@ -142,18 +142,6 @@ SECTIONS
 	. = ALIGN(4);
 	__exidx_end = .;	
 
-	.bss (NOLOAD) :
-	{
-		. = ALIGN(4);
-		__bss_start = .;
-		. = ALIGN(4);
-		*(.bss .bss.* .gnu.linkonce.b.*)
-		. = ALIGN(4);
-		*(COMMON);
-		. = ALIGN(4);
-		__bss_end = .;
-	} > ram
-
 	.stack (NOLOAD) :
 	{
 		. = ALIGN(4);
@@ -164,6 +152,18 @@ SECTIONS
 		__main_stack_end = .;
 		. = ALIGN(4);
 		__stack_end = .;
+	} > ram
+
+	.bss (NOLOAD) :
+	{
+		. = ALIGN(4);
+		__bss_start = .;
+		. = ALIGN(4);
+		*(.bss .bss.* .gnu.linkonce.b.*)
+		. = ALIGN(4);
+		*(COMMON);
+		. = ALIGN(4);
+		__bss_end = .;
 	} > ram
 
 	.data :
@@ -177,7 +177,7 @@ SECTIONS
 		__data_end = .;
 		__data_init_end = LOADADDR (.data);
 	} > ram AT > rom
-	
+
 	.heap (NOLOAD) :
 	{
 		. = ALIGN(4);
