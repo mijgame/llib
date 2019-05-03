@@ -88,24 +88,8 @@ SECTIONS
         KEEP (*crtend.o(.dtors))
 
         . = ALIGN(4);
-
-        *(.gcc_except_table); /* information used for stack unwinding during exception */
-        . = ALIGN(4);
-        *(.eh_frame_hdr); /* additional information about .ex_frame section */
-        . = ALIGN(4);
-        *(.eh_frame); /* information used for stack unwinding during exception */
-        . = ALIGN(4);
         __text_end = .;
     } > rom
-
-    . = ALIGN(4);
-    __exidx_start = .;
-    .ARM.exidx :
-    {
-        *(.ARM.exidx* .gnu.linkonce.armexidx.*);
-    } > rom    
-    . = ALIGN(4);
-    __exidx_end = .;    
 
     .stack (NOLOAD) :
     {
@@ -150,11 +134,6 @@ SECTIONS
         . = ALIGN(4);
         __heap_end = __ram_end;
     } > ram
-
-    .ARM.attributes 0 : 
-    { 
-        *(.ARM.attributes) 
-    }
 
     .stab 0 (NOLOAD) : 
     { 
