@@ -6,129 +6,149 @@
 #include <peripheral.hpp>
 #include <type_traits>
 
-namespace llib::due{
+namespace llib::due {
     template<typename Pin>
-    class pin_tc{
-        private:
-            constexpr static uint32_t variant_mck = CHIP_FREQ_CPU_MAX;
-            static inline uint32_t freq = 0;
+    class pin_tc {
+    protected:
+        constexpr static uint32_t variant_mck = CHIP_FREQ_CPU_MAX;
+        static inline uint32_t freq = 0;
 
-        public:
-            template<uint32_t frequency = 10000>
-            static void init(){
-                // create pointer to channel
-                TcChannel * T_ch = &(tc::port<typename Pin::timer_channel::timer>->TC_CHANNEL[Pin::timer_channel::channel]);
+        static TcChannel &get_timer_channel() {
+            return tc::port<typename Pin::timer_channel::timer>->TC_CHANNEL[Pin::timer_channel::channel];
+        }
 
-                // remove write protect from TC
-                tc::port<typename Pin::timer_channel::timer>->TC_WPMR = TC_WPMR_WPKEY_PASSWD;     
+    public:
+        template<uint32_t Frequency = 10000>
+        static void init() {
+            // Create pointer to channel
+            auto &timer_channel = get_timer_channel();
 
-                if constexpr (!std::is_same_v<typename Pin::timer_pin, tc::tclk>){
-                    if(!(T_ch->TC_SR & TC_SR_CLKSTA)){
-                        // enable peripheral clock
-                        enable_clock<typename Pin::timer_channel>();
+            // Remove write protection from TC
+            tc::port<typename Pin::timer_channel::timer>->TC_WPMR = TC_WPMR_WPKEY_PASSWD;
 
-                        // disable tc clock
-                        T_ch->TC_CCR = TC_CCR_CLKDIS;
+            // TODO: implement TCLK of tc
+            if constexpr (std::is_same_v<typename Pin::timer_pin, tc::tclk>) {
+                return;
+            }
 
-                        // disable interrupts on channel
-                        T_ch->TC_IDR = ~0x0;
+            if (!(timer_channel.TC_SR & TC_SR_CLKSTA)) {
+                // Enable peripheral clock
+                enable_clock<typename Pin::timer_channel>();
 
-                        // clear status registers
-                        T_ch->TC_SR;
+                // Disable tc clock
+                timer_channel.TC_CCR = TC_CCR_CLKDIS;
 
-                        T_ch->TC_CMR = TC_CMR_TCCLKS_TIMER_CLOCK1 | TC_CMR_WAVE | 
-                                    TC_CMR_WAVSEL_UP_RC | TC_CMR_EEVT_XC0 | TC_CMR_ACPA_CLEAR | 
-                                    TC_CMR_ACPC_CLEAR | TC_CMR_BCPB_CLEAR | TC_CMR_BCPC_CLEAR;
+                // Disable interrupts on channel
+                timer_channel.TC_IDR = ~0x0U;
 
-                        // set frequency
-                        set_frequency<frequency>();
-                    }
+                // Clear status registers
+                timer_channel.TC_SR;
+                timer_channel.TC_CMR = TC_CMR_TCCLKS_TIMER_CLOCK1 | TC_CMR_WAVE
+                                       | TC_CMR_WAVSEL_UP_RC | TC_CMR_EEVT_XC0 | TC_CMR_ACPA_CLEAR
+                                       | TC_CMR_ACPC_CLEAR | TC_CMR_BCPB_CLEAR | TC_CMR_BCPC_CLEAR;
 
-                    // clear output
-                    set<0x0>();
+                // Set frequency
+                set_frequency<Frequency>();
+            }
 
-                    // setup peripheral
-                    set_peripheral<Pin>();
+            // clear output
+            set<0x0>();
 
-                    // enable channel clock
-                    T_ch->TC_CCR = TC_CCR_CLKEN | TC_CCR_SWTRG;
+            // setup peripheral
+            set_peripheral<Pin>();
 
+            // enable channel clock
+            timer_channel.TC_CCR = TC_CCR_CLKEN | TC_CCR_SWTRG;
+        }
+
+        template<uint32_t Frequency>
+        static void set_frequency() {
+            set_frequency(Frequency);
+        }
+
+        static void set_frequency(const uint32_t frequency) {
+            get_timer_channel().TC_RC = (variant_mck / 2) / frequency;
+
+            // Set frequency for set function
+            freq = (variant_mck / 2) / frequency;
+        }
+
+        template<uint8_t Value>
+        static void set() {
+            if constexpr(std::is_same_v<typename Pin::timer_pin, tc::tclk>) {
+                // Can't set a tclk pin since it is only an input
+                return;
+            }
+
+            // Create pointer to channel
+            auto &timer_channel = get_timer_channel();
+
+            if constexpr(std::is_same_v<typename Pin::timer_pin, tc::tioa>) {
+                if constexpr (Value) {
+                    timer_channel.TC_RA = (Value * freq) / 0xFF;
+                    timer_channel.TC_CMR =
+                        (timer_channel.TC_CMR & ~(TC_CMR_ACPA_Msk | TC_CMR_ACPC_Msk))
+                        | TC_CMR_ACPA_CLEAR
+                        | TC_CMR_ACPC_SET;
                 } else {
-                    // TODO: implement TCLK of tc
-                }        
-            }
-
-            template<uint32_t frequency>
-            static void set_frequency(){
-                tc::port<typename Pin::timer_channel::timer>->
-                    TC_CHANNEL[Pin::timer_channel::channel].TC_RC = (variant_mck / 2) / frequency;
-
-                // set frequency for set function
-                freq = (variant_mck / 2) / frequency;                
-            }
-
-            static void set_frequency(uint32_t frequency){
-                tc::port<typename Pin::timer_channel::timer>->
-                    TC_CHANNEL[Pin::timer_channel::channel].TC_RC = (variant_mck / 2) / frequency;
-
-                // set frequency for set function
-                freq = (variant_mck / 2) / frequency;
-            }
-
-            template<uint8_t value>
-            static void set(){
-                if constexpr(std::is_same_v<typename Pin::timer_pin, tc::tclk>){
-                    // cant set a tclk pin sinds it is only an input
-                    return;
+                    timer_channel.TC_CMR =
+                        (timer_channel.TC_CMR & ~(TC_CMR_ACPA_Msk | TC_CMR_ACPC_Msk))
+                        | TC_CMR_ACPA_CLEAR
+                        | TC_CMR_ACPC_CLEAR;
                 }
-                
-                // create pointer to channel
-                TcChannel * T_ch = &(tc::port<typename Pin::timer_channel::timer>->TC_CHANNEL[Pin::timer_channel::channel]);
-
-                if constexpr(std::is_same_v<typename Pin::timer_pin, tc::tioa>){
-                    if constexpr (value){
-                        T_ch->TC_RA = (value * freq) / 0xFF;
-                        T_ch->TC_CMR = (T_ch->TC_CMR & ~(TC_CMR_ACPA_Msk | TC_CMR_ACPC_Msk)) | TC_CMR_ACPA_CLEAR | TC_CMR_ACPC_SET;
-                    } else {
-                         T_ch->TC_CMR = (T_ch->TC_CMR & ~(TC_CMR_ACPA_Msk | TC_CMR_ACPC_Msk)) | TC_CMR_ACPA_CLEAR | TC_CMR_ACPC_CLEAR;
-                    }
-                } 
-                else if(std::is_same_v<typename Pin::timer_pin, tc::tiob>){
-                    if constexpr (value){
-                        T_ch->TC_RB = (value * freq) / 0xFF;
-                        T_ch->TC_CMR = (T_ch->TC_CMR & ~(TC_CMR_BCPB_Msk | TC_CMR_BCPC_Msk)) | TC_CMR_BCPB_CLEAR | TC_CMR_BCPC_SET;                   
-                    } else {
-                        T_ch->TC_CMR = (T_ch->TC_CMR & ~(TC_CMR_BCPB_Msk | TC_CMR_BCPC_Msk)) | TC_CMR_BCPB_CLEAR | TC_CMR_BCPC_CLEAR;            
-                    }
+            } else if (std::is_same_v<typename Pin::timer_pin, tc::tiob>) {
+                if constexpr (Value) {
+                    timer_channel.TC_RB = (Value * freq) / 0xFF;
+                    timer_channel.TC_CMR =
+                        (timer_channel.TC_CMR & ~(TC_CMR_BCPB_Msk | TC_CMR_BCPC_Msk))
+                        | TC_CMR_BCPB_CLEAR
+                        | TC_CMR_BCPC_SET;
+                } else {
+                    timer_channel.TC_CMR =
+                        (timer_channel.TC_CMR & ~(TC_CMR_BCPB_Msk | TC_CMR_BCPC_Msk))
+                        | TC_CMR_BCPB_CLEAR
+                        | TC_CMR_BCPC_CLEAR;
                 }
             }
+        }
 
-            static void set(const uint8_t value){
-                if constexpr(std::is_same_v<Pin::timer_pin, tc::tclk>){
-                    // cant set a tclk pin sinds it is only an input
-                    return;
+        static void set(const uint8_t value) {
+            if constexpr(std::is_same_v<Pin::timer_pin, tc::tclk>) {
+                // Can't set a tclk pin since it is only an input
+                return;
+            }
+
+            // create pointer to channel
+            auto &timer_channel = get_timer_channel();
+
+            if constexpr(std::is_same_v<typename Pin::timer_pin, tc::tioa>) {
+                if (value) {
+                    timer_channel.TC_RA = (value * freq) / 0xFF;
+                    timer_channel.TC_CMR =
+                        (timer_channel.TC_CMR & ~(TC_CMR_ACPA_Msk | TC_CMR_ACPC_Msk))
+                        | TC_CMR_ACPA_CLEAR
+                        | TC_CMR_ACPC_SET;
+                } else {
+                    timer_channel.TC_CMR =
+                        (timer_channel.TC_CMR & ~(TC_CMR_ACPA_Msk | TC_CMR_ACPC_Msk))
+                        | TC_CMR_ACPA_CLEAR
+                        | TC_CMR_ACPC_CLEAR;
                 }
-
-                // create pointer to channel
-                TcChannel * T_ch = &(tc::port<typename Pin::timer_channel::timer>->TC_CHANNEL[Pin::timer_channel::channel]);
-
-                if constexpr(std::is_same_v<typename Pin::timer_pin, tc::tioa>){
-                    if (value){
-                        T_ch->TC_RA = (value * freq) / 0xFF;
-                        T_ch->TC_CMR = (T_ch->TC_CMR & ~(TC_CMR_ACPA_Msk | TC_CMR_ACPC_Msk)) | TC_CMR_ACPA_CLEAR | TC_CMR_ACPC_SET;
-                    } else {
-                        T_ch->TC_CMR = (T_ch->TC_CMR & ~(TC_CMR_ACPA_Msk | TC_CMR_ACPC_Msk)) | TC_CMR_ACPA_CLEAR | TC_CMR_ACPC_CLEAR;
-                    }
-                } 
-                else if(std::is_same_v<typename Pin::timer_pin, tc::tiob>){
-                    if (value){
-                        T_ch->TC_RB = (value * freq) / 0xFF;
-                        T_ch->TC_CMR = (T_ch->TC_CMR & ~(TC_CMR_BCPB_Msk | TC_CMR_BCPC_Msk)) | TC_CMR_BCPB_CLEAR | TC_CMR_BCPC_SET;                   
-                    } else {
-                        T_ch->TC_CMR = (T_ch->TC_CMR & ~(TC_CMR_BCPB_Msk | TC_CMR_BCPC_Msk)) | TC_CMR_BCPB_CLEAR | TC_CMR_BCPC_CLEAR;            
-                    }             
+            } else if (std::is_same_v<typename Pin::timer_pin, tc::tiob>) {
+                if (value) {
+                    timer_channel.TC_RB = (value * freq) / 0xFF;
+                    timer_channel.TC_CMR =
+                        (timer_channel.TC_CMR & ~(TC_CMR_BCPB_Msk | TC_CMR_BCPC_Msk))
+                        | TC_CMR_BCPB_CLEAR
+                        | TC_CMR_BCPC_SET;
+                } else {
+                    timer_channel.TC_CMR =
+                        (timer_channel.TC_CMR & ~(TC_CMR_BCPB_Msk | TC_CMR_BCPC_Msk))
+                        | TC_CMR_BCPB_CLEAR
+                        | TC_CMR_BCPC_CLEAR;
                 }
             }
+        }
     };
 }
 
