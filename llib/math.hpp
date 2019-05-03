@@ -240,6 +240,18 @@ namespace llib {
         return log(n) / ln10;
     }
 
+    /**
+     * Map a range of values to another range of values.
+     * E.g. map 0...255 tot 0...1024.
+     * @tparam T
+     * @tparam G
+     * @param x
+     * @param in_min
+     * @param in_max
+     * @param out_min
+     * @param out_max
+     * @return
+     */
     template<typename T, typename G = T>
     constexpr T map(const T x, const G in_min, const G in_max, const G out_min, const G out_max){
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;

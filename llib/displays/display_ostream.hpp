@@ -49,18 +49,9 @@ namespace llib::displays {
                 newline();
             }
 
-            const auto &image = font[c];
-
-            for (uint_fast8_t im_x = 0; im_x < 8; im_x++) {
-                for (uint_fast8_t im_y = 0; im_y < 8; im_y++) {
-                    auto tmp = pos + llib::vector2u(im_x, im_y);
-
-                    display.write(
-                        tmp.x, tmp.y,
-                        image[llib::vector2u(im_x, im_y)]
-                    );
-                }
-            }
+            display.write(
+                pos, font[c]
+            );
 
             pos.x += char_width;
         }

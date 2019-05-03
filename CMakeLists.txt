@@ -19,7 +19,12 @@ set(AS_GCC "${CORTEX_INCLUDE}/sam3xa/source/as_gcc")
 
 # Targets
 set(TARGET_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/targets/due")
-set(TARGET_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targets/due/wait.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/targets/due/stream_target.cpp")
+set(TARGET_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targets/due/wait.cpp"
+        targets/due/stream_target.cpp
+        targets/due/tc_interrupt.cpp
+        targets/due/interrupt.cpp
+)
+
 set(TARGET_STARTUP "${CMAKE_CURRENT_SOURCE_DIR}/targets/due/startup.c")
 
 # Linkerscript for Arduino Due
@@ -74,9 +79,9 @@ set(LLIB_HEADERS
         llib/decorators.hpp
         llib/ports.hpp
         llib/ringbuffer.hpp
-        llib/displays/display_32x32.hpp llib/displays/ssd1306.hpp llib/displays/strategy.hpp llib/displays/display_ostream.hpp 
+        llib/displays/display_32x32.hpp llib/displays/ssd1306.hpp llib/displays/strategy.hpp llib/displays/display_ostream.hpp
         llib/graphics/color.hpp llib/graphics/font.hpp llib/graphics/image.hpp
-        llib/vector2.hpp llib/streams/combined_stream.hpp llib/io/pfc8574.hpp llib/analog/pcf8591.hpp)
+        llib/vector2.hpp llib/streams/combined_stream.hpp llib/io/pfc8574.hpp llib/analog/pcf8591.hpp llib/sensors/hcsr04.hpp)
 
 add_executable(llib ${BOOT_SOURCES} ${LLIB_HEADERS} ${TARGET_INCLUDE} ${TARGET_STARTUP} ${TARGET_SOURCES})
 add_custom_command(TARGET llib POST_BUILD COMMAND ${ARM_EABI_OBJCOPY} ARGS -O binary -R .bss llib llib.bin)
