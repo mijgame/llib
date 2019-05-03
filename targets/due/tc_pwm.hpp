@@ -20,6 +20,8 @@ namespace llib::due {
     public:
         template<uint32_t Frequency = 10000>
         static void init() {
+            static_assert(Frequency <= CHIP_FREQ_CPU_MAX / 2, "The timer frequency cannot exceed MCK/2.");
+
             // Create pointer to channel
             auto &timer_channel = get_timer_channel();
 
@@ -63,6 +65,8 @@ namespace llib::due {
 
         template<uint32_t Frequency>
         static void set_frequency() {
+            static_assert(Frequency <= CHIP_FREQ_CPU_MAX / 2, "The timer frequency cannot exceed MCK/2.");
+
             set_frequency(Frequency);
         }
 

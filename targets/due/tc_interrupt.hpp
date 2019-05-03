@@ -7,7 +7,7 @@
 
 namespace llib::due {
     namespace tc {
-        template<typename TC, typename T = typename TC::timer>
+        template<typename TC>
         class controller {
         private:
             constexpr static uint32_t variant_mck = CHIP_FREQ_CPU_MAX;
@@ -16,16 +16,18 @@ namespace llib::due {
         public:
             template<uint32_t Frequency = 1000>
             static void init(void (*isr)()) {
-                // create pointer to channel
-                TcChannel *T_ch = &(port<T>->TC_CHANNEL[TC::channel]);
+                static_assert(Frequency <= CHIP_FREQ_CPU_MAX / 2, "The timer frequency cannot exceed MCK/2.");
 
-                // remove write protect from TC
-                port<T>->TC_WPMR = TC_WPMR_WPKEY_PASSWD;
+                // Create pointer to channel
+                TcChannel *timer_channel = &(port<typename TC::timer>->TC_CHANNEL[TC::channel]);
+
+                // Remove write protect from TC
+                port<typename TC::timer>->TC_WPMR = TC_WPMR_WPKEY_PASSWD;
 
                 attach_interrupt<TC, ~0x0U>(isr);
 
-                // check if channel is already active
-                if ((T_ch->TC_SR & TC_SR_CLKSTA) != 0) {
+                // Check if channel is already active
+                if ((timer_channel->TC_SR & TC_SR_CLKSTA) != 0) {
                     return;
                 }
 
@@ -33,16 +35,16 @@ namespace llib::due {
                 enable_clock<TC>();
 
                 // Disable tc clock
-                T_ch->TC_CCR = TC_CCR_CLKDIS;
+                timer_channel->TC_CCR = TC_CCR_CLKDIS;
 
                 // Disable interrupts on channel
-                T_ch->TC_IDR = ~0x0U;
+                timer_channel->TC_IDR = ~0x0U;
 
                 // Clear status registers
-                T_ch->TC_SR;
+                timer_channel->TC_SR;
 
                 // Set channel mode
-                T_ch->TC_CMR = TC_CMR_WAVE | TC_CMR_WAVSEL_UP_RC | TC_CMR_TCCLKS_TIMER_CLOCK1;
+                timer_channel->TC_CMR = TC_CMR_WAVE | TC_CMR_WAVSEL_UP_RC | TC_CMR_TCCLKS_TIMER_CLOCK1;
 
                 // Enable rc compare interrupt
                 enable_interrupt();
@@ -51,27 +53,29 @@ namespace llib::due {
                 set_frequency<Frequency>();
 
                 // Enable channel clock
-                T_ch->TC_CCR = TC_CCR_CLKEN | TC_CCR_SWTRG;
+                timer_channel->TC_CCR = TC_CCR_CLKEN | TC_CCR_SWTRG;
             }
 
             template<uint32_t Frequency>
             static void set_frequency() {
+                static_assert(Frequency <= CHIP_FREQ_CPU_MAX / 2, "The timer frequency cannot exceed MCK/2.");
+
                 set_frequency(Frequency);
             }
 
             static void set_frequency(const uint32_t frequency) {
-                port<T>->TC_CHANNEL[TC::channel].TC_RC = (variant_mck / 2) / frequency;
+                port<typename TC::timer>->TC_CHANNEL[TC::channel].TC_RC = (variant_mck / 2) / frequency;
 
                 // set frequency for set function
                 freq = (variant_mck / 2) / frequency;
             }
 
             static void enable_interrupt() {
-                port<T>->TC_CHANNEL[TC::channel].TC_IER = TC_IER_CPCS;
+                port<typename TC::timer>->TC_CHANNEL[TC::channel].TC_IER = TC_IER_CPCS;
             }
 
             static void disable_interrupt() {
-                port<T>->TC_CHANNEL[TC::channel].TC_IDR = TC_IDR_CPCS;
+                port<typename TC::timer>->TC_CHANNEL[TC::channel].TC_IDR = TC_IDR_CPCS;
             }
         };
     }
