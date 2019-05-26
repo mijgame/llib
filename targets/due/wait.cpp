@@ -61,31 +61,28 @@ namespace llib {
         _wait_for(rollovers, ticks);
     }
 
-    static inline uint32_t _counter = 0;
-
     void wait_for_new(const llib::us us) {
         using tc_controller = target::tc::controller<
-            target::tc::channel_8
+            target::tc::channel_1
         >;
 
+        static volatile bool done = false;
         static bool initialized = false;
 
         if (!initialized) {
             tc_controller::init<CHIP_FREQ_CPU_MAX / 2>([]() {
-                _counter += 1;
-                llib::cout << _counter << '\n';
+                done = true;
             });
 
             initialized = true;
         }
 
+        tc_controller::set_frequency(us.value * 1000 * 1000);
         tc_controller::enable_interrupt();
 
-        while (_counter < 42 * us.value) {
-//            __WFI();
-        }
+        while (!done);
 
-        _counter = 0;
+        done = false;
 
         tc_controller::disable_interrupt();
     }

@@ -22,26 +22,20 @@ namespace llib::due {
             // Enable clock of peripheral
             enable_clock<Handler>();
 
-            // Disable irq
-            NVIC->ICER[Handler::irqn >> 5] = (1 << (Handler::irqn & 0x1F));
+            constexpr auto irqn = static_cast<IRQn_Type>(Handler::irqn);
 
-            // Clean pending irq
-            NVIC->ICPR[Handler::irqn >> 5] = (1 << (Handler::irqn & 0x1F));
-
-            // Set priority to priority
-            NVIC->IP[Handler::irqn] = ((priority << (8 - __NVIC_PRIO_BITS)) & 0xFF);
-
-            // Enable irq
-            NVIC->ISER[Handler::irqn >> 5] = (1 << (Handler::irqn & 0x1F));
+            NVIC_DisableIRQ(irqn);
+            NVIC_ClearPendingIRQ(irqn);
+            NVIC_SetPriority(irqn, priority);
+            NVIC_EnableIRQ(irqn);
         }
 
         template<typename Handler>
         constexpr void _disable_interrupt_source() {
-            // Disable irq
-            NVIC->ICER[Handler::irqn >> 5] = (1 << (Handler::irqn & 0x1F));
+            constexpr auto irqn = static_cast<IRQn_Type>(Handler::irqn);
 
-            // Clean pending irq
-            NVIC->ICPR[Handler::irqn >> 5] = (1 << (Handler::irqn & 0x1F));
+            NVIC_DisableIRQ(irqn);
+            NVIC_ClearPendingIRQ(irqn);
         }
 
         template<typename Pin, uint8_t priority>
@@ -168,8 +162,29 @@ namespace llib::due {
         _disable_interrupt_source<Handler>();
     }
 
+    template<typename Pin>
+    void enable_irq() {
+        NVIC_EnableIRQ(
+            static_cast<IRQn_Type>(Pin::irqn)
+        );
+    }
+
+    template<typename Pin>
+    void disable_irq() {
+        NVIC_DisableIRQ(
+            static_cast<IRQn_Type>(Pin::irqn)
+        );
+    }
+
+    template<typename Pin>
+    void clear_pending_irq() {
+        NVIC_ClearPendingIRQ(
+            static_cast<IRQn_Type>(Pin::irqn)
+        );
+    }
+
     template<uint16_t IrqnId>
-    static void software_interrupt() {
+    void software_interrupt() {
         // Activate a interrupt within software
         // 0x03 -> activates IRQ3
         NVIC->STIR = (IrqnId & 0x1FFU);

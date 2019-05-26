@@ -50,9 +50,21 @@ namespace llib::due::tc {
 
             // Clear output register
             set_frequency<Frequency>();
+        }
 
-            // Enable channel clock
-            timer_channel->TC_CCR = TC_CCR_CLKEN | TC_CCR_SWTRG;
+        static void start() {
+            clear_pending_irq<TC>();
+            enable_irq<TC>();
+
+            // Timer start signal
+            port<typename TC::timer>->TC_CHANNEL[TC::channel].TC_CCR = TC_CCR_CLKEN | TC_CCR_SWTRG;
+        }
+
+        static void stop() {
+            disable_irq<TC>();
+
+            // Timer stop signal
+            port<typename TC::timer>->TC_CHANNEL[TC::channel].TC_CCR = TC_CCR_CLKDIS;
         }
 
         template<uint32_t Frequency>

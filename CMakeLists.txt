@@ -80,7 +80,7 @@ set(LLIB_HEADERS
         llib/ringbuffer.hpp
         llib/displays/display_32x32.hpp llib/displays/ssd1306.hpp llib/displays/strategy.hpp llib/displays/display_ostream.hpp
         llib/graphics/color.hpp llib/graphics/font.hpp llib/graphics/image.hpp
-        llib/vector2.hpp llib/streams/combined_stream.hpp llib/io/pfc8574.hpp llib/analog/pcf8591.hpp llib/sensors/hcsr04.hpp)
+        llib/vector2.hpp llib/streams/combined_stream.hpp llib/io/pfc8574.hpp llib/analog/pcf8591.hpp llib/sensors/hcsr04.hpp llib/util.hpp test.cpp)
 
 add_executable(llib ${BOOT_SOURCES} ${LLIB_HEADERS} ${TARGET_INCLUDE} ${TARGET_STARTUP} ${TARGET_SOURCES})
 add_custom_command(TARGET llib POST_BUILD COMMAND ${ARM_EABI_OBJCOPY} ARGS -O binary -R .bss -R .stack llib llib.bin)
