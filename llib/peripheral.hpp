@@ -5,6 +5,27 @@
 #include <pins.hpp>
 
 namespace llib {
+    template<typename T>
+    concept bool HasInitFunction = requires () {
+        { T::init() } -> void;
+    };
+
+    template<typename T>
+    concept bool HasGetFunction = requires () {
+        { T::get() } -> bool;
+    };
+
+    template<typename T>
+    concept bool HasSetFunction = requires () {
+        { T::set() } -> void;
+    };
+
+    template<typename T>
+    concept bool IsPinIn = HasInitFunction<T> && HasGetFunction<T>;
+
+    template<typename T>
+    concept bool IsPinOut = HasInitFunction<T> && HasSetFunction<T>;
+
 
     template<typename Pin>
     class pin_in {
