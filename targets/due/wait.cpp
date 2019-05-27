@@ -1,5 +1,6 @@
 #include <wait.hpp>
 #include <base.hpp>
+#include <tc_interrupt.hpp>
 
 namespace llib {
     struct _timer {
@@ -83,6 +84,51 @@ namespace llib {
 
     void wait_for(const llib::s s) {
        wait_for(ms{s.value * 1000});
+    }
+
+    void wait_for_new(const llib::us us) {
+        static volatile bool done = false;
+
+        using tc_controller = target::tc::controller<
+            target::tc::channel_0
+        >;
+
+        tc_controller::init([] {
+            done = true;
+        });
+
+        uint32_t _us = us.value;
+        uint32_t _sec = us.value / 1'000'000;
+
+        llib::cout << "S: " << _sec << " uS: " << _us << '\n'; 
+
+        if (_sec) {
+            tc_controller::set_frequency(
+                target::tc::centihertz::from_s(_sec)
+            );
+            tc_controller::enable_interrupt();
+
+            while (!done) {
+                __WFE();
+            }
+
+            done = false;
+        }
+ 
+        if (_us) {
+            tc_controller::set_frequency(
+                target::tc::hertz::from_us(_us)
+            );
+            tc_controller::enable_interrupt();
+
+            while (!done) {
+                __WFE();
+            }
+
+            done = false;
+        }
+
+        tc_controller::disable_interrupt();
     }
 
 //    void sleep_for(uint64_t ns) {

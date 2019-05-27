@@ -27,6 +27,8 @@ namespace llib {
     void wait_for(llib::ms ms);
 
     void wait_for(llib::s s);
+    
+    void wait_for_new(llib::us s);
 
     /**
      * Wait for the given amount of nanoseconds.

@@ -3,6 +3,7 @@
 
 #include "base.hpp"
 #include "pins.hpp"
+#include "stream.hpp"
 
 namespace llib::due {
     enum class interrupt {
@@ -99,6 +100,8 @@ namespace llib::due {
             while ((trailing_zeros = __CLZ(__RBIT(status_register & interrupt_mask))) < 32) {
                 auto bit = static_cast<uint8_t>(trailing_zeros);
 
+                llib::cout << "B: " << bit << "; " << size_t(llib::due::_callbacks<Handler>::callbacks[bit] == nullptr) << '\n';
+
                 if (llib::due::_callbacks<Handler>::callbacks[bit] != nullptr) {
                     llib::due::_callbacks<Handler>::callbacks[bit]();
                 }
@@ -167,6 +170,11 @@ namespace llib::due {
         }
     }
 
+    template<typename Handler, uint8_t priority = 7>
+    void enable_interrupt_source(){
+        _enable_interrupt_source<Handler, priority>();
+    }
+
     template<typename Handler, uint32_t mask, uint8_t priority = 7>
     void attach_interrupt(interrupt_callback func) {
         // add function to iqrn on positions of mask and enable the iqrn interupt
@@ -200,33 +208,14 @@ namespace llib::due {
 }
 
 extern "C" {
-void __PIOA_Handler() {
-    llib::due::_handle_isr<llib::due::pioa>(
-        llib::due::pins::port<llib::due::pioa>->PIO_ISR,
-        llib::due::pins::port<llib::due::pioa>->PIO_IMR
-    );
-}
+void __PIOA_Handler();
 
-void __PIOB_Handler() {
-    llib::due::_handle_isr<llib::due::piob>(
-        llib::due::pins::port<llib::due::piob>->PIO_ISR,
-        llib::due::pins::port<llib::due::piob>->PIO_IMR
-    );
-}
+void __PIOB_Handler();
 
-void __PIOC_Handler() {
-    llib::due::_handle_isr<llib::due::pioc>(
-        llib::due::pins::port<llib::due::pioc>->PIO_ISR,
-        llib::due::pins::port<llib::due::pioc>->PIO_IMR
-    );
-}
+void __PIOC_Handler();
 
-void __PIOD_Handler() {
-    llib::due::_handle_isr<llib::due::piod>(
-        llib::due::pins::port<llib::due::piod>->PIO_ISR,
-        llib::due::pins::port<llib::due::piod>->PIO_IMR
-    );
-}
+void __PIOD_Handler();
+
 }
 
 #endif //LLIB_DUE_INTERRUPT_HPP
