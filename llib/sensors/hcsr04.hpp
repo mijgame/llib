@@ -5,13 +5,13 @@
 #include <peripheral.hpp>
 
 namespace llib::sensors {
-    template<typename TriggerPin, typename EchoPin>
+    template<PinOut TriggerPin, PinIn EchoPin>
     class hcsr04 {
     public:
         static uint32_t read() {
             // Clear
             TriggerPin::template set<false>();
-            llib::wait_for(llib::us{5});
+            llib::wait_for(llib::us{2});
 
             // Trigger the sensor
             TriggerPin::template set<true>();
@@ -25,7 +25,6 @@ namespace llib::sensors {
             while (!EchoPin::get());
 
             while (EchoPin::get()) {
-                llib::cout << EchoPin::get() << llib::endl;
                 wait_for(us);
                 duration += 1;
             }

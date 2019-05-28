@@ -21,7 +21,11 @@ namespace llib::due {
             constexpr static uint32_t variant_mck = CHIP_FREQ_CPU_MAX;
 
             constexpr static void _set_freq(uint32_t frequency) {
+                // Set the frequency
                 port<T>->TC_CHANNEL[TC::channel].TC_RC = frequency;
+
+                // Reset the counter value
+                port<T>->TC_CHANNEL[TC::channel].TC_CCR = TC_CCR_SWTRG;
             }
 
         public:
@@ -59,12 +63,16 @@ namespace llib::due {
                 T_ch->TC_CCR = TC_CCR_CLKEN | TC_CCR_SWTRG;
             }
 
-            static void set_frequency(hertz frequency) {
-                _set_freq((variant_mck / 2) / frequency.value);
+            static void set_frequency(us _us) {
+                _set_freq(42 * _us.value);
             }
 
-            static void set_frequency(centihertz frequency) {
-                _set_freq((variant_mck / 2 / 100) * frequency.value);
+            static void set_frequency(ms _ms) {
+                _set_freq(42'000 * _ms.value);
+            }
+
+            static void set_frequency(s _s) {
+                _set_freq((variant_mck / 2) * _s.value);
             }
 
             static void enable_interrupt() {

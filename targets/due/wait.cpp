@@ -16,7 +16,7 @@ namespace llib {
 
         while (!done) {
             // Sleep to save power...
-            __WFE();
+//            __WFE();
         }
 
         done = false;
@@ -29,20 +29,17 @@ namespace llib {
             done = true;
         });
 
-        uint32_t _sec = us.value / 1'000'000;
+        auto _sec = llib::s{us.value / 1'000'000};
+        auto _us = llib::us{us.value % 1'000'000};
 
-        if (_sec) {
-            tc_controller::set_frequency(
-                centihertz::from_s(_sec)
-            );
+        if (_sec.value) {
+            tc_controller::set_frequency(_sec);
 
             wfe_until_done();
         }
 
-        if (us.value) {
-            tc_controller::set_frequency(
-                hertz::from(us)
-            );
+        if (_us.value) {
+            tc_controller::set_frequency(_us);
 
             wfe_until_done();
         }
@@ -53,9 +50,7 @@ namespace llib {
             done = true;
         });
 
-        tc_controller::set_frequency(
-            hertz::from(ms)
-        );
+        tc_controller::set_frequency(ms);
 
         wfe_until_done();
     }
@@ -65,9 +60,7 @@ namespace llib {
             done = true;
         });
 
-        tc_controller::set_frequency(
-            hertz::from(s)
-        );
+        tc_controller::set_frequency(s);
 
         wfe_until_done();
     }

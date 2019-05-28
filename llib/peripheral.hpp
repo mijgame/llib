@@ -16,15 +16,15 @@ namespace llib {
     };
 
     template<typename T>
-    concept bool HasSetFunction = requires () {
-        { T::set() } -> void;
+    concept bool HasSetFunction = requires (bool val) {
+        { T::set(val) } -> void;
     };
 
     template<typename T>
-    concept bool IsPinIn = HasInitFunction<T> && HasGetFunction<T>;
+    concept bool PinIn = HasInitFunction<T> && HasGetFunction<T>;
 
     template<typename T>
-    concept bool IsPinOut = HasInitFunction<T> && HasSetFunction<T>;
+    concept bool PinOut = HasInitFunction<T> && HasSetFunction<T>;
 
 
     template<typename Pin>
