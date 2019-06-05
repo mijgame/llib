@@ -9,8 +9,8 @@ namespace llib::rtos {
     void thread::start() {
         // Round down stack top to 8 byte boundary
         // Cortex-M stack grows from high -> low memory
-        uint32_t address = (reinterpret_cast<uint32_t>(stack + stack_size)) / 8 * 8;
-        uint32_t *initial_sp = reinterpret_cast<uint32_t *>(address);
+        const uint32_t address = (reinterpret_cast<uint32_t>(stack + stack_size)) / 8 * 8;
+        auto *initial_sp = reinterpret_cast<uint32_t *>(address);
 
         *(--initial_sp) = (1U << 24U);  /* xPSR */
         *(--initial_sp) = (uint32_t) handler; /* PC */
@@ -45,6 +45,10 @@ namespace llib::rtos {
         id = scheduler::register_thread(this);
     }
 
+    /// Scheduler
+
+    // Initialize the idle thread.
+    thread scheduler::idle_thread = thread(scheduler::on_idle);
 
     void scheduler::on_idle() {
         __WFE();
@@ -56,7 +60,7 @@ namespace llib::rtos {
         threads.push_back(th);
         ready_to_run.set(id);
 
-        return id++;
+        return id;
     }
 
     void scheduler::schedule_cycle() {
@@ -75,7 +79,10 @@ namespace llib::rtos {
         // Set up systick
         SysTick_Config(CHIP_FREQ_CPU_MAX / tps);
 
+        // Set the PendSV interrupt to the lowest priority
+        NVIC_SetPriority(PendSV_IRQn, 0xFFU);
 
+        idle_thread.start();
     }
 
     void scheduler::tick() {

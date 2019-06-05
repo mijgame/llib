@@ -76,6 +76,8 @@ namespace llib::rtos {
 
         static void schedule_cycle();
 
+        static thread idle_thread;
+
     public:
         static void startup(size_t tps = 1000);
 
