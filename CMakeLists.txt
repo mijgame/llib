@@ -77,7 +77,10 @@ set(LLIB_HEADERS
         llib/graphics/color.hpp llib/graphics/font.hpp llib/graphics/image.hpp
         llib/vector2.hpp llib/streams/combined_stream.hpp llib/io/pfc8574.hpp llib/analog/pcf8591.hpp llib/units.hpp)
 
-add_executable(llib ${BOOT_SOURCES} ${LLIB_HEADERS} ${TARGET_INCLUDE} ${TARGET_STARTUP} ${TARGET_SOURCES})
+set(LLIB_RTOS_HEADERS rtos/rtos.hpp)
+set(LLIB_RTOS_SOURCES rtos/rtos.cpp rtos/switch_task.asm)
+
+add_executable(llib ${BOOT_SOURCES} ${LLIB_HEADERS} ${TARGET_INCLUDE} ${TARGET_STARTUP} ${TARGET_SOURCES} ${LLIB_RTOS_HEADERS} ${LLIB_RTOS_SOURCES})
 add_custom_command(TARGET llib POST_BUILD COMMAND ${ARM_EABI_OBJCOPY} ARGS -O binary -R .bss -R .stack llib llib.bin)
 add_custom_command(TARGET llib POST_BUILD COMMAND ${ARM_EABI_OBJDUMP} ARGS -S llib > llib.lss)
 add_custom_command(TARGET llib POST_BUILD COMMAND ${ARM_EABI_SIZE} ARGS -A llib ${SIZE_OUTPUT})
