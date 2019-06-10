@@ -15,6 +15,7 @@ endif ()
 
 # Cortex header files include directory
 set(CORTEX_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/cortex/atmel")
+set(BRIGAND_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/brigand")
 set(AS_GCC "${CORTEX_INCLUDE}/sam3xa/source/as_gcc")
 
 # Targets
@@ -73,11 +74,20 @@ set(LLIB_HEADERS
         llib/decorators.hpp
         llib/ports.hpp
         llib/ringbuffer.hpp
-        llib/displays/display_32x32.hpp llib/displays/ssd1306.hpp llib/displays/strategy.hpp llib/displays/display_ostream.hpp 
-        llib/graphics/color.hpp llib/graphics/font.hpp llib/graphics/image.hpp
-        llib/vector2.hpp llib/streams/combined_stream.hpp llib/io/pfc8574.hpp llib/analog/pcf8591.hpp llib/units.hpp)
+        llib/displays/display_32x32.hpp
+        llib/displays/ssd1306.hpp
+        llib/displays/strategy.hpp
+        llib/displays/display_ostream.hpp
+        llib/graphics/color.hpp
+        llib/graphics/font.hpp
+        llib/graphics/image.hpp
+        llib/vector2.hpp
+        llib/streams/combined_stream.hpp
+        llib/io/pfc8574.hpp
+        llib/analog/pcf8591.hpp
+        llib/units.hpp)
 
-set(LLIB_RTOS_HEADERS rtos/rtos.hpp)
+set(LLIB_RTOS_HEADERS rtos/rtos.hpp rtos/promise.hpp rtos/thread.hpp)
 set(LLIB_RTOS_SOURCES rtos/rtos.cpp rtos/switch_task.asm)
 
 add_executable(llib ${BOOT_SOURCES} ${LLIB_HEADERS} ${TARGET_INCLUDE} ${TARGET_STARTUP} ${TARGET_SOURCES} ${LLIB_RTOS_HEADERS} ${LLIB_RTOS_SOURCES})
@@ -85,9 +95,13 @@ add_custom_command(TARGET llib POST_BUILD COMMAND ${ARM_EABI_OBJCOPY} ARGS -O bi
 add_custom_command(TARGET llib POST_BUILD COMMAND ${ARM_EABI_OBJDUMP} ARGS -S llib > llib.lss)
 add_custom_command(TARGET llib POST_BUILD COMMAND ${ARM_EABI_SIZE} ARGS -A llib ${SIZE_OUTPUT})
 
+# Disable Boost support for Brigand
+add_compile_definitions(BRIGAND_NO_BOOST_SUPPORT)
+
 target_link_libraries(llib "m")
 target_link_libraries(llib "gcc")
 target_include_directories(llib PRIVATE ${CORTEX_INCLUDE})
+target_include_directories(llib PRIVATE ${BRIGAND_INCLUDE})
 target_include_directories(llib PRIVATE ${TARGET_INCLUDE})
 target_include_directories(llib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/llib)
 target_include_directories(llib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/targets/due)

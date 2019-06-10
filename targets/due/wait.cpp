@@ -16,7 +16,7 @@ namespace llib {
 
         while (!done) {
             // Sleep to save power...
-//            __WFE();
+            __WFE();
         }
 
         done = false;

@@ -8,7 +8,6 @@
 //    uint32_t new_sp
 //);
 switch_task:
-
    // save current context on the stack
    push { r4 - r7, lr }
    mov r2, r8

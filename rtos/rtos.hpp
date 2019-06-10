@@ -4,85 +4,338 @@
 #include <bitset.hpp>
 #include <dynamic_array.hpp>
 #include <cstddef>
+#include <tuple>
+#include <brigand.hpp>
+#include <wait.hpp>
 
-// Pre-declaration in global scope
-// to allow for friend declaration
+extern "C" {
+// Pre-declaration for friend
 void __pendsv_handler();
 
-extern "C" void switch_task(
+void switch_task(
     uint32_t *old_sp,
     uint32_t new_sp
 );
-
-namespace llib::rtos {
-    class thread {
-    public:
-        // Stack size in bytes, must be divisible by four
-        constexpr static uint32_t stack_size = 512;
-        constexpr static uint32_t stack_words = stack_size / 4;
-
-        using thread_handler = void (*)();
-
-    protected:
-        // Stack TEMP
-        uint32_t stack[stack_words];
-
-        // Stack pointer
-        uint32_t *sp;
-
-        // Timeout down counter
-        uint32_t timeout;
-
-        // Handler
-        thread_handler handler;
-
-        // The id the scheduler has assigned to this thread
-        uint8_t id;
-
-        // Allow the pendsv handler to access the
-        // stack pointer
-        friend void ::__pendsv_handler();
-
-    public:
-        explicit thread(thread_handler handler);
-
-        void start();
-    };
-
-    class scheduler {
-    protected:
-        // 32 user threads + idle thread
-        static inline dynamic_array<thread*, 32 + 1> threads;
-
-        static inline bitset<32> ready_to_run;
-        static inline uint8_t current_thread_id;
-
-        // Volatile because they are accessed by an
-        // interrupt in assembly
-        static volatile inline thread *current_thread;
-        static volatile inline thread *next_thread;
-
-        // Only allow a thread to register
-        // itself
-        friend thread;
-
-        // Allow the pendv handler to access
-        // the current and next thread pointers.
-        friend void ::__pendsv_handler();
-
-        static void on_idle();
-
-        static uint8_t register_thread(thread *th);
-
-        static void schedule_cycle();
-
-        static thread idle_thread;
-
-    public:
-        static void startup(size_t tps = 1000);
-
-        static void tick();
-    };
 }
 
+
+namespace llib::rtos {
+    namespace {
+        void task_trampoline();
+    }
+
+    // Pre-declaration for friend
+    template<typename ...Tasks>
+    class scheduler;
+
+    class task_base {
+    protected:
+        // Stack pointer
+        uint32_t sp;
+
+        friend void ::__pendsv_handler();
+
+    public:
+        virtual void run() = 0;
+
+        virtual void suspend() = 0;
+
+        virtual void resume() = 0;
+
+        virtual bool ready_to_run() const = 0;
+
+        virtual uint8_t get_priority() const = 0;
+    };
+
+    template<uint8_t Priority, uint32_t StackSize = 2048>
+    class task : public task_base {
+    private:
+        constexpr static uint32_t stack_words = (StackSize + 3) / 4;
+        constexpr static uint32_t marker = 0xDEADBEEF;
+
+        bool ready = true;
+
+        // Stack memory for this task
+        uint32_t stack[stack_words] = {};
+
+    public:
+        /*
+         * The priority of this task.
+         * 0 = the highest priority
+         * 255 = the lowest priority
+         */
+        constexpr static uint8_t priority = Priority;
+
+        task() {
+            // Fill up all stack locations with a marker
+            for (size_t i = 0; i < stack_words; ++i) {
+                stack[i] = marker;
+            }
+
+            stack[stack_words - 1] = reinterpret_cast<uint32_t>(task_trampoline);
+
+            // -10 -> r4 to r12 + lr and pc
+            sp = reinterpret_cast<uint32_t>(&stack[stack_words - 10]);
+        }
+
+        /**
+         * Suspend the task.
+         */
+        void suspend() override {
+            ready = false;
+        }
+
+        /**
+         * Allow this task to be scheduled
+         * again.
+         */
+        void resume() override {
+            ready = true;
+        }
+
+        /**
+         * Is this task ready to run?
+         *
+         * @return
+         */
+        bool ready_to_run() const override {
+            return ready;
+        }
+
+        /**
+         * Get the priority of this task.
+         *
+         * @return
+         */
+        uint8_t get_priority() const override {
+            return Priority;
+        }
+    };
+
+    class scheduler_base {
+    protected:
+        task_base *current = nullptr;
+        task_base *next = nullptr;
+
+        friend void ::__pendsv_handler();
+
+    public:
+        static scheduler_base *instance;
+
+        virtual void tick() = 0;
+
+        virtual task_base *get_current_task() = 0;
+    };
+
+    namespace {
+        /**
+         * The idle task is a task that is run when
+         * there is no other work to do. It is responsible
+         * for the "idle action", like sleeping the processor.
+         */
+        class idle_task : public task<255> {
+        public:
+            idle_task() : task<255>() {}
+
+            void run() override {
+                for (;;) {
+                    llib::cout << "idle\n";
+                    //__WFE();
+                }
+            }
+
+            /**
+             * The idle task is always ready
+             * to run.
+             *
+             * @return
+             */
+            bool ready_to_run() const override {
+                return true;
+            }
+        };
+
+        /**
+         * Helper function that calls run
+         * on the current task.
+         */
+        void task_trampoline() {
+            llib::cout << "trampoline\n";
+            auto *task = scheduler_base::instance->get_current_task();
+            task->run();
+        }
+    }
+
+    /**
+     * Compare helper to sort tasks based on
+     * their priority.
+     */
+    template<typename Left, typename Right>
+    using compare_task_priority = brigand::bool_<
+        (Left::priority < Right::priority)
+    >;
+
+    template<typename ...Tasks>
+    class scheduler : public scheduler_base {
+    protected:
+        /**
+         * Tasks are sorted by their priority, from
+         * smallest number (highest priority) to the
+         * largest number (lowest priority).
+         */
+        using SortedTasks = brigand::sort<
+            brigand::push_back<
+                brigand::list<
+                    std::decay_t<Tasks>...
+                >,
+
+                // The idle task is inserted
+                idle_task
+            >,
+            brigand::bind<
+                compare_task_priority,
+                brigand::_1,
+                brigand::_2
+            >
+        >;
+
+        // Tuple helps with getting indices
+        using TasksTuple = brigand::as_tuple<SortedTasks>;
+
+        dynamic_array<
+            task_base *,
+            std::tuple_size_v<TasksTuple>
+        > tasks;
+
+        // Storage for the idle task.
+        idle_task idle;
+
+        void schedule_cycle() const {
+            /*
+             * This will set the PendSV bit in
+             * the Interrupt Control and State Register, which
+             * will set the PendSV exception to "pending".
+             *
+             * This will actually run once no other exceptions
+             * are running.
+             */
+            SCB->ICSR = SCB_ICSR_PENDSVSET_Msk;
+        }
+
+    public:
+        /**
+         * Instantiate the scheduler with all tasks.
+         * The tasks will be taken in by ref.
+         *
+         * Currently, there is a limitation where the
+         * tasks have to be passed in order of priority.
+         *
+         * @param t
+         */
+        explicit scheduler(Tasks &...t) {
+            /*
+             * Currently, a static assert is used
+             * to check if the user passed the tasks in
+             * the correct order.
+             *
+             * Maybe it is possible in the future to sort
+             * the variadic argument pack with values such that
+             * the user could pass the tasks in any order desired?
+             */
+            static_assert(
+                std::is_same_v<
+                    std::tuple<Tasks..., idle_task>,
+                    TasksTuple
+                >,
+                "The tasks should be passed in order of their priority."
+            );
+
+            static_assert(
+                (std::is_base_of_v<task_base, Tasks> && ...),
+                "All tasks should inherit from task_base"
+            );
+
+            (tasks.push_back(&t), ...);
+            tasks.push_back(&idle);
+        }
+
+        /**
+         * Called by the PendSV handler, will
+         * check if any task with a higher priority is
+         * ready to run.
+         */
+        void tick() override {
+            llib::cout << "tick\n";
+
+            /*
+             * Tasks are sorted by priority, find the
+             * next task to run. If no user tasks are ready to
+             * run, the idle task is used.
+             *
+             * This is because the idle task is the last
+             * element in the list and always ready to run.
+             */
+
+            for (task_base *task : tasks) {
+                if (!task->ready_to_run()) {
+                    continue;
+                }
+
+                /*
+                 * Are we currently running the
+                 * task that has the highest priority?
+                 */
+                if (task == current) {
+                    return; // Nothing to do
+                }
+
+                // Schedule the task to be run
+                next = task;
+                schedule_cycle();
+
+                break;
+            }
+        }
+
+        /**
+         * Get a pointer to the current
+         * task.
+         *
+         * @return
+         */
+        task_base *get_current_task() override {
+            return current;
+        }
+
+        /**
+         * Run the scheduler.
+         *
+         * This should not return, as it is possible
+         * that the scheduler will go out of scope.
+         */
+        void run(const size_t tps = 1000) {
+            // Set this scheduler as the current scheduler.
+            instance = this;
+
+            // Give the current thread an initial
+            // value of the idle thread.
+            current = tasks[tasks.size()];
+
+            llib::wait_for(llib::us{10});
+
+            /// Important: instance and current have to be set before interrupts run!  ///
+
+            // Set up SysTick to trigger "tps" times per second
+            SysTick_Config(CHIP_FREQ_CPU_MAX / tps);
+
+            // Set the PendSV interrupt to the lowest priority
+            NVIC_SetPriority(PendSV_IRQn, 0xFFU);
+
+            // Infinite loop, that should never
+            // be actually run except for a short moment
+            // at startup.
+            for (;;) {}
+        }
+    };
+}
 #endif //LLIB_RTOS_HPP
