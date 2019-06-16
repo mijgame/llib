@@ -37,11 +37,18 @@ void __pendsv_handler() {
         "push { r2 - r6 }\n"
 
         // *store_old_sp = SP
-        "mov r2, sp\n"
+        // "mov r2, sp\n"
+
+        // get process stack pointer
+        "MRS r2, psp\n"
         "str r2, [ %0 ]\n"
+        
 
         // SP = next_sp
-        "mov sp, %1\n"
+        // "mov sp, %1\n"
+
+        // write new stack location to the process stack ptr
+        "MSR psp, %1\n"
 
         // restore the new context from the stack
         "pop { r2 - r6 }\n"

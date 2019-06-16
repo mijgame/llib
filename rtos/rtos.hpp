@@ -178,6 +178,17 @@ namespace llib::rtos {
     template<typename ...Tasks>
     class scheduler : public scheduler_base {
     protected:
+        constexpr static size_t stack_size = 32;
+        /**
+         * Stack for last function calls in the run function as 
+         * we switch to a different stack.
+         * 
+         * We need at least 8 bytes for a interrupt. The rest is
+         * uncalculated and may not be enough.
+         * 
+         */
+        const uint32_t stack[stack_size] = {};
+
         /**
          * Tasks are sorted by their priority, from
          * smallest number (highest priority) to the
@@ -319,11 +330,18 @@ namespace llib::rtos {
 
             // Give the current thread an initial
             // value of the idle thread.
-            current = tasks[tasks.size()];
+            current = tasks[tasks.size() - 1];
 
             llib::wait_for(llib::us{10});
 
             /// Important: instance and current have to be set before interrupts run!  ///
+
+            // set the process stack pointer to a memory location.
+            // this is done so we dont use any stack we don't know.
+            __set_PSP(reinterpret_cast<uint32_t>(&stack[stack_size - 1]));
+
+            // enable the process stack
+            __set_CONTROL(__get_CONTROL() | 0x1 << 1);
 
             // Set up SysTick to trigger "tps" times per second
             SysTick_Config(CHIP_FREQ_CPU_MAX / tps);
