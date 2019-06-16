@@ -13,7 +13,7 @@ void __systick_handler() {
     __enable_irq();
 }
 
-__attribute__((noreturn)) void __pendsv_handler() {
+void __pendsv_handler() {
     llib::cout << "pendsv\n";
 
     auto *instance = scheduler_base::instance;
@@ -21,32 +21,42 @@ __attribute__((noreturn)) void __pendsv_handler() {
     task_base *old = instance->current;
     instance->current = instance->next;
 
-    switch_task(
-        &old->sp,
-        instance->next->sp
-    );
-//    asm volatile(
-//        "push { r4 - r7, lr }\n"
-//        "mov r2, r8\n"
-//        "mov r3, r9\n"
-//        "mov r4, r10\n"
-//        "mov r5, r11\n"
-//        "mov r6, r12\n"
-//        "push { r2 - r6 }\n"
-//        "mov r2, sp \n"
-//        "str r2, [ %r0 ]\n"
-//        "mov sp, %r1\n"
-//        "pop { r2 - r6 }\n"
-//        "mov r12, r6\n"
-//        "mov r11, r5\n"
-//        "mov r10, r4\n"
-//        "mov r9, r3\n"
-//        "mov r8, r2\n"
-//        "pop { r4 - r7, pc }"
-//        : : "ir"(&old->sp), "ir"(instance->next->sp)
+//    switch_task(
+//        &old->sp,
+//        instance->next->sp
 //    );
 
-    // No code executed here
-    __builtin_unreachable();
+    asm volatile(
+        // save current context on the stack
+        "push { r4 - r7, lr }\n"
+        "mov r2, r8\n"
+        "mov r3, r9\n"
+        "mov r4, r10\n"
+        "mov r5, r11\n"
+        "mov r6, r12\n"
+        "push { r2 - r6 }\n"
+
+        // *store_old_sp = SP
+        "mov r2, sp\n"
+        "str r2, [ %0 ]\n"
+
+        // SP = next_sp
+        "mov sp, %1\n"
+
+        // restore the new context from the stack
+        "pop { r2 - r6 }\n"
+        "mov r12, r6\n"
+        "mov r11, r5\n"
+        "mov r10, r4\n"
+        "mov r9, r3\n"
+        "mov r8, r2\n"
+        "pop { r4 - r7, pc }"
+
+        : /* No output operands */
+
+        // %0 = pointer to old SP
+        // %1 = new value of SP
+        : "r"(&old->sp), "r"(instance->next->sp)
+    );
 }
 }
