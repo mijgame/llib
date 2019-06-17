@@ -33,10 +33,11 @@ void __attribute__((optimize("O0"))) __pendsv_handler() {
         "str r2, [ %0 ]\n"
 
         // save current context on the old stack
-        "str r4, [r2, #0x00]\n"
-        "str r5, [r2, #0x04]\n"
-        "str r6, [r2, #0x08]\n"
-        "str r7, [r2, #0x0C]\n"
+        "stm r2,{r4, r5, r6, r7}\n"
+//        "str r4, [r2, #0x00]\n"
+//        "str r5, [r2, #0x04]\n"
+//        "str r6, [r2, #0x08]\n"
+//        "str r7, [r2, #0x0C]\n"
 
         // copy the higher registers to the old stack
         "mov r3, r8\n"
@@ -51,10 +52,11 @@ void __attribute__((optimize("O0"))) __pendsv_handler() {
         "mov r0, %1\n"
 
         // restore the new context from the stack
-        "ldr r4, [r0, #0x00]\n"
-        "ldr r5, [r0, #0x04]\n"
-        "ldr r6, [r0, #0x08]\n"
-        "ldr r7, [r0, #0x0C]\n"
+        "ldm r0, {r4, r5, r6, r7}\n"
+//        "ldr r4, [r0, #0x00]\n"
+//        "ldr r5, [r0, #0x04]\n"
+//        "ldr r6, [r0, #0x08]\n"
+//        "ldr r7, [r0, #0x0C]\n"
 
         // copy the higher registers to from the new stack
         "ldr r3, [r0, #0x10]\n"
@@ -79,5 +81,7 @@ void __attribute__((optimize("O0"))) __pendsv_handler() {
     );
 
     instance->current = instance->next;
+
+    llib::cout << llib::array_values(&instance->current->sp, 16) << '\n';
 }
 }
