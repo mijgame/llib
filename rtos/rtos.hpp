@@ -353,14 +353,18 @@ namespace llib::rtos {
             // this is done so we dont use any stack we don't know.
             __set_PSP(reinterpret_cast<uint32_t>(&stack[stack_size - 1]));
 
-            // enable the process stack
-            __set_CONTROL(__get_CONTROL() | 0x1 << 1);
-
             // Set up SysTick to trigger "tps" times per second
             SysTick_Config(CHIP_FREQ_CPU_MAX / tps);
 
             // Set the PendSV interrupt to the lowest priority
             NVIC_SetPriority(PendSV_IRQn, 0xFFU);
+
+            // enable the process stack
+            __set_CONTROL(__get_CONTROL() | 0x1 << 1);
+
+            // ISB instruction must be emitted immediately after
+            // MSR to ensure the new stack pointer is used
+            __ISB();
 
             // Infinite loop, that should never
             // be actually run except for a short moment

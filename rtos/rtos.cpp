@@ -24,6 +24,7 @@ void __attribute__((optimize("O0"))) __pendsv_handler() {
     asm volatile (
         // get process stack pointer
         "mrs r2, PSP\n"
+        "isb\n"
 
         // reserve space for registers (8 * 4 = 32 bytes)
         "sub r2, #0x20\n"
@@ -68,6 +69,7 @@ void __attribute__((optimize("O0"))) __pendsv_handler() {
         // update the new stack pointer
         "add r3, r0, #0x20\n"
         "msr PSP, r3\n"
+        "isb\n"
 
         : /* No output operands */
 
