@@ -72,10 +72,21 @@ namespace llib::rtos {
                 stack[i] = marker;
             }
 
-            stack[stack_words - 1] = reinterpret_cast<uint32_t>(task_trampoline);
+            // software stacking (r4 - r11) + 
+            // hardware stacking (r0 - r3 + r12 + lr + pc + stack) = 16
+            sp = reinterpret_cast<uint32_t>(&stack[stack_words - 16]);  
 
-            // -10 -> r4 to r12 + lr and pc
-            sp = reinterpret_cast<uint32_t>(&stack[stack_words - 10]);
+            auto *stack_ptr = reinterpret_cast<uint32_t*>(sp);
+            auto task_tram = reinterpret_cast<uint32_t>(task_trampoline);
+
+            // set reg 12
+            stack_ptr[12] = 0x00;                                                
+            // lr register
+            stack_ptr[13] = task_tram;
+            // pc register
+            stack_ptr[14] = task_tram;
+            // stack register
+            stack_ptr[15] = sp;
         }
 
         /**
@@ -299,6 +310,8 @@ namespace llib::rtos {
                 if (task == current) {
                     return; // Nothing to do
                 }
+
+                llib::cout << "Switching task\n";
 
                 // Schedule the task to be run
                 next = task;

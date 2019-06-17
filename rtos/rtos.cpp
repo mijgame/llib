@@ -7,57 +7,67 @@ using namespace llib::rtos;
 scheduler_base *scheduler_base::instance = nullptr;
 
 extern "C" {
+auto *instance = scheduler_base::instance;
+
 void __systick_handler() {
     __disable_irq();
     scheduler_base::instance->tick();
     __enable_irq();
 }
 
-void __pendsv_handler() {
-    llib::cout << "pendsv\n";
-
-    auto *instance = scheduler_base::instance;
-
+void __attribute__((optimize("O0"))) __pendsv_handler() {
     task_base *old = instance->current;
-    instance->current = instance->next;
 
-//    switch_task(
-//        &old->sp,
-//        instance->next->sp
-//    );
-
-    asm volatile(
-        // save current context on the stack
-        "push { r4 - r7, lr }\n"
-        "mov r2, r8\n"
-        "mov r3, r9\n"
-        "mov r4, r10\n"
-        "mov r5, r11\n"
-        "mov r6, r12\n"
-        "push { r2 - r6 }\n"
-
-        // *store_old_sp = SP
-        // "mov r2, sp\n"
-
+    // this uses the idea that the following registers are already stored in
+    // the old stack:
+    // r0, r1, r2, r3, r12, lr, pc, stack
+    asm volatile (
         // get process stack pointer
-        "MRS r2, psp\n"
+        "mrs r2, PSP\n"
+
+        // reserve space for registers (8 * 4 = 32 bytes)
+        "sub r2, #0x20\n"
+
+        // store the new location for later use
         "str r2, [ %0 ]\n"
-        
 
-        // SP = next_sp
-        // "mov sp, %1\n"
+        // save current context on the old stack
+        "str r4, [r2, #0x00]\n"
+        "str r5, [r2, #0x04]\n"
+        "str r6, [r2, #0x08]\n"
+        "str r7, [r2, #0x0C]\n"
 
-        // write new stack location to the process stack ptr
-        "MSR psp, %1\n"
+        // copy the higher registers to the old stack
+        "mov r3, r8\n"
+        "str r3, [r2, #0x10]\n"
+        "mov r3, r9\n"
+        "str r3, [r2, #0x14]\n"
+        "mov r3, r10\n"
+        "str r3, [r2, #0x18]\n"
+        "mov r3, r11\n"
+        "str r3, [r2, #0x1C]\n"
+
+        "mov r0, %1\n"
 
         // restore the new context from the stack
-        "pop { r2 - r6 }\n"
-        "mov r12, r6\n"
-        "mov r11, r5\n"
-        "mov r10, r4\n"
+        "ldr r4, [r0, #0x00]\n"
+        "ldr r5, [r0, #0x04]\n"
+        "ldr r6, [r0, #0x08]\n"
+        "ldr r7, [r0, #0x0C]\n"
+
+        // copy the higher registers to from the new stack
+        "ldr r3, [r0, #0x10]\n"
+        "mov r8, r3\n"
+        "ldr r3, [r0, #0x14]\n"
         "mov r9, r3\n"
-        "mov r8, r2\n"
-        "pop { r4 - r7, pc }"
+        "ldr r3, [r0, #0x18]\n"
+        "mov r10, r3\n"
+        "ldr r3, [r0, #0x1C]\n"
+        "mov r11, r3\n"
+
+        // update the new stack pointer
+        "add r3, r0, #0x20\n"
+        "msr PSP, r3\n"
 
         : /* No output operands */
 
@@ -65,5 +75,7 @@ void __pendsv_handler() {
         // %1 = new value of SP
         : "r"(&old->sp), "r"(instance->next->sp)
     );
+
+    instance->current = instance->next;
 }
 }
