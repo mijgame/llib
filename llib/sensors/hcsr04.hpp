@@ -11,7 +11,9 @@ namespace llib::sensors {
         static uint32_t read() {
             // Clear
             TriggerPin::template set<false>();
+
             llib::wait_for(llib::us{2});
+            llib::wait_for(llib::us{5});
 
             // Trigger the sensor
             TriggerPin::template set<true>();

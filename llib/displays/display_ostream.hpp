@@ -48,7 +48,7 @@ namespace llib::displays {
             if (pos.x + char_width > line_width + 1) {
                 newline();
             }
-
+            
             display.write(
                 pos, font[c]
             );
