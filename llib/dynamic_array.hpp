@@ -6,6 +6,7 @@
 #include <iterator>
 
 #include "math.hpp"
+#include "error.hpp"
 
 namespace llib {
     template<typename T, size_t Size>
@@ -112,7 +113,7 @@ namespace llib {
          */
         class random_access_iterator {
         protected:
-            dynamic_array<T, Size> &subject;
+            dynamic_array<T, Size> *subject;
             size_t at;
 
             // Allow access to the 'at' member
@@ -124,21 +125,18 @@ namespace llib {
             using pointer = value_type *;
             using const_pointer = value_type const *;
             using reference = value_type &;
-            using iterator_category = std::bidirectional_iterator_tag;
+            using iterator_category = std::random_access_iterator_tag;
 
             constexpr random_access_iterator(dynamic_array<T, Size> &subject)
-                    : subject(subject), at(0) {}
+                    : subject(&subject), at(0) {}
 
             constexpr random_access_iterator(dynamic_array<T, Size> &subject, size_t start)
-                    : subject(subject), at(start) {}
+                    : subject(&subject), at(start) { }
 
             constexpr random_access_iterator(const random_access_iterator &rhs)
                     : subject(rhs.subject), at(rhs.at) {}
 
-            constexpr random_access_iterator(random_access_iterator &&rhs) {
-                subject = rhs.subject;
-                at = rhs.at;
-            }
+            constexpr random_access_iterator(random_access_iterator &&rhs) noexcept = default;
 
             constexpr random_access_iterator &operator=(const random_access_iterator &rhs) {
                 subject = rhs.subject;
@@ -147,12 +145,7 @@ namespace llib {
                 return *this;
             }
 
-            constexpr random_access_iterator &operator=(random_access_iterator &&rhs) {
-                subject = rhs.subject;
-                at = rhs.at;
-
-                return *this;
-            }
+            constexpr random_access_iterator &operator=(random_access_iterator &&rhs) noexcept = default;
 
             /**
              * a == b
@@ -161,8 +154,7 @@ namespace llib {
              * @return
              */
             constexpr bool operator==(const random_access_iterator &rhs) const {
-                return at == rhs.at
-                       && std::addressof(subject) == std::addressof(rhs.subject);
+                return at == rhs.at && subject == rhs.subject;
             }
 
             /**
@@ -176,19 +168,19 @@ namespace llib {
             }
 
             constexpr reference operator*() {
-                return subject[at];
+                return (*subject).at(at);
             }
 
             constexpr value_type operator*() const {
-                return subject[at];
+                return (*subject).at(at);
             }
 
             constexpr pointer operator->() {
-                return &subject[at];
+                return &(*subject).at(at);
             }
 
             constexpr const_pointer operator->() const {
-                return &subject[at];
+                return &(*subject).at(at);
             }
 
             /**
@@ -337,6 +329,221 @@ namespace llib {
             }
         };
 
+        class const_random_access_iterator {
+        protected:
+            const dynamic_array<T, Size> *subject;
+            size_t at;
+
+            // Allow access to the 'at' member
+            friend dynamic_array;
+
+        public:
+            using difference_type = std::ptrdiff_t;
+            using value_type = T;
+            using pointer = value_type *;
+            using const_pointer = value_type const *;
+            using reference = value_type &;
+            using iterator_category = std::random_access_iterator_tag;
+
+            constexpr const_random_access_iterator(const dynamic_array<T, Size> &subject)
+                : subject(&subject), at(0) {}
+
+            constexpr const_random_access_iterator(const dynamic_array<T, Size> &subject, size_t start)
+                : subject(&subject), at(start) {}
+
+            constexpr const_random_access_iterator(const const_random_access_iterator &rhs)
+                : subject(rhs.subject), at(rhs.at) {}
+
+            constexpr const_random_access_iterator &operator=(const const_random_access_iterator &rhs) = default;
+
+            constexpr const_random_access_iterator &operator=(const_random_access_iterator &&rhs) noexcept = default;
+
+            /**
+             * a == b
+             *
+             * @param rhs
+             * @return
+             */
+            constexpr bool operator==(const const_random_access_iterator &rhs) const {
+                return at == rhs.at && subject == rhs.subject;
+            }
+
+            /**
+             * a != b
+             *
+             * @param rhs
+             * @return
+             */
+            constexpr bool operator!=(const const_random_access_iterator &rhs) {
+                return !operator==(rhs);
+            }
+
+            constexpr value_type operator*() const {
+                return subject->at(at);
+            }
+
+            constexpr const_pointer operator->() const {
+                return &subject->at(at);
+            }
+
+            /**
+             * Pre-increment.
+             *
+             * @return
+             */
+            constexpr const_random_access_iterator &operator++() {
+                at++;
+                return *this;
+            }
+
+            /**
+             * Post increment.
+             *
+             * @return
+             */
+            constexpr const const_random_access_iterator operator++(int) {
+                const_random_access_iterator temp(*this);
+                operator++();
+                return temp;
+            }
+
+            constexpr const_random_access_iterator &operator--() {
+                at--;
+                return *this;
+            }
+
+            constexpr const const_random_access_iterator operator--(int) {
+                const_random_access_iterator temp(*this);
+                operator--();
+                return temp;
+            }
+
+            /**
+             * a + n
+             *
+             * @param n
+             * @return
+             */
+            constexpr const_random_access_iterator operator+(const size_t n) const {
+                return const_random_access_iterator(subject, at + n);
+            }
+
+            /**
+             * n + a
+             *
+             * @param n
+             * @param it
+             * @return
+             */
+            constexpr friend const_random_access_iterator operator+(const size_t n, const const_random_access_iterator &it) {
+                return it + n;
+            }
+
+            /**
+             * a - n
+             *
+             * @param n
+             * @return
+             */
+            constexpr const_random_access_iterator operator-(const size_t n) const {
+                return const_random_access_iterator(subject, at - n);
+            }
+
+            /**
+             * a - b
+             *
+             * @param other
+             * @return
+             */
+            constexpr const_random_access_iterator operator-(const const_random_access_iterator &other) const {
+                return const_random_access_iterator(subject, at - other.at);
+            }
+
+            /**
+             * a < b
+             *
+             * @param other
+             * @return
+             */
+            constexpr const_random_access_iterator operator<(const const_random_access_iterator &other) const {
+                return at < other.at;
+            }
+
+            /**
+             * a > b
+             *
+             * @param other
+             * @return
+             */
+            constexpr const_random_access_iterator operator>(const const_random_access_iterator &other) const {
+                return at > other.at;
+            }
+
+            /**
+             * a <= b
+             *
+             * @param other
+             * @return
+             */
+            constexpr const_random_access_iterator operator<=(const const_random_access_iterator &other) const {
+                return operator<(other) || operator==(other);
+            }
+
+            /**
+             * a >= b
+             *
+             * @param other
+             * @return
+             */
+            constexpr const_random_access_iterator operator>=(const const_random_access_iterator &other) const {
+                return operator>(other) || operator==(other);
+            }
+
+            /**
+             * a += n
+             *
+             * @param n
+             * @return
+             */
+            constexpr const_random_access_iterator operator+=(const size_t n) {
+                at += n;
+                return *this;
+            }
+
+            /**
+             * a -= n
+             *
+             * @param n
+             * @return
+             */
+            constexpr const_random_access_iterator operator-=(const size_t n) {
+                at -= n;
+                return *this;
+            }
+        };
+
+        /**
+         * Get a reference to the element at the given index.
+         * This does not do bounds checking.
+         *
+         * @param n
+         * @return
+         */
+        T &at(size_t n) {
+           return store[n];
+        }
+
+        /**
+         * Get a const reference to the element at the given index.
+         * This does not do bounds checking.
+         *
+         * @param n
+         * @return
+         */
+        T const &at(size_t n) const {
+            return store[n];
+        }
+
         /**
          * Get a reference to the first element
          * in the array. Calling this function on
@@ -446,7 +653,7 @@ namespace llib {
 
         // Reduce visual noise with these aliases
         using iterator = random_access_iterator;
-        using const_iterator = const random_access_iterator;
+        using const_iterator = const_random_access_iterator;
 
         /**
          * Insert a single element.
@@ -455,7 +662,7 @@ namespace llib {
          * @param value
          * @return
          */
-        constexpr  iterator insert(const_iterator &it, const T &value) {
+        constexpr iterator insert(const_iterator &it, const T &value) {
             free_position(it.at);
             store[it.at] = value;
             index++;
@@ -737,7 +944,7 @@ namespace llib {
          * @return
          */
         constexpr const_iterator begin() const {
-            return iterator(*this);
+            return const_iterator(*this);
         }
 
         /**
