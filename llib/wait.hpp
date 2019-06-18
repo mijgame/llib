@@ -23,6 +23,7 @@ namespace llib {
     void wait_for(llib::ns ns);
 
     void wait_for(llib::us us);
+    void wait_for_new(llib::us us);
 
     void wait_for(llib::ms ms);
 

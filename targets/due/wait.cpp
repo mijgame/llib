@@ -1,5 +1,7 @@
 #include <wait.hpp>
 #include <base.hpp>
+#include <tc_interrupt.hpp>
+#include <error.hpp>
 
 namespace llib {
     struct _timer {
@@ -57,6 +59,32 @@ namespace llib {
         const uint_fast32_t ticks = total_ticks - ticks_per_rollover * rollovers;
 
         _wait_for(rollovers, ticks);
+    }
+
+    void wait_for_new(const llib::us us) {
+        using tc_controller = target::tc::controller<
+            target::tc::channel_1
+        >;
+
+        static volatile bool done = false;
+        static bool initialized = false;
+
+        if (!initialized) {
+            tc_controller::init<CHIP_FREQ_CPU_MAX / 2>([]() {
+                done = true;
+            });
+
+            initialized = true;
+        }
+
+        tc_controller::set_frequency(us.value * 1000 * 1000);
+        tc_controller::enable_interrupt();
+
+        while (!done);
+
+        done = false;
+
+        tc_controller::disable_interrupt();
     }
 
     void wait_for(const llib::us us) {
