@@ -1,6 +1,7 @@
 #ifndef LLIB_DUE_INTERRUPT_HPP
 #define LLIB_DUE_INTERRUPT_HPP
 
+#include <util.hpp>
 #include "base.hpp"
 #include "pins.hpp"
 
@@ -18,39 +19,32 @@ namespace llib::due {
     namespace {
         template<typename Handler, uint8_t priority>
         constexpr void _enable_interrupt_source() {
-            // enable clock of peripheral
+            // Enable clock of peripheral
             enable_clock<Handler>();
 
-            // Disable irq
-            NVIC->ICER[Handler::irqn >> 5] = (1 << (Handler::irqn & 0x1F));
+            constexpr auto irqn = static_cast<IRQn_Type>(Handler::irqn);
 
-            // Clean pending irq
-            NVIC->ICPR[Handler::irqn >> 5] = (1 << (Handler::irqn & 0x1F));
-
-            // Set priority to priority
-            NVIC->IP[Handler::irqn] = ((priority << (8 - __NVIC_PRIO_BITS)) & 0xFF);
-
-            // Enable irq
-            NVIC->ISER[Handler::irqn >> 5] = (1 << (Handler::irqn & 0x1F));
+            NVIC_DisableIRQ(irqn);
+            NVIC_ClearPendingIRQ(irqn);
+            NVIC_SetPriority(irqn, priority);
+            NVIC_EnableIRQ(irqn);
         }
 
         template<typename Handler>
         constexpr void _disable_interrupt_source() {
-            // Disable irq
-            NVIC->ICER[Handler::irqn >> 5] = (1 << (Handler::irqn & 0x1F));
+            constexpr auto irqn = static_cast<IRQn_Type>(Handler::irqn);
 
-            // Clean pending irq
-            NVIC->ICPR[Handler::irqn >> 5] = (1 << (Handler::irqn & 0x1F));
-        }        
+            NVIC_DisableIRQ(irqn);
+            NVIC_ClearPendingIRQ(irqn);
+        }
 
         template<typename Pin, uint8_t priority>
         void _enable_interrupt_source_for_pin() {
-            // check if an interupt has already been set in the pio of the pin
-            if(!(pins::port<typename Pin::port>->PIO_IMR)){
+            // Check if an interrupt has already been set in the pio of the pin
+            if (!(pins::port<typename Pin::port>->PIO_IMR)) {
                 _enable_interrupt_source<typename Pin::port, priority>();
             }
         }
-
 
         template<typename Pin, interrupt Mode>
         constexpr void _set_interrupt_mode() {
@@ -83,77 +77,53 @@ namespace llib::due {
             pins::port<typename Pin::port>->PIO_IER = mask;
         }
 
-        template<typename Port>
+        template<typename>
         struct _callbacks {
-            static interrupt_callback callbacks[32];
+            static inline interrupt_callback callbacks[32] = {};
         };
-
-        template<typename Port>
-        interrupt_callback _callbacks<Port>::callbacks[32] = {};
-
 
         template<typename Handler>
         constexpr void _handle_isr(uint32_t status_register, uint32_t interrupt_mask) {
-            uint8_t trailing_zeros = 0;
-
-            while ((trailing_zeros = __CLZ(__RBIT(status_register & interrupt_mask))) < 32) {
-                auto bit = static_cast<uint8_t>(trailing_zeros);
-
-                if (llib::due::_callbacks<Handler>::callbacks[bit] != nullptr) {
-                    llib::due::_callbacks<Handler>::callbacks[bit]();
+            util::for_bit_in_mask(
+                status_register & interrupt_mask,
+                [](const uint8_t bit) {
+                    if (llib::due::_callbacks<Handler>::callbacks[bit] != nullptr) {
+                        llib::due::_callbacks<Handler>::callbacks[bit]();
+                    }
                 }
-
-                status_register = status_register & (~(1 << bit));
-            }
-        }        
-
-        template<typename Handler, uint32_t Mask>
-        constexpr void _set_callback_func(interrupt_callback func){     
-            uint32_t mask = Mask;   
-            uint8_t trailing_zeros = 0;
-
-            // reverse the bit order and do a leading zero's check ( so we are counting the trailing zero's)
-            while ((trailing_zeros = __CLZ(__RBIT(mask))) < 32) {
-                auto bit = static_cast<uint8_t>(trailing_zeros);
-
-                // set the function on the positions of the bits in the mask
-                llib::due::_callbacks<Handler>::callbacks[bit] = func;
-
-                mask &= (~(1 << bit));
-            }   
+            );
         }
 
         template<typename Handler, uint32_t Mask>
-        constexpr void _unset_callback_func(){  
-            uint32_t mask = Mask;   
-            uint8_t trailing_zeros = 0;
+        constexpr void _set_callback_func(interrupt_callback func) {
+            util::for_bit_in_mask<Mask>(
+                [func](const uint8_t bit) {
+                    // Set the function on the positions of the bits in the mask
+                    llib::due::_callbacks<Handler>::callbacks[bit] = func;
+                }
+            );
+        }
 
-            // reverse the bit order and do a leading zero's check ( so we are counting the trailing zero's)
-            while ((trailing_zeros = __CLZ(__RBIT(mask))) < 32) {
-                auto bit = static_cast<uint8_t>(trailing_zeros);
-
-                // set the function on the positions of the bits in the mask
-                llib::due::_callbacks<Handler>::callbacks[bit] = nullptr;
-            
-                mask &= (~(1 << bit));
-            }
-        }        
+        template<typename Handler, uint32_t Mask>
+        constexpr void _unset_callback_func() {
+            _set_callback_func<Handler, Mask>(nullptr);
+        }
     }
 
     /**
      * Set an interrupt on a pin with interrupt mode, priority and a 
      *  function to call when the interrupt happens
      *
-     * @param func funtion to execute on interrupt call
-     * @tparam Pin the pin for the interrupt
-     * @tparam Mode for the pin to generate a interrupt
-     * @tparam priority priority for the interrupt. Sets the priority for the 
-     *     whole pio doesnt update if the pio has already been set.
+     * @param func Function to execute on interrupt call
+     * @tparam Pin The pin for the interrupt
+     * @tparam Mode For the pin to generate a interrupt
+     * @tparam priority Priority for the interrupt. Sets the priority for the
+     *     whole PIO doesn't update if the pio has already been set.
      */
     template<typename Pin, interrupt Mode, uint8_t priority = 7>
-    void attach_interrupt(interrupt_callback func) {        
+    void attach_interrupt(interrupt_callback func) {
         _enable_interrupt_source_for_pin<Pin, priority>();
-        _set_callback_func<typename Pin::port, uint32_t(1U << Pin::number)>(func);        
+        _set_callback_func<typename Pin::port, uint32_t(1U << Pin::number)>(func);
         _set_interrupt_mode<Pin, Mode>();
     }
 
@@ -161,72 +131,64 @@ namespace llib::due {
     void detach_interrupt() {
         pins::port<typename Pin::port>->PIO_IDR = pins::mask<Pin>;
 
-        if(!(pins::port<typename Pin::port>->PIO_IMR)){
-            // no more pins attached to interrupt on this pio so disable iqrn
+        if (!(pins::port<typename Pin::port>->PIO_IMR)) {
+            // No more pins attached to interrupt on this PIO, so disable iqrn.
             _disable_interrupt_source<typename Pin::port>();
         }
     }
 
     template<typename Handler, uint32_t mask, uint8_t priority = 7>
     void attach_interrupt(interrupt_callback func) {
-        // add function to iqrn on positions of mask and enable the iqrn interupt
+        // Add function to iqrn on positions of mask and enable the iqrn interrupt.
         _set_callback_func<Handler, mask>(func);
         _enable_interrupt_source<Handler, priority>();
     }
 
     template<typename Handler, uint32_t mask>
     void detach_interrupt() {
-        // add function to iqrn on positions of mask and enable the iqrn interupt
+        // Add function to iqrn on positions of mask and enable the iqrn interrupt.
         _unset_callback_func<Handler, mask>();
 
-        // check if any of the callbacks is used 
-        // Todo: Change to check if the interupt mask register is set
-        for(auto i = 0; i < 32; i++){
-            if(llib::due::_callbacks<Handler>::callbacks[i] != nullptr){
+        // Check if any of the callbacks is used.
+
+        // Todo: Change to check if the interrupt mask register is set
+        for (auto i = 0; i < 32; i++) {
+            if (llib::due::_callbacks<Handler>::callbacks[i] != nullptr) {
                 return;
             }
         }
 
-        // disable interrupt if all callbacks are disabled
+        // Disable interrupt if all callbacks are disabled.
         _disable_interrupt_source<Handler>();
     }
 
-    template<uint16_t irqn_id>
-    static void software_interrupt(){
-        // activate a interrupt within software
+    template<typename Pin>
+    void enable_irq() {
+        NVIC_EnableIRQ(
+            static_cast<IRQn_Type>(Pin::irqn)
+        );
+    }
+
+    template<typename Pin>
+    void disable_irq() {
+        NVIC_DisableIRQ(
+            static_cast<IRQn_Type>(Pin::irqn)
+        );
+    }
+
+    template<typename Pin>
+    void clear_pending_irq() {
+        NVIC_ClearPendingIRQ(
+            static_cast<IRQn_Type>(Pin::irqn)
+        );
+    }
+
+    template<uint16_t IrqnId>
+    void software_interrupt() {
+        // Activate a interrupt within software
         // 0x03 -> activates IRQ3
-        NVIC->STIR = (irqn_id & 0x1FF);
-    }    
-}
-
-extern "C" {
-void __PIOA_Handler() {
-    llib::due::_handle_isr<llib::due::pioa>(
-        llib::due::pins::port<llib::due::pioa>->PIO_ISR,
-        llib::due::pins::port<llib::due::pioa>->PIO_IMR
-    );
-}
-
-void __PIOB_Handler() {
-    llib::due::_handle_isr<llib::due::piob>(
-        llib::due::pins::port<llib::due::piob>->PIO_ISR,
-        llib::due::pins::port<llib::due::piob>->PIO_IMR
-    );
-}
-
-void __PIOC_Handler() {
-    llib::due::_handle_isr<llib::due::pioc>(
-        llib::due::pins::port<llib::due::pioc>->PIO_ISR,
-        llib::due::pins::port<llib::due::pioc>->PIO_IMR
-    );
-}
-
-void __PIOD_Handler() {
-    llib::due::_handle_isr<llib::due::piod>(
-        llib::due::pins::port<llib::due::piod>->PIO_ISR,
-        llib::due::pins::port<llib::due::piod>->PIO_IMR
-    );
-}
+        NVIC->STIR = (IrqnId & 0x1FFU);
+    }
 }
 
 #endif //LLIB_DUE_INTERRUPT_HPP
