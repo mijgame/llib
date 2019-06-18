@@ -3,6 +3,7 @@
 
 #include <type_traits>
 #include <array>
+#include <dynamic_array.hpp>
 
 #include <stdio.h>
 #include "base.hpp"
@@ -370,6 +371,16 @@ namespace llib {
          */
         template<size_t Size>
         constexpr array_values(const std::array<T, Size> &arr)
+            : arr(arr.data()), size(Size) {}
+
+        /**
+         * Construct the values helper from a llib::dynamic_array.
+         *
+         * @tparam Size
+         * @param arr
+         */
+        template<size_t Size>
+        constexpr array_values(const llib::dynamic_array<T, Size> &arr)
             : arr(arr.data()), size(Size) {}
     };
 
