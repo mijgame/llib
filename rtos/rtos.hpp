@@ -90,8 +90,8 @@ namespace llib::rtos {
             stack_ptr[13] = task_tram;
             // pc register
             stack_ptr[14] = task_tram;
-            // stack register
-            stack_ptr[15] = sp;
+            // xpsr register
+            stack_ptr[15] = 0x10000000;
         }
 
         /**
