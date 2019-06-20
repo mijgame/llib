@@ -204,7 +204,7 @@ namespace llib::displays {
 
 
     template<typename I2C, template<typename> typename Strategy = buffered>
-    class ssd1306 : public Strategy<detail::_ssd1306>, public display {
+    class ssd1306 : public Strategy<detail::_ssd1306>, public display<ssd1306<I2C, Strategy>> {
     protected:
         using base = Strategy<detail::_ssd1306>;
 

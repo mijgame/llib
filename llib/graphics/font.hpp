@@ -7,6 +7,7 @@
 
 namespace llib::graphics {
     class font {
+        __attribute__((section (".text")))
         constexpr static std::array<image<8, 8>, 128> images = {
             image<8, 8>( 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ), // U+0000
             image<8, 8>( 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ), // U+0001
