@@ -147,7 +147,7 @@ namespace llib {
             }
 
             // Process individual digits
-            while (num != 0) {
+            while (num > 0) {
                 int rem = num % base;
 
                 if (rem > 9) {
