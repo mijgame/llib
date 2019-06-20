@@ -5,9 +5,9 @@
    
 .bss
 .align 2
-_switch:
-   .word
-   .word
+_switch: 
+   .word 0x00000000 
+   .word 0x00000000
 
 .text
 .align 2
