@@ -8,14 +8,18 @@
 #include <brigand.hpp>
 #include <wait.hpp>
 
+namespace llib::rtos {
+     struct _switch_helper {
+        uint32_t *old_sp;
+        uint32_t new_sp;
+    };
+}
+
+extern llib::rtos::_switch_helper _switch;
+
 extern "C" {
 // Pre-declaration for friend
 void __pendsv_handler();
-
-void switch_task(
-    uint32_t *old_sp,
-    uint32_t new_sp
-);
 }
 
 
@@ -33,8 +37,9 @@ namespace llib::rtos {
         // Stack pointer
         uint32_t sp;
 
-        friend void ::__pendsv_handler();
-
+        template<typename ...Tasks>
+        friend class scheduler;
+        
     public:
         virtual void run() = 0;
 
@@ -233,6 +238,9 @@ namespace llib::rtos {
         idle_task idle;
 
         void schedule_cycle() const {
+            _switch.old_sp = &current->sp;
+            _switch.new_sp = next->sp;
+
             /*
              * This will set the PendSV bit in
              * the Interrupt Control and State Register, which
