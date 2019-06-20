@@ -1,16 +1,11 @@
    .cpu cortex-m3
    .syntax unified
+	.thumb
+	.thumb_func   
    .global __pendsv_handler
-   .global _switch
+   .text
+   .align 2
    
-.bss
-.align 2
-_switch: 
-   .word 0x00000000 
-   .word 0x00000000
-
-.text
-.align 2
 __pendsv_handler:
    # get the current and next stack locations
    ldr r3, =_switch
@@ -34,6 +29,15 @@ __pendsv_handler:
 
    # update the new stack pointer
    msr PSP, r1
+
+   @ ldr r0, [ r0 ]
+   @ mov r1, #16
+   @ bl print_stack
+
+   @ ldr r3, =_switch
+   @ ldr r0, [ r3, #0x4 ]
+   @ mov r1, #16
+   @ bl print_stack
 
    # flush stack pointers
    isb

@@ -84,6 +84,15 @@ namespace llib::rtos {
             auto *stack_ptr = reinterpret_cast<uint32_t*>(sp);
             auto task_tram = reinterpret_cast<uint32_t>(task_trampoline);
 
+            // reg 0
+            stack_ptr[8] = 0x00000000;
+            // reg 1
+            stack_ptr[9] = 0x11111111;
+            // reg 2
+            stack_ptr[10] = 0x22222222;
+            // reg 3
+            stack_ptr[11] = 0x33333333;                                              
+
             // set reg 12
             stack_ptr[12] = 0x00;                                                
             // lr register
@@ -91,7 +100,9 @@ namespace llib::rtos {
             // pc register
             stack_ptr[14] = task_tram;
             // xpsr register
-            stack_ptr[15] = 0x10000000;
+            stack_ptr[15] = 0x1000000;
+
+            llib::cout << "Stack ptr task: " << sp << '\n';
         }
 
         /**
