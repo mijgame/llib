@@ -363,6 +363,7 @@ namespace llib::rtos {
             // Give the current thread an initial
             // value of the idle thread.
             current = tasks[tasks.size() - 1];
+            next = current;
 
             llib::wait_for(llib::us{10});
 
@@ -384,6 +385,7 @@ namespace llib::rtos {
             // ISB instruction must be emitted immediately after
             // MSR to ensure the new stack pointer is used
             __ISB();
+            __DSB();
 
             // Infinite loop, that should never
             // be actually run except for a short moment
