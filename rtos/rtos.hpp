@@ -30,6 +30,22 @@ void __pendsv_handler();
 namespace llib::rtos {
     namespace {
         void task_trampoline();
+
+        template <class T, class Tuple>
+        struct tuple_index;
+
+        template <class T, class... Types>
+        struct tuple_index<T, std::tuple<T, Types...>> {
+            static const std::size_t value = 0;
+        };
+
+        template <class T, class U, class... Types>
+        struct tuple_index<T, std::tuple<U, Types...>> {
+            static const std::size_t value = 1 + tuple_index<T, std::tuple<Types...>>::value;
+        };
+
+        template <class T, class Tuple>
+        constexpr size_t tuple_index_v = tuple_index<T, Tuple>::value;
     }
 
     // Pre-declaration for friend
@@ -206,7 +222,11 @@ namespace llib::rtos {
     template<typename ...Tasks>
     class scheduler : public scheduler_base {
     protected:
-        constexpr static size_t stack_size = 32;
+        /**
+         * 16 for all registers + 1 for SP
+         */
+        constexpr static size_t stack_size = 17;
+
         /**
          * Stack for last function calls in the run function as 
          * we switch to a different stack.
@@ -241,10 +261,9 @@ namespace llib::rtos {
         // Tuple helps with getting indices
         using TasksTuple = brigand::as_tuple<SortedTasks>;
 
-        dynamic_array<
-            task_base *,
-            std::tuple_size_v<TasksTuple>
-        > tasks;
+        constexpr static size_t task_count = std::tuple_size_v<TasksTuple>;
+
+        dynamic_array<task_base *, task_count> tasks;
 
         // Storage for the idle task.
         idle_task idle;
@@ -275,30 +294,23 @@ namespace llib::rtos {
          * @param t
          */
         explicit scheduler(Tasks &...t) {
-            /*
-             * Currently, a static assert is used
-             * to check if the user passed the tasks in
-             * the correct order.
-             *
-             * Maybe it is possible in the future to sort
-             * the variadic argument pack with values such that
-             * the user could pass the tasks in any order desired?
-             */
-            static_assert(
-                std::is_same_v<
-                    std::tuple<Tasks..., idle_task>,
-                    TasksTuple
-                >,
-                "The tasks should be passed in order of their priority."
-            );
-
             static_assert(
                 (std::is_base_of_v<task_base, Tasks> && ...),
                 "All tasks should inherit from task_base"
             );
 
-            (tasks.push_back(&t), ...);
-            tasks.push_back(&idle);
+            // Pre-size the array to the task count
+            tasks.resize(task_count);
+
+            // Because the index of the task is known at compile time,
+            // the user can pass the tasks in any way they like and this
+            // will put them in the right place in the tasks array.
+            (
+                tasks.set(tuple_index_v<typeof(t), TasksTuple>, &t),
+                ...
+            );
+
+            tasks.set(task_count - 1, &idle);
         }
 
         /**
