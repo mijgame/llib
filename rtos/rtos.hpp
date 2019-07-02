@@ -9,13 +9,17 @@
 #include <wait.hpp>
 
 namespace llib::rtos {
-     struct _switch_helper {
+    class task_base;
+
+    struct _switch_helper {
         uint32_t *old_sp;
         uint32_t new_sp;
+        task_base **current;
+        task_base **next;
     };
 }
 
-extern llib::rtos::_switch_helper _switch;
+extern volatile llib::rtos::_switch_helper _switch;
 
 extern "C" {
 // Pre-declaration for friend
@@ -35,11 +39,12 @@ namespace llib::rtos {
     class task_base {
     protected:
         // Stack pointer
-        uint32_t sp;
+        uint32_t sp = 0;
 
         template<typename ...Tasks>
-        friend class scheduler;
-        
+        friend
+        class scheduler;
+
     public:
         virtual void run() = 0;
 
@@ -79,9 +84,9 @@ namespace llib::rtos {
 
             // software stacking (r4 - r11) + 
             // hardware stacking (r0 - r3 + r12 + lr + pc + stack) = 16
-            sp = reinterpret_cast<uint32_t>(&stack[stack_words - 16]);  
+            sp = reinterpret_cast<uint32_t>(&stack[stack_words - 16]);
 
-            auto *stack_ptr = reinterpret_cast<uint32_t*>(sp);
+            auto *stack_ptr = reinterpret_cast<uint32_t *>(sp);
             auto task_tram = reinterpret_cast<uint32_t>(task_trampoline);
 
             // reg 0
@@ -91,18 +96,16 @@ namespace llib::rtos {
             // reg 2
             stack_ptr[10] = 0x22222222;
             // reg 3
-            stack_ptr[11] = 0x33333333;                                              
+            stack_ptr[11] = 0x33333333;
 
             // set reg 12
-            stack_ptr[12] = 0x00;                                                
+            stack_ptr[12] = 0x00;
             // lr register
             stack_ptr[13] = task_tram;
             // pc register
             stack_ptr[14] = task_tram;
             // xpsr register
             stack_ptr[15] = 0x1000000;
-
-            llib::cout << "Stack ptr task: " << sp << '\n';
         }
 
         /**
@@ -144,7 +147,7 @@ namespace llib::rtos {
         task_base *current = nullptr;
         task_base *next = nullptr;
 
-        friend void ::__pendsv_handler();
+        friend void::__pendsv_handler();
 
     public:
         static scheduler_base *instance;
@@ -166,8 +169,7 @@ namespace llib::rtos {
 
             void run() override {
                 for (;;) {
-                    llib::cout << "idle\n";
-                    //__WFE();
+                    __WFE();
                 }
             }
 
@@ -187,7 +189,6 @@ namespace llib::rtos {
          * on the current task.
          */
         void task_trampoline() {
-            llib::cout << "trampoline\n";
             auto *task = scheduler_base::instance->get_current_task();
             task->run();
         }
@@ -306,8 +307,6 @@ namespace llib::rtos {
          * ready to run.
          */
         void tick() override {
-            llib::cout << "tick\n";
-
             /*
              * Tasks are sorted by priority, find the
              * next task to run. If no user tasks are ready to
@@ -316,7 +315,6 @@ namespace llib::rtos {
              * This is because the idle task is the last
              * element in the list and always ready to run.
              */
-
             for (task_base *task : tasks) {
                 if (!task->ready_to_run()) {
                     continue;
@@ -329,8 +327,6 @@ namespace llib::rtos {
                 if (task == current) {
                     return; // Nothing to do
                 }
-
-                llib::cout << "Switching task\n";
 
                 // Schedule the task to be run
                 next = task;
@@ -365,6 +361,9 @@ namespace llib::rtos {
             current = tasks[tasks.size() - 1];
             next = current;
 
+            _switch.current = &current;
+            _switch.next = &next;
+
             llib::wait_for(llib::us{10});
 
             /// Important: instance and current have to be set before interrupts run!  ///
@@ -377,10 +376,11 @@ namespace llib::rtos {
             SysTick_Config(CHIP_FREQ_CPU_MAX / tps);
 
             // Set the PendSV interrupt to the lowest priority
-            NVIC_SetPriority(PendSV_IRQn, 0xFFU);
+            NVIC_SetPriority(PendSV_IRQn, 0x0F);
+            NVIC_SetPriority(SysTick_IRQn, 0x01);
 
             // enable the process stack
-            __set_CONTROL(__get_CONTROL() | 0x1 << 1);
+            __set_CONTROL(__get_CONTROL() | (0x1U << 1U));
 
             // ISB instruction must be emitted immediately after
             // MSR to ensure the new stack pointer is used

@@ -6,11 +6,9 @@ using namespace llib::rtos;
 
 scheduler_base *scheduler_base::instance = nullptr;
 
-llib::rtos::_switch_helper _switch;
+volatile llib::rtos::_switch_helper _switch;
 
 extern "C" {
-auto *instance = scheduler_base::instance;
-
 void __systick_handler() {
     // __disable_irq();
     scheduler_base::instance->tick();
@@ -18,7 +16,7 @@ void __systick_handler() {
 }
 
 void __hardfault_handler() {
-    llib::cout << "HARDFAULT ERROR\n";
+    llib::cout << "HARDFAULT";
 
     for (;;) {}
 }
