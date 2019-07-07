@@ -21,12 +21,6 @@ namespace llib::rtos {
 
 extern volatile llib::rtos::_switch_helper _switch;
 
-extern "C" {
-// Pre-declaration for friend
-void __pendsv_handler();
-}
-
-
 namespace llib::rtos {
     namespace {
         void task_trampoline();
@@ -66,9 +60,15 @@ namespace llib::rtos {
 
         virtual void suspend() = 0;
 
+        virtual void yield() = 0;
+
+        virtual void unyield() = 0;
+
         virtual void resume() = 0;
 
         virtual bool ready_to_run() const = 0;
+
+        virtual bool yielded() const = 0;
 
         virtual uint8_t get_priority() const = 0;
     };
@@ -77,9 +77,9 @@ namespace llib::rtos {
     class task : public task_base {
     private:
         constexpr static uint32_t stack_words = (StackSize + 3) / 4;
-        constexpr static uint32_t marker = 0xDEADBEEF;
 
         bool ready = true;
+        bool currently_yielded = false;
 
         // Stack memory for this task
         uint32_t stack[stack_words] = {};
@@ -93,11 +93,6 @@ namespace llib::rtos {
         constexpr static uint8_t priority = Priority;
 
         task() {
-            // Fill up all stack locations with a marker
-            for (size_t i = 0; i < stack_words; ++i) {
-                stack[i] = marker;
-            }
-
             // software stacking (r4 - r11) + 
             // hardware stacking (r0 - r3 + r12 + lr + pc + stack) = 16
             sp = reinterpret_cast<uint32_t>(&stack[stack_words - 16]);
@@ -132,6 +127,28 @@ namespace llib::rtos {
         }
 
         /**
+         * Yield the current task.
+         * When is task is yielded, for one cycle
+         * it won't be considered ready to run, allowing
+         * other tasks to execute work.
+         *
+         * This is handy when the task needs to periodically
+         * check for progress, while not suspending (which would rely
+         * on an external factor to unsuspend the task).
+         *
+         * If a task is yielded but not ready to run,
+         * it is only unyielded when it is ready to run again.
+         */
+        void yield() override;
+
+        /**
+         * Unyield the current task.
+         */
+        void unyield() override {
+            currently_yielded = false;
+        }
+
+        /**
          * Allow this task to be scheduled
          * again.
          */
@@ -149,6 +166,15 @@ namespace llib::rtos {
         }
 
         /**
+         * Is this task currently yielded?
+         *
+         * @return
+         */
+        bool yielded() const override {
+            return currently_yielded;
+        }
+
+        /**
          * Get the priority of this task.
          *
          * @return
@@ -163,15 +189,25 @@ namespace llib::rtos {
         task_base *current = nullptr;
         task_base *next = nullptr;
 
-        friend void::__pendsv_handler();
-
     public:
         static scheduler_base *instance;
 
         virtual void tick() = 0;
 
         virtual task_base *get_current_task() = 0;
+
+        virtual void request_cycle() = 0;
     };
+
+    /**
+     * @tparam Priority
+     * @tparam StackSize
+     */
+    template<uint8_t Priority, uint32_t StackSize>
+    void task<Priority, StackSize>::yield() {
+        currently_yielded = true;
+        scheduler_base::instance->request_cycle();
+    }
 
     namespace {
         /**
@@ -337,7 +373,7 @@ namespace llib::rtos {
                  * task that has the highest priority?
                  */
                 if (task == current) {
-                    return; // Nothing to do
+                    break; // Nothing to do
                 }
 
                 // Schedule the task to be run
@@ -345,6 +381,12 @@ namespace llib::rtos {
                 schedule_cycle();
 
                 break;
+            }
+
+            for (task_base *task : tasks) {
+                if (task->yielded()) {
+                    task->unyield();
+                }
             }
         }
 
@@ -356,6 +398,13 @@ namespace llib::rtos {
          */
         task_base *get_current_task() override {
             return current;
+        }
+
+        /**
+         * Request a scheduling cycle.
+         */
+        void request_cycle() override {
+            tick();
         }
 
         /**
