@@ -11,3 +11,5 @@ set(ARM_EABI_SIZE "C:/SysGCC/arm-none-eabi/bin/arm-none-eabi-size.exe")
 
 # other settings
 set(SIZE_OUTPUT "-d")
+
+include("${CMAKE_CURRENT_SOURCE_DIR}/flags.cmake")

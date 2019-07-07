@@ -14,3 +14,5 @@ set(TERMINAL "${CMAKE_CURRENT_SOURCE_DIR}/tools/lpc21isp_197/lpc21isp_hr_linux")
 set(BOSSAC "bossac")
 set(SERIAL_PORT /dev/ttyACM0)
 set(SIZE_OUTPUT "-d")
+
+include("${CMAKE_CURRENT_SOURCE_DIR}/flags.cmake")

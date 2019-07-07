@@ -1,24 +1,3 @@
-# compiler settings
-set(CMAKE_C_COMPILER "$ENV{HOME}/opt/gcc-arm-none-eabi-8-2018-q4-major/bin/arm-none-eabi-gcc")
-set(CMAKE_CXX_COMPILER "$ENV{HOME}/opt/gcc-arm-none-eabi-8-2018-q4-major/bin/arm-none-eabi-g++")
-
-# arm-eabi
-set(ARM_EABI_OBJCOPY "$ENV{HOME}/opt/gcc-arm-none-eabi-8-2018-q4-major/bin/arm-none-eabi-objcopy")
-set(ARM_EABI_OBJDUMP "$ENV{HOME}/opt/gcc-arm-none-eabi-8-2018-q4-major/bin/arm-none-eabi-objdump")
-set(ARM_EABI_SIZE "$ENV{HOME}/opt/gcc-arm-none-eabi-8-2018-q4-major/bin/arm-none-eabi-size")
-
-# other settings
-set(TERMINAL "${CMAKE_CURRENT_SOURCE_DIR}/tools/lpc21isp_197/lpc21isp_hr_linux" CACHE STRING "" FORCE)
-set(BOSSAC "bossac" CACHE STRING "" FORCE)
-set(SERIAL_PORT /dev/ttyACM0 CACHE STRING "" FORCE)
-set(SIZE_OUTPUT "-d" CACHE STRING "" FORCE)
-
-set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
-set(BUILD_SHARED_LIBS OFF)
-
-# TODO
-# This SHOULD be put in a shared file, but cmake is a general
-# piece of shit and screams when you try to include a file here
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1)
 set(CMAKE_SYSTEM_PROCESSOR cortex-m3)
@@ -41,6 +20,9 @@ set(CMAKE_EXE_LINKER_FLAGS "${COMMON_FLAGS} ${LINKER_FLAGS}" CACHE STRING "" FOR
 set(CMAKE_ASM_FLAGS "${COMMON_FLAGS} ${C_FLAGS} ${ASM_FLAGS}" CACHE STRING "" FORCE)
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
-set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH)
-set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+
+# Flags
+set(CMAKE_ASM_FLAGS "${COMMON_FLAGS} ${C_FLAGS} ${ASM_FLAGS}")
