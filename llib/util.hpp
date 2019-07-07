@@ -1,6 +1,8 @@
 #ifndef LLIB_UTIL_HPP
 #define LLIB_UTIL_HPP
 
+#include <iterator>
+
 namespace llib {
     // TODO: there are more algorithms to add here!
     // - block sort (fast stable sorting)
