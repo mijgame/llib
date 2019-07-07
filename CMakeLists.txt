@@ -20,7 +20,12 @@ set(AS_GCC "${CORTEX_INCLUDE}/sam3xa/source/as_gcc")
 
 # Targets
 set(TARGET_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/targets/due")
-set(TARGET_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targets/due/wait.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/targets/due/stream_target.cpp")
+set(TARGET_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targets/due/wait.cpp"
+        targets/due/stream_target.cpp
+        targets/due/tc_interrupt.cpp
+        targets/due/interrupt.cpp
+)
+
 set(TARGET_STARTUP "${CMAKE_CURRENT_SOURCE_DIR}/targets/due/startup.c")
 
 # Linkerscript for Arduino Due
@@ -40,6 +45,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
 set(COMMON_FLAGS "-D__SAM3X8E__ -Os -mcpu=cortex-m3 -march=armv7-m -mthumb -Wall -Werror -Wno-maybe-uninitialized -Wno-unused-local-typedefs -Wno-unused-but-set-variable -Wno-unused-local-typedefs -Wno-unused-function -Wno-attributes -Werror -fno-exceptions -fno-non-call-exceptions -fno-common -ffunction-sections -fdata-sections -fno-exceptions -fno-asynchronous-unwind-tables -fomit-frame-pointer -fdata-sections -ffunction-sections -nostdlib")
 set(CXX_FLAGS "-std=c++17 -fconcepts -fno-rtti -fno-threadsafe-statics -fno-use-cxa-get-exception-ptr")
+
 set(C_FLAGS "-std=c11")
 set(LINKER_FLAGS "-I${AS_GCC} -T ${LINKERSCRIPT_PATH} -lm -lgcc -Wl,--gc-sections -Wl,-fatal-warnings -Wl,-Map=llib.map -nostdlib -nodefaultlibs -nostartfiles")
 set(ASM_FLAGS "-x assembler-with-cpp")
@@ -91,6 +97,7 @@ set(LLIB_RTOS_HEADERS rtos/rtos.hpp rtos/promise.hpp rtos/thread.hpp)
 set(LLIB_RTOS_SOURCES rtos/rtos.cpp rtos/switch_task.asm)
 
 add_executable(llib ${BOOT_SOURCES} ${LLIB_HEADERS} ${TARGET_INCLUDE} ${TARGET_STARTUP} ${TARGET_SOURCES} ${LLIB_RTOS_HEADERS} ${LLIB_RTOS_SOURCES})
+
 add_custom_command(TARGET llib POST_BUILD COMMAND ${ARM_EABI_OBJCOPY} ARGS -O binary -R .bss -R .stack llib llib.bin)
 add_custom_command(TARGET llib POST_BUILD COMMAND ${ARM_EABI_OBJDUMP} ARGS -S llib > llib.lss)
 add_custom_command(TARGET llib POST_BUILD COMMAND ${ARM_EABI_SIZE} ARGS -A llib ${SIZE_OUTPUT})

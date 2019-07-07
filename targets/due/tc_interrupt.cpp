@@ -25,42 +25,42 @@ void __TC2_Handler(){
     );
 }
 
-void __TC3_Handler(){ 
+void __TC3_Handler() {
     llib::due::_handle_isr<llib::due::tc::channel_3>(
         TC1->TC_CHANNEL[0].TC_SR,
         TC1->TC_CHANNEL[0].TC_IMR
     );
 }
 
-void __TC4_Handler(){   
+void __TC4_Handler() {
     llib::due::_handle_isr<llib::due::tc::channel_4>(
         TC1->TC_CHANNEL[1].TC_SR,
         TC1->TC_CHANNEL[1].TC_IMR
     );
 }
-
-void __TC5_Handler(){   
+   
+void __TC5_Handler() {
     llib::due::_handle_isr<llib::due::tc::channel_5>(
         TC1->TC_CHANNEL[2].TC_SR,
         TC1->TC_CHANNEL[2].TC_IMR
     );
 }
 
-void __TC6_Handler(){  
+void __TC6_Handler() {
     llib::due::_handle_isr<llib::due::tc::channel_6>(
         TC2->TC_CHANNEL[0].TC_SR,
         TC2->TC_CHANNEL[0].TC_IMR
     );
 }
 
-void __TC7_Handler(){   
+void __TC7_Handler() {
     llib::due::_handle_isr<llib::due::tc::channel_7>(
         TC2->TC_CHANNEL[1].TC_SR,
         TC2->TC_CHANNEL[1].TC_IMR
     );
 }
 
-void __TC8_Handler(){
+void __TC8_Handler() {
     llib::due::_handle_isr<llib::due::tc::channel_8>(
         TC2->TC_CHANNEL[2].TC_SR,
         TC2->TC_CHANNEL[2].TC_IMR

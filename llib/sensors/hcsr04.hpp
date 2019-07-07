@@ -29,7 +29,7 @@ namespace llib::sensors {
                 duration += 1;
             }
 
-            uint32_t distance = (duration / 2) / 29; // Should be 29.1 ...
+            uint32_t distance = (duration / 2) / 29; // Should be 29.4118 ...
 
             return distance;
         }

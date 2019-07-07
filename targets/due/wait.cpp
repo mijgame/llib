@@ -40,7 +40,6 @@ namespace llib {
 
         if (_us.value) {
             tc_controller::set_frequency(_us);
-
             wfe_until_done();
         }
     }
