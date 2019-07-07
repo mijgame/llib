@@ -6,6 +6,8 @@
 #include <cstring>
 #include <initializer_list>
 
+#include <util.hpp>
+
 namespace llib {
     /**
      * Dynamic string for embedded applications.
@@ -58,6 +60,22 @@ namespace llib {
             return i;
         }
 
+        constexpr bool is_lowercase(char c) const {
+            return c >= 'a' && c <= 'z';
+        }
+
+        constexpr bool is_uppercase(char c) const {
+            return c >= 'A' && c <= 'Z';
+        }
+
+        constexpr bool is_number(char c) const {
+            return c >= '0' && c <= '9';
+        }
+
+        constexpr bool is_whitespace(char c) const {
+            return c == ' ' || c == '\n' || c == '\t' || c== '\r';
+        }
+
     public:
         /**
          * npos is a constant that refers to the end of the string
@@ -94,10 +112,11 @@ namespace llib {
 
         /**
          * Initialize the string with the given value.
+         * Notice: this constructor should not be explicit!
          *
          * @param value
          */
-        constexpr explicit string(const char *value) {
+        constexpr string(const char *value) {
             assign(value);
         }
 
@@ -287,7 +306,16 @@ namespace llib {
          * @return
          */
         constexpr string &assign(const char *value) {
-            buffer_length += str_copy(buffer, value);
+            const auto len = str_len(value);
+
+            memcpy(
+                (void *) buffer,
+                (const void *) value,
+                len
+            );
+
+            buffer_length = len;
+            buffer[len + 1] = '\0';
 
             return *this;
         }
@@ -302,7 +330,7 @@ namespace llib {
         constexpr string &assign(const char *value, const size_t n) {
             memcpy(
                 (void *) buffer,
-                (void *) value,
+                (const void *) value,
                 n
             );
 
@@ -460,12 +488,144 @@ namespace llib {
             return *this;
         };
 
-        // template<size_t OtherBufferSize>
-        // constexpr size_t find(const string<OtherBufferSize> &other, size_t pos = 0) const {
-        //     for (size_t i = pos; i < buffer_length; ++i) {
-        //         if ()
-        //     }
-        // }
+        /**
+         * Search the string for the given substring.
+         * If found, the position of the first character in the match
+         * is returned. If nothing is found, -1 is returned.
+         *
+         * This function uses a naive search algorithm, which works
+         * well for small strings on embedded systems as there are no setup costs
+         * or additional memory requirements.
+         *
+         * @tparam OtherBufferSize
+         * @param subject
+         * @return
+         */
+        template<size_t OtherBufferSize>
+        constexpr int find(const string<OtherBufferSize> &subject) const {
+            int pos = 0;
+            int length = static_cast<int>(len() - subject.len());
+
+            while (pos < length) {
+                if (buffer[pos] != subject[0]) {
+                    pos += 1;
+                    continue;
+                }
+
+                size_t match = 1;
+                while (buffer[pos + match] == subject[match]) {
+                    match += 1;
+
+                    if (match == subject.len()) {
+                        return static_cast<int>(pos);
+                    }
+                }
+
+                pos += match;
+            }
+
+            return -1;
+        }
+
+        /**
+         * Capitalize the first letter of the string.
+         *
+         * @return
+         */
+        constexpr void capitalize() {
+            if (buffer_length > 0 && is_lowercase(buffer[0])) {
+                buffer[0] -= 32;
+            }
+        }
+
+        /**
+         * Convert the string to lowercase.
+         *
+         * @return
+         */
+        constexpr void to_lower() {
+            for (size_t i = 0; i < buffer_length; i++) {
+                if (is_uppercase(buffer[i])) {
+                    buffer[i] += 32;
+                }
+            }
+        }
+
+        /**
+         * Convert the string to uppercase.
+         *
+         * @return
+         */
+        constexpr void to_upper() {
+            for (size_t i = 0; i < buffer_length; i++) {
+                if (is_lowercase(buffer[i])) {
+                    buffer[i] -= 32;
+                }
+            }
+        }
+
+        /**
+         * Check if the entire string is lowercase.
+         * This function will ignore whitespace.
+         *
+         * @return
+         */
+        constexpr bool is_lower() const {
+            for (size_t i = 0; i < buffer_length; i++) {
+                if (is_whitespace(buffer[i])) {
+                    continue;
+                }
+
+                if (! is_lowercase(buffer[i])) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /**
+         * Check if the entire string is uppercase.
+         * This function will ignore whitespace.
+         *
+         * @return
+         */
+        constexpr bool is_upper() const {
+            for (size_t i = 0; i < buffer_length; i++) {
+                if (is_whitespace(buffer[i])) {
+                    continue;
+                }
+
+                if (! is_uppercase(buffer[i])) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /**
+         * Check if the entire string is alphanumeric.
+         * This function will ignore whitespace.
+         *
+         * @return
+         */
+        constexpr bool is_alnum() const {
+            for (size_t i = 0; i < buffer_length; i++) {
+                if (is_whitespace(buffer[i])) {
+                    continue;
+                }
+
+                if (!(is_lowercase(buffer[i])
+                      || is_number(buffer[i])
+                      || is_uppercase(buffer[i]))
+                    ) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
 
         /**
          * Get the length of the string.
@@ -515,8 +675,8 @@ namespace llib {
         * @param other
         */
         constexpr void push_back(const char c) {
-            buffer[buffer_length] = c;
-            buffer[++buffer_length] = '\0';
+            buffer[buffer_length++] = c;
+            buffer[buffer_length + 1] = '\0';
         }
 
         /**
@@ -601,6 +761,51 @@ namespace llib {
          */
         constexpr string<BufferSize> &operator+=(const char *other) {
             append(other);
+            return *this;
+        }
+
+        /**
+         * Create a new string that contains the old string
+         * n times.
+         *
+         * Notice: the current string buffer should be large enough to
+         * store the whole new string!
+         *
+         * @param n
+         * @return
+         */
+        constexpr string<BufferSize> operator*(int n) {
+            llib::string<BufferSize> copy = *this;
+
+            // n - 1 because 'aa' * 3 should be 'aaaaaa'.
+            for (int i = 0; i < n - 1; i++) {
+                copy.append(*this);
+            }
+
+            return copy;
+        }
+
+        /**
+         * Copy the string value into the current buffer
+         * n times.
+         *
+         * Notice: the current string buffer should be large enough to
+         * store the whole new string!
+         *
+         * @param n
+         * @return
+         */
+        constexpr string<BufferSize> &operator*=(size_t n) {
+            size_t length = buffer_length;
+
+            for (size_t i = 0; i < n - 1; i++) {
+                for (size_t j = 0; j < length; j++) {
+                    buffer[buffer_length++] = buffer[j];
+                }
+            }
+
+            buffer[buffer_length + 1] = '\0';
+
             return *this;
         }
 

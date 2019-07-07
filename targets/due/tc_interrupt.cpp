@@ -1,5 +1,4 @@
 #include <tc_interrupt.hpp>
-#include <error.hpp>
 
 extern "C" {
 void __TC0_Handler() {
