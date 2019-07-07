@@ -129,16 +129,18 @@ namespace llib::displays {
         }
 
         template<typename I2C>
-        void flush() {
+        auto flush() {
             I2C::start_transmission(address);
 
             detail::_command<I2C>(detail::_column_addr, 0, 127);
             detail::_command<I2C>(detail::_page_addr, 0, 7);
 
             I2C::write(detail::_data_mode);
-            I2C::write(buffer, sizeof(buffer));
+            auto transaction = I2C::write_dma(buffer, sizeof(buffer));
 
             I2C::end_transmission();
+
+            return transaction;
         }
     };
 
@@ -245,8 +247,8 @@ namespace llib::displays {
         /**
          * Flush the buffer to the display.
          */
-        LLIB_FORCE_INLINE void flush() {
-            base::template flush<I2C>();
+        LLIB_FORCE_INLINE auto flush() {
+            return base::template flush<I2C>();
         }
     };
 }

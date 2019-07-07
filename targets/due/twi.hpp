@@ -1,6 +1,7 @@
 #ifndef LLIB_DUE_TWI_HPP
 #define LLIB_DUE_TWI_HPP
 
+#include <transaction.hpp>
 #include "pins.hpp"
 #include "peripheral.hpp"
 #include "wait.hpp"
@@ -60,6 +61,24 @@ namespace llib::due::twi {
         ENDTX = 0x2000,
         RXBUFF = 0x4000,
         TXBUFE = 0x8000
+    };
+
+    template<typename TWI>
+    class twi_dma_transaction : public transaction<twi_dma_transaction<TWI>> {
+    protected:
+        friend transaction<twi_dma_transaction<TWI>>;
+
+        static void _wait() {
+            while (!_done());
+        }
+
+        static bool _done() {
+            return _remaining() == 0;
+        }
+
+        static size_t _remaining() {
+            return port<TWI>->TWI_TCR;
+        }
     };
 
     template<typename TWI, mode TwiMode, size_t RxBuffer = 64, size_t TxBuffer = 64>
@@ -232,6 +251,17 @@ namespace llib::due::twi {
             }
 
             return twi_message::OK;
+        }
+
+        static twi_dma_transaction<TWI> write_dma(const uint8_t *data, const size_t size) {
+            port<TWI>->TWI_PTCR = TWI_PTCR_RXTDIS | TWI_PTCR_TXTDIS;
+            port<TWI>->TWI_TNPR = 0;
+            port<TWI>->TWI_TNCR = 0;
+            port<TWI>->TWI_TPR = reinterpret_cast<uint32_t>(data);
+            port<TWI>->TWI_TCR = size;
+            port<TWI>->TWI_PTCR = TWI_PTCR_TXTEN;
+
+            return {};
         }
 
         /**
