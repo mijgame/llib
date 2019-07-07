@@ -646,6 +646,27 @@ namespace llib {
 
         return init;
     }
+
+    template<typename Container>
+    constexpr void shift_left(Container &container, size_t n) {
+        auto first = std::begin(container);
+        auto last = std::end(container);
+
+        if (n == 0 || first == last) {
+            return;
+        }
+
+        auto prev = first;
+        ++first;
+
+        for (size_t i = 0; i < n; i++, ++prev, ++first) {
+            *prev = *first;
+
+            if (prev == last) {
+                return;
+            }
+        }
+    }
 }
 
 #endif //LLIB_UTIL_HPP

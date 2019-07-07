@@ -4,6 +4,7 @@
 #include <util.hpp>
 #include "base.hpp"
 #include "pins.hpp"
+#include "stream.hpp"
 
 namespace llib::due {
     enum class interrupt {
@@ -84,12 +85,15 @@ namespace llib::due {
 
         template<typename Handler>
         constexpr void _handle_isr(uint32_t status_register, uint32_t interrupt_mask) {
-            util::for_bit_in_mask(
-                status_register & interrupt_mask,
-                [](const uint8_t bit) {
-                    if (llib::due::_callbacks<Handler>::callbacks[bit] != nullptr) {
-                        llib::due::_callbacks<Handler>::callbacks[bit]();
-                    }
+            uint8_t trailing_zeros = 0;
+
+            while ((trailing_zeros = __CLZ(__RBIT(status_register & interrupt_mask))) < 32) {
+                auto bit = static_cast<uint8_t>(trailing_zeros);
+
+                llib::cout << "B: " << bit << "; " << size_t(llib::due::_callbacks<Handler>::callbacks[bit] == nullptr) << '\n';
+
+                if (llib::due::_callbacks<Handler>::callbacks[bit] != nullptr) {
+                    llib::due::_callbacks<Handler>::callbacks[bit]();
                 }
             );
         }
@@ -137,6 +141,11 @@ namespace llib::due {
         }
     }
 
+    template<typename Handler, uint8_t priority = 7>
+    void enable_interrupt_source(){
+        _enable_interrupt_source<Handler, priority>();
+    }
+
     template<typename Handler, uint32_t mask, uint8_t priority = 7>
     void attach_interrupt(interrupt_callback func) {
         // Add function to iqrn on positions of mask and enable the iqrn interrupt.
@@ -161,8 +170,8 @@ namespace llib::due {
         // Disable interrupt if all callbacks are disabled.
         _disable_interrupt_source<Handler>();
     }
-
-    template<typename Pin>
+    
+  template<typename Pin>
     void enable_irq() {
         NVIC_EnableIRQ(
             static_cast<IRQn_Type>(Pin::irqn)
@@ -188,7 +197,17 @@ namespace llib::due {
         // Activate a interrupt within software
         // 0x03 -> activates IRQ3
         NVIC->STIR = (IrqnId & 0x1FFU);
-    }
+    }    
+}
+
+extern "C" {
+  void __PIOA_Handler();
+
+  void __PIOB_Handler();
+
+  void __PIOC_Handler();
+
+  void __PIOD_Handler();
 }
 
 #endif //LLIB_DUE_INTERRUPT_HPP

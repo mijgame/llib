@@ -1,86 +1,23 @@
 #include <wait.hpp>
 #include <base.hpp>
 #include <tc_interrupt.hpp>
-#include <error.hpp>
+#include <units.hpp>
 
 namespace llib {
-    struct _timer {
-        uint_fast32_t counter;
-        uint_fast32_t rollovers;
+    using tc_controller = target::tc::controller<
+        target::tc::channel_0
+    >;
 
-        _timer()
-            : counter(0), rollovers(0) {}
-    };
+    // For now, we only need one bool in total.
+    static volatile bool done = false;
 
-    void _stop_systick() {
-        SysTick->CTRL = 0;
-    }
-
-    void _reset_systick() {
-        if (!(SysTick->CTRL & SysTick_CTRL_ENABLE_Msk)) {
-            SysTick->CTRL = 0;          // Stop timer
-            SysTick->LOAD = 0xFFFFFF;   // 24-bit timer
-            SysTick->CTRL = 5;          // Start timer
-        }
-
-        SysTick->VAL = 0;           // Clear timer
-    }
-
-    void _advance_timer(_timer &timer) {
-        if (SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk) {
-            timer.rollovers += 1;
-        }
-
-        timer.counter = 0xFFFFFF - (SysTick->VAL & 0xFFFFFF);
-    }
-
-    void _wait_for(const uint_fast32_t rollovers, const uint_fast32_t ticks) {
-        _timer timer;
-
-        _reset_systick();
-
-        while (timer.rollovers < rollovers) {
-            _advance_timer(timer);
-        }
-
-        // TODO: can a rollover occur without us knowing here?
-        while (timer.counter < ticks) {
-            _advance_timer(timer);
-        }
-
-        _stop_systick();
-    }
-
-    void wait_for(const llib::ns ns) {
-        constexpr uint_fast32_t ticks_per_rollover = 16777216;
-
-        const uint_fast32_t total_ticks = ns.value / 12;
-        const uint_fast32_t rollovers = total_ticks / ticks_per_rollover;
-        const uint_fast32_t ticks = total_ticks - ticks_per_rollover * rollovers;
-
-        _wait_for(rollovers, ticks);
-    }
-
-    void wait_for_new(const llib::us us) {
-        using tc_controller = target::tc::controller<
-            target::tc::channel_1
-        >;
-
-        static volatile bool done = false;
-        static bool initialized = false;
-
-        if (!initialized) {
-            tc_controller::init<CHIP_FREQ_CPU_MAX / 2>([]() {
-                done = true;
-            });
-
-            initialized = true;
-        }
-
-        tc_controller::set_frequency(us.value * 1000 * 1000);
+    void wfe_until_done() {
         tc_controller::enable_interrupt();
 
-        while (!done);
+        while (!done) {
+            // Sleep to save power...
+            __WFE();
+        }
 
         done = false;
 
@@ -88,40 +25,42 @@ namespace llib {
     }
 
     void wait_for(const llib::us us) {
-        // Approx: rounded down from 199648,8704
-        constexpr uint_fast32_t us_per_rollover = 199648;
-        constexpr uint_fast32_t ns_short_per_rollover = 129;
+        tc_controller::init([] {
+            done = true;
+        });
 
-        const uint_fast32_t rollovers = us.value / us_per_rollover;
-        const uint_fast32_t ticks = (us.value - us_per_rollover * rollovers) * 84;
+        auto _sec = llib::s{us.value / 1'000'000};
+        auto _us = llib::us{us.value % 1'000'000};
 
-        _wait_for(rollovers, ticks);
-        wait_for(ns{rollovers * ns_short_per_rollover});
+        if (_sec.value) {
+            tc_controller::set_frequency(_sec);
+
+            wfe_until_done();
+        }
+
+        if (_us.value) {
+            tc_controller::set_frequency(_us);
+            wfe_until_done();
+        }
     }
 
     void wait_for(const llib::ms ms) {
-        constexpr uint_fast32_t ms_per_rollover = 199;
+        tc_controller::init([] {
+            done = true;
+        });
 
-        const uint_fast32_t rollovers = ms.value / ms_per_rollover;
-        const uint_fast32_t excess_us = (ms.value % ms_per_rollover) * 1000;
+        tc_controller::set_frequency(ms);
 
-        _wait_for(rollovers, 0);
-        wait_for(us{excess_us});
+        wfe_until_done();
     }
 
     void wait_for(const llib::s s) {
-       wait_for(ms{s.value * 1000});
+        tc_controller::init([] {
+            done = true;
+        });
+
+        tc_controller::set_frequency(s);
+
+        wfe_until_done();
     }
-
-//    void sleep_for(uint64_t ns) {
-//        // TODO: use timer
-//
-//        wait_for(ns);
-//    }
-}
-
-extern "C" {
-void __systick_handler() {
-    // do nothing
-}
 }

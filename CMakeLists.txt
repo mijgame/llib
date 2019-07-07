@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.12)
 
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1)
@@ -15,6 +15,7 @@ endif ()
 
 # Cortex header files include directory
 set(CORTEX_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/cortex/atmel")
+set(BRIGAND_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/brigand")
 set(AS_GCC "${CORTEX_INCLUDE}/sam3xa/source/as_gcc")
 
 # Targets
@@ -31,7 +32,7 @@ set(TARGET_STARTUP "${CMAKE_CURRENT_SOURCE_DIR}/targets/due/startup.c")
 set(LINKERSCRIPT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/boot/linkerscript.ld")
 
 # Startup & system options
-set(BOOT_SOURCES boot/startup.c main.cpp boot/polyfill.c)
+set(BOOT_SOURCES boot/startup.c main.cpp boot/polyfill.c targets/due/interrupt.cpp targets/due/tc_interrupt.cpp)
 
 # Supress Error when trying to test the compiler
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
@@ -43,7 +44,8 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
 set(COMMON_FLAGS "-D__SAM3X8E__ -Os -mcpu=cortex-m3 -march=armv7-m -mthumb -Wall -Werror -Wno-maybe-uninitialized -Wno-unused-local-typedefs -Wno-unused-but-set-variable -Wno-unused-local-typedefs -Wno-unused-function -Wno-attributes -Werror -fno-exceptions -fno-non-call-exceptions -fno-common -ffunction-sections -fdata-sections -fno-exceptions -fno-asynchronous-unwind-tables -fomit-frame-pointer -fdata-sections -ffunction-sections -nostdlib")
-set(CXX_FLAGS "-std=c++17 -fno-rtti -fno-threadsafe-statics -fno-use-cxa-get-exception-ptr")
+set(CXX_FLAGS "-std=c++17 -fconcepts -fno-rtti -fno-threadsafe-statics -fno-use-cxa-get-exception-ptr")
+
 set(C_FLAGS "-std=c11")
 set(LINKER_FLAGS "-I${AS_GCC} -T ${LINKERSCRIPT_PATH} -lm -lgcc -Wl,--gc-sections -Wl,-fatal-warnings -Wl,-Map=llib.map -nostdlib -nodefaultlibs -nostartfiles")
 set(ASM_FLAGS "-x assembler-with-cpp")
@@ -78,19 +80,35 @@ set(LLIB_HEADERS
         llib/decorators.hpp
         llib/ports.hpp
         llib/ringbuffer.hpp
-        llib/util.hpp
-        llib/displays/display_32x32.hpp llib/displays/ssd1306.hpp llib/displays/strategy.hpp llib/displays/display_ostream.hpp 
-        llib/graphics/color.hpp llib/graphics/font.hpp llib/graphics/image.hpp
-        llib/vector2.hpp llib/streams/combined_stream.hpp llib/io/pfc8574.hpp llib/analog/pcf8591.hpp llib/sensors/hcsr04.hpp llib/util.hpp test.cpp)
+        llib/displays/display_32x32.hpp
+        llib/displays/ssd1306.hpp
+        llib/displays/strategy.hpp
+        llib/displays/display_ostream.hpp
+        llib/graphics/color.hpp
+        llib/graphics/font.hpp
+        llib/graphics/image.hpp
+        llib/vector2.hpp
+        llib/streams/combined_stream.hpp
+        llib/io/pfc8574.hpp
+        llib/analog/pcf8591.hpp
+        llib/units.hpp)
 
-add_executable(llib ${BOOT_SOURCES} ${LLIB_HEADERS} ${TARGET_INCLUDE} ${TARGET_STARTUP} ${TARGET_SOURCES})
+set(LLIB_RTOS_HEADERS rtos/rtos.hpp rtos/promise.hpp rtos/thread.hpp)
+set(LLIB_RTOS_SOURCES rtos/rtos.cpp rtos/switch_task.asm)
+
+add_executable(llib ${BOOT_SOURCES} ${LLIB_HEADERS} ${TARGET_INCLUDE} ${TARGET_STARTUP} ${TARGET_SOURCES} ${LLIB_RTOS_HEADERS} ${LLIB_RTOS_SOURCES})
+
 add_custom_command(TARGET llib POST_BUILD COMMAND ${ARM_EABI_OBJCOPY} ARGS -O binary -R .bss -R .stack llib llib.bin)
 add_custom_command(TARGET llib POST_BUILD COMMAND ${ARM_EABI_OBJDUMP} ARGS -S llib > llib.lss)
 add_custom_command(TARGET llib POST_BUILD COMMAND ${ARM_EABI_SIZE} ARGS -A llib ${SIZE_OUTPUT})
 
+# Disable Boost support for Brigand
+add_compile_definitions(BRIGAND_NO_BOOST_SUPPORT)
+
 target_link_libraries(llib "m")
 target_link_libraries(llib "gcc")
 target_include_directories(llib PRIVATE ${CORTEX_INCLUDE})
+target_include_directories(llib PRIVATE ${BRIGAND_INCLUDE})
 target_include_directories(llib PRIVATE ${TARGET_INCLUDE})
 target_include_directories(llib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/llib)
 target_include_directories(llib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/targets/due)

@@ -639,6 +639,18 @@ namespace llib {
         }
 
         /**
+         * Resize the container.
+         * This moves the internal index to the
+         * given point.
+         *
+         * @param n
+         * @return
+         */
+        constexpr void resize(const size_t n) {
+            index = n;
+        }
+
+        /**
          * Remove all elements from the array.
          * These elements are destroyed.
          */
@@ -914,6 +926,30 @@ namespace llib {
          */
         constexpr T &operator[](const size_t index) {
             return store[index];
+        }
+
+        /**
+         * Set the item at the given index
+         * to the given value.
+         *
+         * @param index
+         * @param val
+         * @return
+         */
+        constexpr void set(const size_t index, const T &val) {
+            store[index] = val;
+        }
+
+        /**
+         * Set the item at the given index
+         * to the given value.
+         *
+         * @param index
+         * @param val
+         * @return
+         */
+        constexpr void set(const size_t index, T &&val) {
+            store[index] = std::move(val);
         }
 
         /**
