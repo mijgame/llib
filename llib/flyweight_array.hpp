@@ -145,7 +145,7 @@ namespace llib {
         }
 
         constexpr flyweight_reference<T, Size, Cap> operator[](const size_t index) {
-
+            return flyweight_reference<T, Size, Cap>(*this, index);
         }
 
         constexpr size_t max_size() const {
