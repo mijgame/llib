@@ -85,7 +85,11 @@ namespace llib {
                 return false;
             }
 
-            values[*pos] = value;
+            const auto index = *pos;
+
+            keys[index] = value;
+            values[index] = value;
+            used.set(index);
 
             return true;
         }
