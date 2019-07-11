@@ -91,7 +91,7 @@ set(LLIB_HEADERS
         llib/streams/combined_stream.hpp
         llib/io/pfc8574.hpp
         llib/analog/pcf8591.hpp
-        llib/units.hpp llib/transaction.hpp llib/flyweight_array.hpp)
+        llib/units.hpp llib/transaction.hpp llib/flyweight_array.hpp llib/hashtable.hpp)
 
 set(LLIB_RTOS_HEADERS rtos/rtos.hpp rtos/promise.hpp rtos/thread.hpp)
 set(LLIB_RTOS_SOURCES rtos/rtos.cpp rtos/switch_task.asm)
