@@ -32,4 +32,4 @@ namespace llib {
     };
 }
 
-#endif //LLIB_QUEUE_HPP
+#endif //LLIB_CONSISTENT_QUEUE_HPP

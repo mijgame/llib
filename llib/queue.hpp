@@ -1,28 +1,24 @@
 #ifndef LLIB_QUEUE_HPP
 #define LLIB_QUEUE_HPP
 
-#include "dynamic_array.hpp"
+#include <ringbuffer.hpp>
+#include <utility>
 
 namespace llib {
     /**
-     * Simple queue build on a dynamic array.
-     * This is a convenience implementation.
-     *
-     * The tparam WriteOptimized controls whether insertions
-     * or deletions are fast. Because of the underlying array structure,
-     * on either insertion or deletion the array contents need to be shuffled
-     * around in memory. Setting write optimized to false would instruct
-     * the queue to shuffle around memory on insertion and simply reduce
-     * the memory size on pop.
+     * A queue implementation.
+     * This queue is based on a ringbuffer, as that offers
+     * better performance. This does mean that the underlying memory
+     * doesn't act like a queue; if you require this behaviour, please use
+     * consistent_queue.
      *
      * @tparam T
      * @tparam MaxSize
-     * @tparam WriteOptimized
      */
-    template<typename T, size_t MaxSize, bool WriteOptimized = true>
+    template<typename T, size_t MaxSize>
     class queue {
     protected:
-        dynamic_array<T, MaxSize> store;
+        ringbuffer<T, MaxSize> store;
 
     public:
         /**
@@ -44,7 +40,7 @@ namespace llib {
          *
          * @param other
          */
-        constexpr queue(queue &&other) {
+        constexpr queue(queue &&other) noexcept {
             store = std::move(other.store);
         }
 
@@ -55,25 +51,19 @@ namespace llib {
          * @return
          */
         constexpr void push(const T &val) {
-            if constexpr (WriteOptimized) {
-                store.push_back(val);
-            } else {
-                store.insert(store.begin(), val);
-            }
+            store.push(val);
         }
 
         /**
-         * Push a value onto the queue.
+         * Move value onto the queue.
          *
          * @param val
          * @return
          */
         constexpr void push(T &&val) {
-            if constexpr (WriteOptimized) {
-                store.push_back(val);
-            } else {
-                store.insert(store.begin(), val);
-            }
+            store.push(
+                std::move(val)
+            );
         }
 
         /**
@@ -83,43 +73,19 @@ namespace llib {
          * @param args
          * @return
          */
-        template<typename ... Args>
+        template<typename ...Args>
         constexpr void emplace(Args &&... args) {
-            if constexpr (WriteOptimized) {
-                store.emplace_back(
-                    std::forward<Args>(args)...
-                );
-            } else {
-                store.emplace(
-                    0, std::forward<Args>(args)...
-                );
-            }
+            store.emplace(
+                std::forward<Args>(args)...
+            );
         }
 
         /**
-         * Copy the value at the front of the queue,
-         * pop and return that value.
-         *
-         * @return
-         */
-        constexpr T copy_and_pop() {
-            T val = front();
-            pop();
-
-            return val;
-        }
-
-        /**
-         * Pop the front of the queue.
-         *
+         * Pop an item from the queue.
          * @return
          */
         constexpr void pop() {
-            if constexpr (WriteOptimized) {
-                store.pop_front();
-            } else {
-                store.pop_back();
-            }
+            store.pop();
         }
 
         /**
@@ -150,60 +116,43 @@ namespace llib {
         }
 
         /**
-         * Get a reference to the first item in the
-         * queue.
+         * Get a reference to the item
+         * at the front of the queue.
          *
          * @return
          */
         constexpr T &front() {
-            if constexpr (WriteOptimized) {
-                return store.front();
-            } else {
-                return store.back();
-            }
+            return store.front();
         }
 
         /**
-         * Get a const reference to the first item in the
-         * queue.
+         * Get a constant reference to the item
+         * at the front of the queue.
          *
          * @return
          */
-        constexpr T const &front() const {
-            if constexpr (WriteOptimized) {
-                return store.front();
-            } else {
-                return store.back();
-            }
+        constexpr T const& front() const {
+            return store.front();
         }
 
         /**
-         * Get a reference to the last item in the
-         * queue.
+         * Get a reference to the item
+         * at the back fo the queue.
          *
          * @return
          */
         constexpr T &back() {
-            if constexpr (WriteOptimized) {
-                return store.back();
-            } else {
-                return store.front();
-            }
-
+            return store.back();
         }
 
         /**
-         * Get a const reference to the last item in the
-         * queue.
+         * Get a constant reference to the item
+         * at the back fo the queue.
          *
          * @return
          */
-        constexpr T const &back() const {
-            if constexpr (WriteOptimized) {
-                return store.back();
-            } else {
-                return store.front();
-            }
+        constexpr T const& back() const {
+            return store.back();
         }
 
         /**
@@ -217,8 +166,9 @@ namespace llib {
         }
 
         /**
-         * Clears the queue
-         * 
+         * Clear the queue.
+         *
+         * @return
          */
         constexpr void clear() {
             store.clear();

@@ -72,7 +72,7 @@ set(LLIB_HEADERS
         llib/stream_base.hpp
         llib/bitset.hpp
         llib/dynamic_array.hpp
-        llib/queue.hpp
+        llib/consistent_queue.hpp
         llib/defines.hpp
         llib/math.hpp
         llib/wait.hpp
@@ -91,7 +91,7 @@ set(LLIB_HEADERS
         llib/streams/combined_stream.hpp
         llib/io/pfc8574.hpp
         llib/analog/pcf8591.hpp
-        llib/units.hpp llib/transaction.hpp llib/flyweight_array.hpp llib/hashtable.hpp)
+        llib/units.hpp llib/transaction.hpp llib/flyweight_array.hpp llib/hashtable.hpp llib/queue.hpp)
 
 set(LLIB_RTOS_HEADERS rtos/rtos.hpp rtos/promise.hpp rtos/thread.hpp)
 set(LLIB_RTOS_SOURCES rtos/rtos.cpp rtos/switch_task.asm)

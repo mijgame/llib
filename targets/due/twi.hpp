@@ -7,7 +7,7 @@
 #include "wait.hpp"
 #include "error.hpp"
 #include "interrupt.hpp"
-#include "queue.hpp"
+#include "consistent_queue.hpp"
 
 namespace llib::due::twi {
     struct twi0 {
@@ -386,8 +386,8 @@ namespace llib::due::twi {
     template<typename TWI, size_t RxBuffer, size_t TxBuffer>
     class bus<TWI, mode::SLAVE, RxBuffer, TxBuffer>{
     private:
-        static inline llib::queue<uint8_t, RxBuffer, true> rx_buffer;
-        static inline llib::queue<uint8_t, TxBuffer, false> tx_buffer;
+        static inline llib::consistent_queue<uint8_t, RxBuffer, true> rx_buffer;
+        static inline llib::consistent_queue<uint8_t, TxBuffer, false> tx_buffer;
 
         using interrupt_callback = void (*)();
 
