@@ -23,6 +23,7 @@ set(COMMON_FLAGS "${COMMON_FLAGS} ${TARGET_CPU_FLAGS}")
 set(CXX_FLAGS "-std=c++17 -fconcepts -fno-rtti -fno-threadsafe-statics -fno-use-cxa-get-exception-ptr")
 set(C_FLAGS "-std=c11")
 set(ASM_FLAGS "-x assembler-with-cpp")
+set(DEBUG_FLAGS "-g")
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -34,9 +35,9 @@ set(LINKER_FLAGS "${LINKER_FLAGS} -lm -lgcc -Wl,--gc-sections -Wl,-fatal-warning
 enable_language(ASM)
 
 # Flags
-set(CMAKE_C_FLAGS_DEBUG "${COMMON_FLAGS} ${C_FLAGS}")
+set(CMAKE_C_FLAGS_DEBUG "${COMMON_FLAGS} ${C_FLAGS} ${DEBUG_FLAGS}")
 set(CMAKE_C_FLAGS_RELEASE "${COMMON_FLAGS} ${C_FLAGS}")
-set(CMAKE_CXX_FLAGS_DEBUG "${COMMON_FLAGS} ${CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS_DEBUG "${COMMON_FLAGS} ${CXX_FLAGS} ${DEBUG_FLAGS}")
 set(CMAKE_CXX_FLAGS_RELEASE "${COMMON_FLAGS} ${CXX_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${COMMON_FLAGS} ${LINKER_FLAGS}")
 set(CMAKE_ASM_FLAGS "${COMMON_FLAGS} ${C_FLAGS} ${ASM_FLAGS}")
