@@ -27,7 +27,6 @@ set(BUILD_SHARED_LIBS OFF)
 # attempt to build a simple test program as this will fail without us using
 # the -nostartfiles option on the command line
 set(CMAKE_C_COMPILER ${TC_PATH}${CROSS_COMPILE}gcc)
-
 set(CMAKE_CXX_COMPILER ${TC_PATH}${CROSS_COMPILE}g++)
 
 # The cross linker
@@ -37,20 +36,22 @@ set(CMAKE_LINKER ${TC_PATH}${CROSS_COMPILE}ld
 # We must set the OBJCOPY setting into cache so that it's available to the
 # whole project. Otherwise, this does not get set into the CACHE and therefore
 # the build doesn't know what the OBJCOPY filepath is
-set(CMAKE_OBJCOPY      ${TC_PATH}${CROSS_COMPILE}objcopy
+set(CMAKE_OBJCOPY ${TC_PATH}${CROSS_COMPILE}objcopy
       CACHE FILEPATH "The toolchain objcopy command " FORCE)
 
-set(CMAKE_OBJDUMP       ${TC_PATH}${CROSS_COMPILE}objdump
+set(CMAKE_OBJDUMP ${TC_PATH}${CROSS_COMPILE}objdump
       CACHE FILEPATH "The toolchain objdump command " FORCE)
 
-set(CMAKE_OBSIZE        ${TC_PATH}${CROSS_COMPILE}size
+set(CMAKE_OBSIZE ${TC_PATH}${CROSS_COMPILE}size
       CACHE FILEPATH "The toolchain size command " FORCE)
 
-# Set the CMAKE C flags (which should also be used by the assembler!)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}" )
+# Set the CMAKE C and CXX flags
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}" CACHE STRING "" )
-set(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS}" CACHE STRING "" )
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}" CACHE STRING "")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" CACHE STRING "")
+set(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS}" CACHE STRING "")
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
