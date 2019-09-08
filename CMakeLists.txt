@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
 
-# The project name
-project(llib)
-
 # Use the toolchain of cmake to include the correct compiler stuff
 set(CMAKE_TOOLCHAIN_FILE "./Platform/toolchain-arm-eabi.cmake")
 
@@ -43,6 +40,9 @@ set(CMAKE_CXX_FLAGS_DEBUG "${COMMON_FLAGS} ${CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS_RELEASE "${COMMON_FLAGS} ${CXX_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${COMMON_FLAGS} ${LINKER_FLAGS}")
 set(CMAKE_ASM_FLAGS "${COMMON_FLAGS} ${C_FLAGS} ${ASM_FLAGS}")
+
+# The project name
+project(llib)
 
 # Llib header files
 set(LLIB_HEADERS
