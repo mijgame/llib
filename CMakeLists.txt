@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.12)
 
-# use the toolchain of cmake to include the correct compiler stuff
+# Use the toolchain of cmake to include the correct compiler stuff
 set(CMAKE_TOOLCHAIN_FILE "./Platform/toolchain-arm-eabi.cmake")
 
-include(./Platform/arduino_due.cmake)
+# Include the target we want to compile for
+include("./Platform/arduino_due.cmake")
 
 # Cortex header files include directory
 set(BRIGAND_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/brigand")
