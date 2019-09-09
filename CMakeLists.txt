@@ -75,8 +75,8 @@ set(LLIB_HEADERS
         llib/units.hpp llib/transaction.hpp)
 
 # Rtos source and header files
-set(LLIB_RTOS_HEADERS rtos/rtos.hpp rtos/promise.hpp rtos/thread.hpp)
-set(LLIB_RTOS_SOURCES rtos/rtos.cpp rtos/switch_task.asm)
+# set(LLIB_RTOS_HEADERS rtos/rtos.hpp rtos/promise.hpp rtos/thread.hpp)
+# set(LLIB_RTOS_SOURCES rtos/rtos.cpp rtos/switch_task.asm)
 
 # Add the llib executable with all the headers and sources
 add_executable(llib ${BOOT_SOURCES} ${LLIB_HEADERS} ${TARGET_INCLUDE} ${TARGET_STARTUP} ${TARGET_SOURCES} ${LLIB_RTOS_HEADERS} ${LLIB_RTOS_SOURCES})
