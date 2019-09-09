@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.12)
 set(CMAKE_TOOLCHAIN_FILE "./Platform/toolchain-arm-eabi.cmake")
 
 # Include the target we want to compile for
-include("./Platform/arduino_due.cmake")
+include("./Platform/teensy.cmake")
 
 # Cortex header files include directory
 set(BRIGAND_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/brigand")
@@ -100,5 +100,3 @@ include_directories(PRIVATE ${TARGET_INCLUDE})
 include_directories(PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/llib)
 include_directories(PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-# target specific includes
-target_include_directories(llib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/targets/due)
