@@ -3,7 +3,7 @@
 
 #include "stream_base.hpp"
 
-namespace llib::due {
+namespace llib::teensy {
     namespace detail {
         // todo: implement write and read
         void write_impl(char c);
