@@ -21,3 +21,4 @@ set(TARGET_LINKERSCRIPT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/boot/teensy/linkerscri
 # Cpu flags for the teensy
 set(TARGET_CPU_FLAGS "-DCPU_MIMXRT1062CVJ5A")
 
+set(LLIB_TARGET "teensy")

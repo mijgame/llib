@@ -50,7 +50,7 @@ set(COMMON_FLAGS "${COMMON_FLAGS} -Wall -Werror -Wno-maybe-uninitialized -Wno-un
 set(COMMON_FLAGS "${COMMON_FLAGS} -Wno-unused-local-typedefs -Wno-unused-function -Wno-attributes -Werror -fno-exceptions")
 set(COMMON_FLAGS "${COMMON_FLAGS} -fno-non-call-exceptions -fno-common -ffunction-sections -fdata-sections -fno-exceptions")
 set(COMMON_FLAGS "${COMMON_FLAGS} -fno-asynchronous-unwind-tables -fomit-frame-pointer -fdata-sections -ffunction-sections -nostdlib")
-set(COMMON_FLAGS "${COMMON_FLAGS} ${TARGET_CPU_FLAGS}")
+set(COMMON_FLAGS "${COMMON_FLAGS} ${TARGET_CPU_FLAGS} -DLLIB_TARGET=\"${LLIB_TARGET}\"")
 
 # boot sources
 set(BOOT_SOURCES ${BOOT_SOURCES} boot/polyfill.c CACHE STRING "")

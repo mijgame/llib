@@ -18,3 +18,4 @@ set(TARGET_LINKERSCRIPT_INCLUDE "${CORTEX_INCLUDE}/sam3xa/source/as_gcc")
 # Cpu flags for the due
 set(TARGET_CPU_FLAGS "-D__SAM3X8E__ -Os -mcpu=cortex-m3 -march=armv7-m -mthumb")
 
+set(LLIB_TARGET "arduino_due")

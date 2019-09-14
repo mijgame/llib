@@ -19,7 +19,7 @@ namespace llib {
         namespace pins {}
     }
 
-    namespace target = tests;
+    namespace target = LLIB_TARGET;
     namespace pins = target::pins;
 }
 

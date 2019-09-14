@@ -37,7 +37,7 @@ set(CMAKE_OBSIZE echo
       CACHE FILEPATH "The toolchain size command " FORCE)
 
 # Toolchain flags
-set(COMMON_FLAGS "${COMMON_FLAGS} ${TARGET_CPU_FLAGS} -D__CLZ=\"__builtin_clz\"")
+set(COMMON_FLAGS "${COMMON_FLAGS} ${TARGET_CPU_FLAGS} -D__CLZ=\"__builtin_clz\" -DLLIB_TARGET=\"${LLIB_TARGET}\"")
 
 # boot sources
 set(BOOT_SOURCES ${BOOT_SOURCES} CACHE STRING "")
