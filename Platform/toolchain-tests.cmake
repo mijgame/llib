@@ -26,6 +26,7 @@ set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_C_COMPILER ${TC_PATH}gcc)
 set(CMAKE_CXX_COMPILER ${TC_PATH}g++)
 
+# Todo: Make this not needed
 set(CMAKE_OBJCOPY echo
       CACHE FILEPATH "The toolchain objcopy command " FORCE)
 
