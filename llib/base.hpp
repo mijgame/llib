@@ -3,7 +3,7 @@
 
 #define register
 
-#include "sam.h"
+// #include "sam.h"
 
 // TODO: switch targets
 namespace llib {
@@ -11,7 +11,15 @@ namespace llib {
         namespace pins {}
     }
 
-    namespace target = due;
+    namespace teensy {
+        namespace pins {}
+    }
+
+    namespace tests {
+        namespace pins {}
+    }
+
+    namespace target = tests;
     namespace pins = target::pins;
 }
 
