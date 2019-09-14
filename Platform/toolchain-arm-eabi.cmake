@@ -45,13 +45,40 @@ set(CMAKE_OBJDUMP ${TC_PATH}${CROSS_COMPILE}objdump
 set(CMAKE_OBSIZE ${TC_PATH}${CROSS_COMPILE}size
       CACHE FILEPATH "The toolchain size command " FORCE)
 
-# Set the CMAKE C and CXX flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+# Toolchain flags
+set(COMMON_FLAGS "${COMMON_FLAGS} -Wall -Werror -Wno-maybe-uninitialized -Wno-unused-local-typedefs -Wno-unused-but-set-variable")
+set(COMMON_FLAGS "${COMMON_FLAGS} -Wno-unused-local-typedefs -Wno-unused-function -Wno-attributes -Werror -fno-exceptions")
+set(COMMON_FLAGS "${COMMON_FLAGS} -fno-non-call-exceptions -fno-common -ffunction-sections -fdata-sections -fno-exceptions")
+set(COMMON_FLAGS "${COMMON_FLAGS} -fno-asynchronous-unwind-tables -fomit-frame-pointer -fdata-sections -ffunction-sections -nostdlib")
+set(COMMON_FLAGS "${COMMON_FLAGS} ${TARGET_CPU_FLAGS}")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}" CACHE STRING "")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" CACHE STRING "")
-set(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS}" CACHE STRING "")
+# boot sources
+set(BOOT_SOURCES ${BOOT_SOURCES} boot/polyfill.c)
+
+
+# Other compiler flags
+set(CXX_FLAGS "-std=c++17 -fconcepts -fno-rtti -fno-threadsafe-statics -fno-use-cxa-get-exception-ptr")
+set(C_FLAGS "-std=c11")
+set(ASM_FLAGS "-x assembler-with-cpp")
+set(DEBUG_FLAGS "-g")
+
+set(CMAKE_CXX_STANDARD 17)
+
+# Linker settings
+set(LINKER_FLAGS "${LINKER_FLAGS} -I${TARGET_LINKERSCRIPT_INCLUDE} -T ${TARGET_LINKERSCRIPT_PATH}")
+set(LINKER_FLAGS "${LINKER_FLAGS} -lm -lgcc -Wl,--gc-sections -Wl,-fatal-warnings -Wl,-Map=llib.map -nostdlib -nodefaultlibs -nostartfiles")
+
+# Compiler flags
+set(CMAKE_C_FLAGS_DEBUG "${COMMON_FLAGS} ${C_FLAGS} ${DEBUG_FLAGS}" CACHE STRING "")
+set(CMAKE_C_FLAGS_RELEASE "${COMMON_FLAGS} ${C_FLAGS}" CACHE STRING "")
+
+set(CMAKE_CXX_FLAGS_DEBUG "${COMMON_FLAGS} ${CXX_FLAGS} ${DEBUG_FLAGS}" CACHE STRING "")
+set(CMAKE_CXX_FLAGS_RELEASE "${COMMON_FLAGS} ${CXX_FLAGS}" CACHE STRING "")
+
+set(CMAKE_ASM_FLAGS "${COMMON_FLAGS} ${C_FLAGS} ${ASM_FLAGS}" CACHE STRING "")
+
+# Linker flags
+set(CMAKE_EXE_LINKER_FLAGS "${COMMON_FLAGS} ${LINKER_FLAGS}" CACHE STRING "")
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)

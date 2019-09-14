@@ -4,43 +4,16 @@ cmake_minimum_required(VERSION 3.12)
 set(CMAKE_TOOLCHAIN_FILE "./Platform/toolchain-arm-eabi.cmake")
 
 # Include the target we want to compile for
-include("./Platform/teensy.cmake")
+include("./Platform/arduino_due.cmake")
 
 # Cortex header files include directory
 set(BRIGAND_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/brigand")
 
 # Startup & system options
-set(BOOT_SOURCES main.cpp boot/polyfill.c ${TARGET_BOOT_SOURCES})
-
-# Common flags
-set(COMMON_FLAGS "${COMMON_FLAGS} -Wall -Werror -Wno-maybe-uninitialized -Wno-unused-local-typedefs -Wno-unused-but-set-variable")
-set(COMMON_FLAGS "${COMMON_FLAGS} -Wno-unused-local-typedefs -Wno-unused-function -Wno-attributes -Werror -fno-exceptions")
-set(COMMON_FLAGS "${COMMON_FLAGS} -fno-non-call-exceptions -fno-common -ffunction-sections -fdata-sections -fno-exceptions")
-set(COMMON_FLAGS "${COMMON_FLAGS} -fno-asynchronous-unwind-tables -fomit-frame-pointer -fdata-sections -ffunction-sections -nostdlib")
-set(COMMON_FLAGS "${COMMON_FLAGS} ${TARGET_CPU_FLAGS}")
-
-# Other compiler flags
-set(CXX_FLAGS "-std=c++17 -fconcepts -fno-rtti -fno-threadsafe-statics -fno-use-cxa-get-exception-ptr")
-set(C_FLAGS "-std=c11")
-set(ASM_FLAGS "-x assembler-with-cpp")
-set(DEBUG_FLAGS "-g")
-
-set(CMAKE_CXX_STANDARD 17)
-
-# Linker settings
-set(LINKER_FLAGS "${LINKER_FLAGS} -I${TARGET_LINKERSCRIPT_INCLUDE} -T ${TARGET_LINKERSCRIPT_PATH}")
-set(LINKER_FLAGS "${LINKER_FLAGS} -lm -lgcc -Wl,--gc-sections -Wl,-fatal-warnings -Wl,-Map=llib.map -nostdlib -nodefaultlibs -nostartfiles")
+set(BOOT_SOURCES main.cpp ${BOOT_SOURCES} ${TARGET_BOOT_SOURCES})
 
 # enable assembly
 enable_language(ASM)
-
-# Flags
-set(CMAKE_C_FLAGS_DEBUG "${COMMON_FLAGS} ${C_FLAGS} ${DEBUG_FLAGS}")
-set(CMAKE_C_FLAGS_RELEASE "${COMMON_FLAGS} ${C_FLAGS}")
-set(CMAKE_CXX_FLAGS_DEBUG "${COMMON_FLAGS} ${CXX_FLAGS} ${DEBUG_FLAGS}")
-set(CMAKE_CXX_FLAGS_RELEASE "${COMMON_FLAGS} ${CXX_FLAGS}")
-set(CMAKE_EXE_LINKER_FLAGS "${COMMON_FLAGS} ${LINKER_FLAGS}")
-set(CMAKE_ASM_FLAGS "${COMMON_FLAGS} ${C_FLAGS} ${ASM_FLAGS}")
 
 # The project name
 project(llib)
