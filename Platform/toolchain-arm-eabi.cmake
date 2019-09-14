@@ -53,8 +53,7 @@ set(COMMON_FLAGS "${COMMON_FLAGS} -fno-asynchronous-unwind-tables -fomit-frame-p
 set(COMMON_FLAGS "${COMMON_FLAGS} ${TARGET_CPU_FLAGS}")
 
 # boot sources
-set(BOOT_SOURCES ${BOOT_SOURCES} boot/polyfill.c)
-
+set(BOOT_SOURCES ${BOOT_SOURCES} boot/polyfill.c CACHE STRING "")
 
 # Other compiler flags
 set(CXX_FLAGS "-std=c++17 -fconcepts -fno-rtti -fno-threadsafe-statics -fno-use-cxa-get-exception-ptr")
