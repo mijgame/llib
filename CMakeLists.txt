@@ -24,6 +24,7 @@ set(TARGET_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targets/due/wait.cpp"
         targets/due/stream_target.cpp
         targets/due/tc_interrupt.cpp
         targets/due/interrupt.cpp
+        targets/due/uotghs.cpp
 )
 
 set(TARGET_STARTUP "${CMAKE_CURRENT_SOURCE_DIR}/targets/due/startup.c")
