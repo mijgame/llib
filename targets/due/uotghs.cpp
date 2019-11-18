@@ -73,12 +73,64 @@ namespace llib::due::usb {
         // enable the usb otg clock
         enable_clock<uotghs>();
 
+        // enable UPLL clock
+        PMC->CKGR_UCKR = CKGR_UCKR_UPLLCOUNT(3) | CKGR_UCKR_UPLLEN;
+
+        // wait for clock to lock status
+        while (!(PMC->PMC_SR & PMC_SR_LOCKU)) {}
+
+        // set the clock input (PLLB) and the clock divider
+        PMC->PMC_USB = PMC_USB_USBS | PMC_USB_USBDIV(0);
+
+        // enable the udp usb clock
+        PMC->PMC_SCER = PMC_SCER_UOTGCLK;
+
         // set the interrupt properties
         NVIC_SetPriority(static_cast<IRQn_Type>(irqn), 5);
 
         // enable the interrupt
         NVIC_EnableIRQ(static_cast<IRQn_Type>(irqn));
 
+        // always authorize asynchrone USB interrupts to exit of sleep mode
+        // for SAM USB wake up device except BACKUP mode
+        PMC->PMC_FSMR |= PMC_FSMR_USBAL;
+
+        // disable USB ID pin so it is ignored by the usb
+        UOTGHS->UOTGHS_CTRL &= ~UOTGHS_CTRL_UIDE;
+
+        // set the device mode (should have no effect as UIDE is disabled)
+        UOTGHS->UOTGHS_CTRL |= UOTGHS_CTRL_UIMOD;
+
+        // enable the otg pad and enable otg usb
+        UOTGHS->UOTGHS_CTRL |= UOTGHS_CTRL_OTGPADE | UOTGHS_CTRL_USBE;
+
+        // disable low speed mode
+        UOTGHS->UOTGHS_DEVCTRL &= ~UOTGHS_DEVCTRL_LS;
+
+        // force device to stay in full speed mode
+        UOTGHS->UOTGHS_DEVCTRL |= UOTGHS_DEVCTRL_SPDCONF_FORCED_FS;
+
+        // unfreeze the clock
+        UOTGHS->UOTGHS_CTRL &= ~UOTGHS_CTRL_FRZCLK;
+
+        // wait until the clock is usable
+        while (!(UOTGHS->UOTGHS_SR & UOTGHS_SR_CLKUSABLE)) {}
+
+        // ack the vbus transition
+        UOTGHS->UOTGHS_SCR = UOTGHS_SCR_VBUSTIC;
+
+        // force Vbus interrupt in case of Vbus always with a high level
+        // this is possible with a short timing between a Host mode stop/start.
+        if (UOTGHS->UOTGHS_SR & UOTGHS_SR_VBUS) {
+            // raise a vbus transition
+            UOTGHS->UOTGHS_SFR = UOTGHS_SFR_VBUSTIS;
+        }        
+
+        // enable the vbus transition interrupt
+        UOTGHS->UOTGHS_CTRL |= UOTGHS_CTRL_VBUSTE;
+
+        // freeze the usb clock
+        UOTGHS->UOTGHS_CTRL |= UOTGHS_CTRL_FRZCLK;        
     }
 }
 
