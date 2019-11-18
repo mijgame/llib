@@ -22,13 +22,76 @@ namespace llib::due::usb {
 
         // check for interrupts on the control endpoint
         if (UOTGHS->UOTGHS_DEVISR & UOTGHS_DEVISR_PEP_0) {
+            // disable overflow and underflow interrupt
+            UOTGHS->UOTGHS_DEVEPTIDR[0] = UOTGHS_DEVEPTIDR_NAKINEC | 
+                                          UOTGHS_DEVEPTIDR_NAKOUTEC;
 
+            // check what event happend on the control endpoint
+            const uint32_t status = UOTGHS->UOTGHS_DEVEPTISR[0];
+
+            if (status & UOTGHS_DEVEPTISR_RXSTPI) {
+                // setup packet received
+
+                // check if the received amount is correct for an control packet
+                if (get_byte_count(status) != 8) {
+                    // stall all in and out packets on Endpoint
+                    UOTGHS->UOTGHS_DEVEPTIER[0] = UOTGHS_DEVEPTIER_STALLRQS;
+
+                    // ack the setup request to clear the interrupt
+                    UOTGHS->UOTGHS_DEVEPTICR[0] = UOTGHS_DEVEPTICR_RXSTPIC;
+
+                    return;                    
+                }
+
+                // get the fifo address of the control endpoint
+                uint8_t *fifo = get_fifo<0>();
+
+                // copy the fifo to a setup packet
+                auto setup_packet = (*reinterpret_cast<
+                    llib::usb::setup::setup_packet*
+                >(fifo));
+
+                if (!decode_setup(setup_packet)) {
+                    // setup request unknown stall
+                    UOTGHS->UOTGHS_DEVEPTIER[0] = UOTGHS_DEVEPTIER_STALLRQS;
+
+                    // ack the setup request
+                    UOTGHS->UOTGHS_DEVEPTICR[0] = UOTGHS_DEVEPTICR_RXSTPIC;
+
+                    return;
+                }
+
+                // ack the setup request
+                UOTGHS->UOTGHS_DEVEPTICR[0] = UOTGHS_DEVEPTICR_RXSTPIC;
+
+            } else if ((status & 0x1) && (UOTGHS->UOTGHS_DEVEPTIMR[0] & 0x1)) {
+                // in packet received
+
+            } else if (status & UOTGHS_DEVEPTISR_RXOUTI) {
+                // out packet received
+
+            } else if (status & UOTGHS_DEVEPTISR_NAKOUTI) {
+                // overflow on out packet
+                UOTGHS->UOTGHS_DEVEPTICR[0] = UOTGHS_DEVEPTICR_NAKOUTIC;
+
+            } else if (status & UOTGHS_DEVEPTISR_NAKINI) {
+                // underflow on in packet
+                UOTGHS->UOTGHS_DEVEPTICR[0] = UOTGHS_DEVEPTICR_NAKINIC;
+
+                // ignore underflow if out data is received
+                if (!(UOTGHS->UOTGHS_DEVEPTISR[0] & UOTGHS_DEVEPTISR_RXOUTI)) {
+                    return;
+                }
+            }
+
+            // stop the interupt as we handled the control interrupt
+            return;
         }
 
         // check for interrupts on the other endpoints 
         // if () {
         // 
-        // }
+        // }        
 
         // usb reset interrupt
         if (UOTGHS->UOTGHS_DEVISR & UOTGHS_DEVISR_EORST) {
@@ -237,6 +300,50 @@ namespace llib::due::usb {
 
         // enable global interrupts
         __enable_irq();        
+    }
+
+    bool uotghs::decode_setup(const llib::usb::setup::setup_packet &p) {
+        using namespace llib::usb::setup;
+
+        // check on correct length for device_to_host messages first
+        if (get_direction(p.bmRequestType) == direction::device_to_host) {
+            if (p.wLength == 0) {
+                // error from usb host
+                return false;
+            }
+        }
+
+        // check if the tyep is a standard request
+        if (get_request_type(p.bmRequestType) == request_type::standard) {
+            switch (get_recipient_code(p.bmRequestType)) {
+                case recipient_code::device:
+                    // handle standard device request
+                    return true;
+                    break;
+                case recipient_code::interface:
+                    // handle standard interface requests
+                    return true;
+                    break;
+                case recipient_code::endpoint:
+                    // handle standard endpoint requests
+                    return true;
+                    break;
+                default:
+                    break;
+            }
+
+            return false;
+        }
+
+        if (get_recipient_code(p.bmRequestType) == recipient_code::interface) {
+            return true;
+        }
+
+        if (get_recipient_code(p.bmRequestType) == recipient_code::endpoint) {
+            return true;
+        }        
+
+        return false;
     }
 }
 
