@@ -20,10 +20,58 @@ namespace llib::due::usb {
             return;
         }
 
+        // check for interrupts on the control endpoint
+        if (UOTGHS->UOTGHS_DEVISR & UOTGHS_DEVISR_PEP_0) {
+
+        }
+
+        // check for interrupts on the other endpoints 
+        // if () {
+        // 
+        // }
+
         // usb reset interrupt
         if (UOTGHS->UOTGHS_DEVISR & UOTGHS_DEVISR_EORST) {
             // ack the reset
             UOTGHS->UOTGHS_DEVICR = UOTGHS_DEVICR_EORSTC;
+
+            // reset usb address to 0 and enable usb device address
+            UOTGHS->UOTGHS_DEVCTRL &= ~UOTGHS_DEVCTRL_UADD_Msk;
+            UOTGHS->UOTGHS_DEVCTRL |= UOTGHS_DEVCTRL_UADD(0) | UOTGHS_DEVCTRL_ADDEN;
+
+            // clear the control endpoint settings
+            UOTGHS->UOTGHS_DEVEPTCFG[0] &= ~(UOTGHS_DEVEPTCFG_EPTYPE_Msk | 
+                                             UOTGHS_DEVEPTCFG_EPDIR | 
+                                             UOTGHS_DEVEPTCFG_EPSIZE_Msk | 
+                                             UOTGHS_DEVEPTCFG_EPBK_Msk);
+
+            // Configure control endpoint
+            UOTGHS->UOTGHS_DEVEPTCFG[0] |= UOTGHS_DEVEPTCFG_EPSIZE_8_BYTE | 
+                                           UOTGHS_DEVEPTCFG_EPBK_1_BANK;
+
+            // allocate configured enpoint in dpram
+            UOTGHS->UOTGHS_DEVEPTCFG[0] = UOTGHS_DEVEPTCFG_ALLOC;
+
+            // enable control endpoint
+            UOTGHS->UOTGHS_DEVEPT |= UOTGHS_DEVEPT_EPEN0;
+
+            // disable interrupts
+            __disable_irq();
+
+            // enable setup and out interrupts
+            UOTGHS->UOTGHS_DEVEPTIER[0] = UOTGHS_DEVEPTIER_RXOUTES | UOTGHS_DEVEPTIER_RXSTPES;
+
+            // enable endpoint 0 interrupt
+            UOTGHS->UOTGHS_DEVIER = UOTGHS_DEVIER_PEP_0;
+
+            // disable in interrupt
+            UOTGHS->UOTGHS_DEVEPTIDR[0] = UOTGHS_DEVEPTIDR_TXINEC;
+
+            // restore the interrupt status
+            __enable_irq();
+
+            // In case of OUT ZLP event is no processed before Setup event occurs
+            UOTGHS->UOTGHS_DEVEPTICR[0] = UOTGHS_DEVEPTICR_RXOUTIC;
 
             return;
         }
@@ -67,9 +115,64 @@ namespace llib::due::usb {
             return;    
         } 
 
+        // vbus transition interrupt
+        if (UOTGHS->UOTGHS_SR & UOTGHS_SR_VBUSTI) {
+            // unfreeze the clock
+            UOTGHS->UOTGHS_CTRL &= ~UOTGHS_CTRL_FRZCLK;
+
+            // ack vbus transition
+            UOTGHS->UOTGHS_SCR = UOTGHS_SCR_VBUSTIC;
+
+            // check if vbus is high to know if we 
+            // attached or detached from usb
+            if (!(UOTGHS->UOTGHS_SR & UOTGHS_SR_VBUS)) {
+                // detach the device from the bus
+                UOTGHS->UOTGHS_DEVCTRL |= UOTGHS_DEVCTRL_DETACH;
+
+                // freeze the usb clock
+                UOTGHS->UOTGHS_CTRL |= UOTGHS_CTRL_FRZCLK;
+
+                return;
+            }
+
+            // disable global interrupts
+            __disable_irq();
+
+            // wait until usb clock is locked
+            while (!(UOTGHS->UOTGHS_SR & UOTGHS_SR_CLKUSABLE)) {}
+
+            // authorize attach if vbus is present
+            UOTGHS->UOTGHS_DEVCTRL &= ~UOTGHS_DEVCTRL_DETACH;
+
+            // enable interupt flags
+            UOTGHS->UOTGHS_DEVIER = UOTGHS_DEVIER_EORSTES | UOTGHS_DEVIER_SUSPES | 
+                                    UOTGHS_DEVIER_WAKEUPES | UOTGHS_DEVIER_SOFES;
+
+            // ack interrupt flags
+            UOTGHS->UOTGHS_DEVICR = UOTGHS_DEVIMR_MSOFE | UOTGHS_DEVICR_SOFC | 
+                                    UOTGHS_DEVICR_EORSTC;
+
+            // The first suspend interrupt must be forced
+            UOTGHS->UOTGHS_DEVIFR = UOTGHS_DEVIFR_SUSPS;
+
+            // ack the wakeup
+            UOTGHS->UOTGHS_DEVICR = UOTGHS_DEVICR_WAKEUPC;
+
+            // disable global interrupts
+            __enable_irq();
+
+            // freeze the usb clock
+            UOTGHS->UOTGHS_CTRL |= UOTGHS_CTRL_FRZCLK;
+
+            return;
+        }
+
     } 
 
     void uotghs::init_usb() {
+        // enable global interrupts
+        __disable_irq();   
+
         // enable the usb otg clock
         enable_clock<uotghs>();
 
@@ -130,7 +233,10 @@ namespace llib::due::usb {
         UOTGHS->UOTGHS_CTRL |= UOTGHS_CTRL_VBUSTE;
 
         // freeze the usb clock
-        UOTGHS->UOTGHS_CTRL |= UOTGHS_CTRL_FRZCLK;        
+        UOTGHS->UOTGHS_CTRL |= UOTGHS_CTRL_FRZCLK;
+
+        // enable global interrupts
+        __enable_irq();        
     }
 }
 
