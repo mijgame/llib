@@ -32,6 +32,10 @@ namespace llib::usb::device {
 
             // prefered speed
             constexpr static usb_speed speed = usb_speed::full_speed;
+
+            // endpoint settings
+            constexpr static uint8_t ep_ctrl_size = 8;
+            constexpr static uint8_t interfaces = 1;
     };
 } // namespace llib::usb::device
 
