@@ -57,7 +57,7 @@ namespace llib::usb::device {
 
                 // interface configuration
                 descriptor::interface_descriptor interface = {
-                    .bAlternateSettings = 0,
+                    .bAlternateSetting = 0,
                     .bNumEndpoints = interfaces,
                     .bInterfaceClass = 0x03,
                     .bInterfaceSubClass = 0x00,
@@ -88,7 +88,7 @@ namespace llib::usb::device {
 
         public:
             // device descriptor
-            static inline descriptor::device_descriptor device = {
+            static inline descriptor::device_descriptor device {
                 .bcdUSB = static_cast<uint16_t>(usb_version::usb_v2_0),
                 .bDeviceClass = 0,
                 .bDeviceSubClass = 0,
@@ -104,11 +104,14 @@ namespace llib::usb::device {
             };
 
             // the all the other descriptors for the hid keyboard
-            static inline keyboard_descriptor descriptor = {};
+            static keyboard_descriptor descriptor;
 
             // report descriptor
             static inline descriptor::hid::report_descriptor report = {};
     };
+
+    // for some reason it complains if it is initilized in the class
+    hid_keyboard::keyboard_descriptor hid_keyboard::descriptor = {};
 } // namespace llib::usb::device
 
 #endif

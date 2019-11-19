@@ -11,9 +11,6 @@ namespace llib::usb {
     class usb {
         public:
             static void init() {
-                // register the callback
-                Usb::register_callback(_isr_handler);
-                
                 // init the usb device
                 Usb::init();
             }
