@@ -496,6 +496,50 @@ namespace llib::usb::descriptor {
     };
 }
 
+namespace llib::usb::descriptor::hid {
+    /**
+     * Hid descriptor. Information from:
+     * http://www.rennes.supelec.fr/ren/fi/elec/docs/usb/hid1_11.pdf
+     * 
+     * Page 78
+     * 
+     */
+    struct hid_descriptor {
+        // header of descriptor
+        const _header header{sizeof(hid_descriptor), 0x21};
+
+        // HID Class Specification release number (eg 2.10 is 0x0210)
+        uint16_t bcdHID;            
+        
+        // Hardware target country
+        uint8_t bCountryCode;
+
+        // Number of HID class descriptors to follow
+        uint8_t bNumDescriptors;
+        
+        // Report descriptor type
+        uint8_t bRDescriptorType; 
+        
+        // Total length of Report descriptor
+        uint16_t wDescriptorLength;
+    };
+
+    /**
+     * Should be filled in like:
+     * https://github.com/NordicSemiconductor/ble-sdk-arduino/blob/master/libraries/BLE/examples/ble_HID_keyboard_template/USD%20HID%20Report%20Descriptor%20-%20Keyboard.txt
+     * 
+     * or
+     * 
+     * http://www.rennes.supelec.fr/ren/fi/elec/docs/usb/hid1_11.pdf
+     * 
+     * page 80
+     * 
+     */
+    struct report_descriptor {
+        uint8_t array[59];
+    };
+}
+
 // release the old pack so the rest of the structs are not 
 // affected by the pack(1)
 #pragma pack(pop)

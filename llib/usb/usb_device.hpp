@@ -7,6 +7,13 @@ namespace llib::usb {
         full_speed,
         high_speed
     };
+
+    enum class usb_version {
+        usb_v1_0 = 0x0100,
+        usb_v1_1 = 0x0110,
+        usb_v2_0 = 0x0200,
+        usb_v2_1 = 0x0201
+    };
 } // namespace llib::usb::device
 
 
