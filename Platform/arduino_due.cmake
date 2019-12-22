@@ -20,4 +20,4 @@ set(LINKERSCRIPT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/boot/sam3x8e/linkerscript.ld"
 # Cpu flags for the due
 set(TARGET_CPU_FLAGS "-D__SAM3X8E__ -Os -mcpu=cortex-m3 -march=armv7-m -mthumb")
 
-set(LLIB_TARGET "arduino_due" CACHE STRING "")
+set(LLIB_TARGET "sam3x8e")
