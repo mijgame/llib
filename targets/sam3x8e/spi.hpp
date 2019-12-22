@@ -1,5 +1,5 @@
-#ifndef LLIB_DUE_SPI_HPP
-#define LLIB_DUE_SPI_HPP
+#ifndef LLIB_SAM3X8E_SPI_HPP
+#define LLIB_SAM3X8E_SPI_HPP
 
 #include "base.hpp"
 #include "pins.hpp"
@@ -7,7 +7,7 @@
 #include "error.hpp"
 #include <type_traits>
 
-namespace llib::due {
+namespace llib::sam3x8e {
     namespace spi {
         struct spi0 {
             constexpr static uint32_t instance_id = ID_SPI0;
@@ -44,35 +44,35 @@ namespace llib::due {
             BIT_16 = 8
         };
 
-        template<typename SPI, typename Pin = pins::d10>
+        template<typename SPI, typename Pin>
         class bus {
         private:
             template<typename PPin>
             static void configure_pin() {
-                // special cases since d10 and d4 have multiple pio's
-                if constexpr(std::is_same_v<PPin, pins::d10>){
-                    return configure_pin<pins::cs0>();
-                }                
-                else if(std::is_same_v<PPin, pins::d4>){
-                    return configure_pin<pins::cs1>();
-                }         
+                // // special cases since d10 and d4 have multiple pio's
+                // if constexpr(std::is_same_v<PPin, pins::d10>){
+                //     return configure_pin<pins::cs0>();
+                // }                
+                // else if(std::is_same_v<PPin, pins::d4>){
+                //     return configure_pin<pins::cs1>();
+                // }         
 
                 // change the peripheral multiplexer to the other port
-                set_peripheral<PPin>();
+                set_peripheral<PPin, PPin::spi::periph>();
             }
 
             template<typename PPin>
             constexpr static uint8_t pin_to_spi() {
-                // special cases since d10 and d4 have multiple pio's
-                if constexpr (std::is_same_v<PPin, pins::d10>){
-                    return pins::cs0::spi_number;
-                }
-                else if (std::is_same_v<PPin, pins::d4>){
-                    return pins::cs1::spi_number;
-                }
-                else{
-                    return PPin::spi_number;
-                }
+                // // special cases since d10 and d4 have multiple pio's
+                // if constexpr (std::is_same_v<PPin, pins::d10>){
+                //     return pins::cs0::spi_number;
+                // }
+                // else if (std::is_same_v<PPin, pins::d4>){
+                //     return pins::cs1::spi_number;
+                // }
+                // else {}
+
+                return static_cast<uint8_t>(detail::spi::mode::CS0) - static_cast<uint8_t>(PPin::spi::type);
             }         
 
             constexpr static uint32_t SPI_PCS(uint32_t npcs) {
@@ -95,9 +95,9 @@ namespace llib::due {
                 configure_pin<Pin>();
 
                 // configure sck, miso and mosi
-                configure_pin<pins::sck>();
-                configure_pin<pins::miso>();
-                configure_pin<pins::mosi>();
+                configure_pin<pins::p110, pins::p110::spi::periph>();
+                configure_pin<pins::p108, pins::p108::spi::periph>();
+                configure_pin<pins::p109, pins::p109::spi::periph>();
 
                 // do a software reset twice
                 spi::port<SPI>->SPI_CR = SPI_CR_SWRST;
@@ -140,4 +140,4 @@ namespace llib::due {
     }
 }
 
-#endif //LLIB_DUE_SPI_HPP
+#endif //LLIB_SAM3X8E_SPI_HPP

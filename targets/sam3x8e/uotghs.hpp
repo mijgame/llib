@@ -1,10 +1,10 @@
-#ifndef LLIB_DUE_UOTGHS_HPP
-#define LLIB_DUE_UOTGHS_HPP
+#ifndef LLIB_SAM3X8E_UOTGHS_HPP
+#define LLIB_SAM3X8E_UOTGHS_HPP
 
 #include "pins.hpp"
 #include "peripheral.hpp"
 
-namespace llib::due{
+namespace llib::sam3x8e{
     // arduino due Usb On-The-Go Interface (UOTGHS)
     // UOTGHS pin: PB11 UOTGID pullups needed when enabled
     // UOTGHS pin: PB10 UOTGVBOF

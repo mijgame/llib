@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.12)
 
-# Use the toolchain of cmake to include the correct compiler stuff
-set(CMAKE_TOOLCHAIN_FILE "./Platform/toolchain-tests.cmake")
-
 # Include the target we want to compile for
-include("./Platform/tests.cmake")
+include("./Platform/arduino_due.cmake")
+
+# Use the toolchain of cmake to include the correct compiler stuff
+set(CMAKE_TOOLCHAIN_FILE "./Platform/toolchain-arm-eabi.cmake")
 
 # Cortex header files include directory
 set(BRIGAND_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/brigand")
@@ -67,9 +67,11 @@ link_libraries(llib "m")
 link_libraries(llib "gcc")
 
 # Include directories for all targets
-include_directories(PRIVATE ${CORTEX_INCLUDE})
+include_directories(PRIVATE ${VENDOR_INCLUDE})
 include_directories(PRIVATE ${BRIGAND_INCLUDE})
 include_directories(PRIVATE ${TARGET_INCLUDE})
+include_directories(PRIVATE ${CHIP_INCLUDE})
 include_directories(PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/llib)
+include_directories(PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/targets)
 include_directories(PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

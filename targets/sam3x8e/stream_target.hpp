@@ -1,9 +1,9 @@
-#ifndef LLIB_DUE_STREAM_HPP
-#define LLIB_DUE_STREAM_HPP
+#ifndef LLIB_SAM3X8E_STREAM_HPP
+#define LLIB_SAM3X8E_STREAM_HPP
 
 #include "stream_base.hpp"
 
-namespace llib::due {
+namespace llib::sam3x8e {
     namespace detail {
         void write_impl(char c);
         char read_impl();
@@ -38,4 +38,4 @@ namespace llib::due {
     };
 }
 
-#endif //LLIB_DUE_STREAM_HPP
+#endif //LLIB_SAM3X8E_STREAM_HPP

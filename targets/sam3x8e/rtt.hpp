@@ -1,10 +1,10 @@
-#ifndef LLIB_DUE_RTT_HPP
-#define LLIB_DUE_RTT_HPP
+#ifndef LLIB_SAM3X8E_RTT_HPP
+#define LLIB_SAM3X8E_RTT_HPP
 
 #include "peripheral.hpp"
 #include "interrupt.hpp"
 
-namespace llib::due {
+namespace llib::sam3x8e {
     class rtt {
     public:
         constexpr static uint32_t instance_id = ID_RTT;
@@ -67,11 +67,11 @@ namespace llib::due {
 
 extern "C" {
 void __RTT_Handler(){
-    llib::due::_handle_isr<llib::due::rtt>(
+    llib::sam3x8e::_handle_isr<llib::sam3x8e::rtt>(
         RTT->RTT_SR,
         0x3 // enable all interupts sinds the RTT doesnt have a interupt mask
     );
 }
 }
 
-#endif //LLIB_DUE_RTT_HPP
+#endif //LLIB_SAM3X8E_RTT_HPP

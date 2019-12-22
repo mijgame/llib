@@ -1,10 +1,9 @@
-#ifndef LLIB_DUE_WATCHDOG_HPP
-#define LLIB_DUE_WATCHDOG_HPP
+#ifndef LLIB_SAM3X8E_WATCHDOG_HPP
+#define LLIB_SAM3X8E_WATCHDOG_HPP
 
 #include "base.hpp"
 
-namespace llib::due {
-
+namespace llib::sam3x8e {
     class watchdog {
     public:
         constexpr static uint32_t instance_id = ID_WDT;
@@ -22,15 +21,13 @@ namespace llib::due {
 
         template<unsigned int CounterStart = 0xFFF, unsigned int Delta = 0xFFF, bool Reset = true>
         static void init() {
-            WDT->WDT_MR = WDT_MR_WDIDLEHLT                          // Stop watchdog if cpu is in idle mode
-                          | WDT_MR_WDDBGHLT                         // Stop watchdog if cpu is in debug state
-                          | WDT_MR_WDFIEN                           // Enable watchdog interrupts
-                          | WDT_MR_WDV(
-                                  CounterStart)                // Set counter value (default takes 16 seconds to trigger Reset)
-                          | WDT_MR_WDD(Delta)                       // Set the range the watchdog is allowed to restart
-                          // If restart is before this value it will throw an error
-                          | static_cast<uint32_t>(Reset
-                    << 13);     // If true this will Reset the cpu if underflow or an error occurred
+            WDT->WDT_MR = WDT_MR_WDIDLEHLT // Stop watchdog if cpu is in idle mode
+                        | WDT_MR_WDDBGHLT // Stop watchdog if cpu is in debug state
+                        | WDT_MR_WDFIEN // Enable watchdog interrupts
+                        | WDT_MR_WDV(CounterStart) // Set counter value (default takes 16 seconds to trigger Reset)
+                        | WDT_MR_WDD(Delta) // Set the range the watchdog is allowed to restart
+                                            // If restart is before this value it will throw an error
+                        | static_cast<uint32_t>(Reset << 13); // If true this will Reset the cpu if underflow or an error occurred
         }
 
         static bool watchdog_error() {
@@ -45,4 +42,4 @@ namespace llib::due {
     };
 }
 
-#endif //LLIB_DUE_WATCHDOG_HPP
+#endif //LLIB_SAM3X8E_WATCHDOG_HPP

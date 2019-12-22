@@ -1,9 +1,9 @@
-#ifndef LLIB_DUE_ADC_HPP
-#define LLIB_DUE_ADC_HPP
+#ifndef LLIB_SAM3X8E_ADC_HPP
+#define LLIB_SAM3X8E_ADC_HPP
 
 #include "peripheral.hpp"
 
-namespace llib::due {
+namespace llib::sam3x8e {
 
     template<typename Pin, bool Freerunning = true>
     class pin_adc {
@@ -19,8 +19,11 @@ namespace llib::due {
             // enable adc clock
             enable_clock<pin_adc>();
 
+            // set the multiplexer to the correct setting
+            set_peripheral<Pin, Pin::adc::periph>();
+
             // Remove pin from pio
-            ADC->ADC_CHER = pins::adc_channel<Pin>;
+            ADC->ADC_CHER = (1U << Pin::adc::id);
 
             // select resolution (10 - 12 bits)
             ADC->ADC_MR = static_cast<uint32_t>(!LowHighRes << 4);
@@ -67,4 +70,4 @@ namespace llib::due {
     };
 }
 
-#endif //LLIB_DUE_ADC_HPP
+#endif //LLIB_SAM3X8E_ADC_HPP

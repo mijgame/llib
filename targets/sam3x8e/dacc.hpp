@@ -1,10 +1,10 @@
-#ifndef LLIB_DUE_DACC_HPP
-#define LLIB_DUE_DACC_HPP
+#ifndef LLIB_SAM3X8E_DACC_HPP
+#define LLIB_SAM3X8E_DACC_HPP
 
 #include "pins.hpp"
 #include "peripheral.hpp"
 
-namespace llib::due {
+namespace llib::sam3x8e {
 
     template<typename Pin, uint8_t Dacc_channel = Pin::dacc_channel>
     class pin_dacc {
@@ -17,7 +17,7 @@ namespace llib::due {
             enable_clock<pin_dacc, typename Pin::port>();
 
             // set pin to peripheral a if someone has used the pin as a pwm pin before
-            set_peripheral<Pin>();
+            set_peripheral<Pin, Pin::dac::periph>();
 
             // setup dacc
             DACC->DACC_MR = DACC_MR_TRGEN_DIS       |
@@ -52,4 +52,4 @@ namespace llib::due {
     };
 }
 
-#endif //LLIB_DUE_DACC_HPP
+#endif //LLIB_SAM3X8E_DACC_HPP

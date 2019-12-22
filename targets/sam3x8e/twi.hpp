@@ -1,5 +1,5 @@
-#ifndef LLIB_DUE_TWI_HPP
-#define LLIB_DUE_TWI_HPP
+#ifndef LLIB_SAM3X8E_TWI_HPP
+#define LLIB_SAM3X8E_TWI_HPP
 
 #include <transaction.hpp>
 #include "pins.hpp"
@@ -9,14 +9,14 @@
 #include "interrupt.hpp"
 #include "queue.hpp"
 
-namespace llib::due::twi {
+namespace llib::sam3x8e::twi {
     struct twi0 {
         // twi numbers are switched on the arduino due
         constexpr static uint32_t instance_id = ID_TWI1;
         constexpr static uint32_t irqn = static_cast<uint32_t>(TWI1_IRQn);
 
-        using sda = pins::sda;
-        using scl = pins::scl;
+        using sda = pins::p86;
+        using scl = pins::p87;
     };
 
     struct twi1 {
@@ -24,8 +24,8 @@ namespace llib::due::twi {
         constexpr static uint32_t instance_id = ID_TWI0;
         constexpr static uint32_t irqn = static_cast<uint32_t>(TWI0_IRQn);
 
-        using sda = pins::sda1;
-        using scl = pins::scl1;
+        using sda = pins::p9;
+        using scl = pins::p70;
     };
 
     enum class mode {
@@ -173,8 +173,8 @@ namespace llib::due::twi {
             enable_clock<TWI>();
 
             // Change the multiplexer
-            set_peripheral<typename TWI::sda>();
-            set_peripheral<typename TWI::scl>();
+            set_peripheral<typename TWI::sda, typename TWI::sda::twi::periph>();
+            set_peripheral<typename TWI::scl, typename TWI::scl::twi::periph>();
 
             // Enable the pullups of the pins
             pin_in<typename TWI::sda>::pullup_enable();
@@ -609,13 +609,13 @@ extern "C" {
 void __TWI0_Handler(){
     // handle twi 0 with twi 1 sinds the twi ports are reversed on the arduino due   
     // force all interrupts to execute handler function at 0x1
-    llib::due::_handle_isr<llib::due::twi::twi1>(0x1, 0x1);
+    llib::sam3x8e::_handle_isr<llib::sam3x8e::twi::twi1>(0x1, 0x1);
 }
 
 void __TWI1_Handler(){
     // handle twi 1 with twi 0 sinds the twi ports are reversed on the arduino due
     // force all interrupts to execute handler function at 0x1
-    llib::due::_handle_isr<llib::due::twi::twi0>(0x1, 0x1);
+    llib::sam3x8e::_handle_isr<llib::sam3x8e::twi::twi0>(0x1, 0x1);
 }
 }
 

@@ -64,7 +64,7 @@ set(DEBUG_FLAGS "-g")
 set(CMAKE_CXX_STANDARD 17)
 
 # Linker settings
-set(LINKER_FLAGS "${LINKER_FLAGS} -I${TARGET_LINKERSCRIPT_INCLUDE} -T ${TARGET_LINKERSCRIPT_PATH}")
+set(LINKER_FLAGS "${LINKER_FLAGS} -T ${LINKERSCRIPT_PATH}")
 set(LINKER_FLAGS "${LINKER_FLAGS} -lm -lgcc -Wl,--gc-sections -Wl,-fatal-warnings -Wl,-Map=llib.map -nostdlib -nodefaultlibs -nostartfiles")
 
 # Compiler flags

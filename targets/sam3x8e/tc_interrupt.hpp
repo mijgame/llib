@@ -1,12 +1,12 @@
-#ifndef LLIB_DUE_TC_INTERRUPT_HPP
-#define LLIB_DUE_TC_INTERRUPT_HPP
+#ifndef LLIB_SAM3X8E_TC_INTERRUPT_HPP
+#define LLIB_SAM3X8E_TC_INTERRUPT_HPP
 
 #include <tc.hpp>
 #include <peripheral.hpp>
 #include <interrupt.hpp>
 #include <units.hpp>
 
-namespace llib::due {
+namespace llib::sam3x8e {
     namespace tc {
         namespace detail {
             template<typename T>
@@ -15,9 +15,11 @@ namespace llib::due {
             };
         }
 
-        template<typename TC, typename T = typename TC::timer>
+        template<typename TC>
         class controller {
         private:
+            using T = typename TC::timer;
+            
             constexpr static uint32_t variant_mck = CHIP_FREQ_CPU_MAX;
 
             constexpr static void _set_freq(uint32_t frequency) {

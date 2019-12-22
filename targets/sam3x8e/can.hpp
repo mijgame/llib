@@ -1,16 +1,16 @@
-#ifndef LLIB_DUE_CAN_HPP
-#define LLIB_DUE_CAN_HPP
+#ifndef LLIB_SAM3X8E_CAN_HPP
+#define LLIB_SAM3X8E_CAN_HPP
 
 #include <base.hpp>
 #include "peripheral.hpp"
 
-namespace llib::due::can {
+namespace llib::sam3x8e::can {
     struct can0 {
         constexpr static uint32_t instance_id = ID_CAN0;
         constexpr static uint32_t irqn = static_cast<uint32_t>(CAN0_IRQn);
 
-        using tx = pins::cantx;
-        using rx = pins::canrx;
+        using tx = pins::p23;
+        using rx = pins::p24;
     };
 
     struct can1 {
@@ -19,8 +19,8 @@ namespace llib::due::can {
 
         // Some details covered here:
         // https://copperhilltech.com/blog/arduino-due-can-bus-controller-area-network-interfaces/
-        using tx = pins::d53;
-        using rx = pins::dac0;
+        using tx = pins::p140;
+        using rx = pins::p76;
     };
 
     template<typename CAN>
@@ -212,8 +212,8 @@ namespace llib::due::can {
             enable_clock<Bus>();
 
             // Change multiplexers on tx/rx pins to CAN
-            set_peripheral<typename Bus::tx>();
-            set_peripheral<typename Bus::rx>();
+            set_peripheral<typename Bus::tx, typename Bus::tx::can::periph>();
+            set_peripheral<typename Bus::rx, typename Bus::tx::can::periph>();
 
             if (!detail::_set_baudrate<Bus, Baud>()) {
                 return false;
@@ -241,4 +241,4 @@ namespace llib::due::can {
     };
 }
 
-#endif //LLIB_DUE_CAN_HPP
+#endif //LLIB_SAM3X8E_CAN_HPP

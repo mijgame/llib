@@ -1,9 +1,9 @@
-#ifndef LLIB_DUE_TRNG_HPP
-#define LLIB_DUE_TRNG_HPP
+#ifndef LLIB_SAM3X8E_TRNG_HPP
+#define LLIB_SAM3X8E_TRNG_HPP
 
 #include "peripheral.hpp"
 
-namespace llib::due {
+namespace llib::sam3x8e {
 
     class trng {
     protected:
@@ -44,4 +44,4 @@ namespace llib::due {
     };
 }
 
-#endif // LLIB_DUE_TRNG_HPP
+#endif // LLIB_SAM3X8E_TRNG_HPP

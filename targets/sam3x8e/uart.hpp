@@ -1,10 +1,11 @@
-#ifndef LLIB_DUE_UART_HPP
-#define LLIB_DUE_UART_HPP
+#ifndef LLIB_SAM3X8E_UART_HPP
+#define LLIB_SAM3X8E_UART_HPP
 
 #include "peripheral.hpp"
+#include "pins.hpp"
 #include "pio.hpp"
 
-namespace llib::due {
+namespace llib::sam3x8e {
     namespace uart {
         struct uart {
             constexpr static uint32_t instance_id = ID_UART;
@@ -16,11 +17,12 @@ namespace llib::due {
             // Enable clock on port A
             enable_clock<pioa>();
 
-            // Disable PIo control on PA9
-            PIOA->PIO_PDR = PIO_PA8;
-            PIOA->PIO_ABSR &= ~PIO_PA8;
-            PIOA->PIO_PDR = PIO_PA9;
-            PIOA->PIO_ABSR &= ~PIO_PA9;
+            using tx = pins::p2;
+            using rx = pins::p27;
+
+            // Disable PIO control on PA9
+            set_peripheral<tx, tx::uart::periph>();
+            set_peripheral<rx, rx::uart::periph>();
 
             // Enable UART clock
             enable_clock<uart>();
@@ -59,4 +61,4 @@ namespace llib::due {
     }
 }
 
-#endif //LLIB_DUE_UART_HPP
+#endif //LLIB_SAM3X8E_UART_HPP

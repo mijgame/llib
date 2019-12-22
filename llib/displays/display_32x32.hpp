@@ -76,7 +76,11 @@ namespace llib::displays {
             CLK::template set<false>();
             
             // attatch update function to a interupt call do hz * 16 for refreshrate
-            llib::target::tc::controller<Tc_channel>::template init<Hz * 16>(flush);
+            llib::target::tc::controller<Tc_channel>::init(flush);
+
+            llib::target::tc::controller<Tc_channel>::set_frequency(llib::us{1'000'000 / (Hz * 16)});
+
+            llib::target::tc::controller<Tc_channel>::enable_interrupt();
         }
 
         static void set_pixel(uint32_t x, uint32_t y, uint8_t red, uint8_t green, uint8_t blue) {
@@ -90,36 +94,41 @@ namespace llib::displays {
                 uint16_t position = lookup[y * width + x];
 
                 // remove old value on pixel position and set new color
-                buffer_red[position] &= 0xF0;
-                buffer_red[position] |= red & 0xF;
+                auto r = buffer_red[position] & 0xF0;
+                r |= (red >> 4);
+                buffer_red[position] = r;
 
-                buffer_green[position] &= 0xF0;
-                buffer_green[position] |= green & 0xF;
+                auto g = buffer_green[position] & 0xF0;
+                g |= (green >> 4);
+                buffer_green[position] = g;
 
-                buffer_blue[position] &= 0xF0;
-                buffer_blue[position] |= blue & 0xF;
-
+                auto b = buffer_blue[position] & 0xF0;
+                b |= (blue >> 4);
+                buffer_blue[position] = b;
             } 
             else {
                 uint16_t position = lookup[(y - 16) * width + x];
 
                 // remove old value on pixel position and set new color
-                buffer_red[position] &= 0x0F;
-                buffer_red[position] |= (red & 0xF) << 4;
+                auto r = buffer_red[position] & 0x0F;
+                r |= (red & 0xF0);
+                buffer_red[position] = r;
 
-                buffer_green[position] &= 0x0F;
-                buffer_green[position] |= (green & 0xF) << 4;
+                auto g = buffer_green[position] & 0x0F;
+                g |= (green & 0xF0);
+                buffer_green[position] = g;
 
-                buffer_blue[position] &= 0x0F;
-                buffer_blue[position] |= (blue & 0xF) << 4;
+                auto b = buffer_blue[position] & 0x0F;
+                b |= (blue & 0xF0);
+                buffer_blue[position] = b;
             }
         }
 
         static void clear(uint8_t red, uint8_t green, uint8_t blue) {
             // create variable to store in buffer
-            uint8_t t_red = ((red & 0xF) << 4) | (red & 0xF);
-            uint8_t t_green = ((green & 0xF) << 4) | (green & 0xF);
-            uint8_t t_blue = ((blue & 0xF) << 4) | (blue & 0xF);
+            uint8_t t_red = (red & 0xF0) | (red >> 4);
+            uint8_t t_green = (green & 0xF0) | (green >> 4);
+            uint8_t t_blue = (blue & 0xF0) | (blue >> 4);
 
             for (uint16_t i = 0; i < (32 * 16); i++) {
                 // set color on top half and bottom half of the screen

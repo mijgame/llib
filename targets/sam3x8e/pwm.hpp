@@ -1,11 +1,11 @@
-#ifndef LLIB_DUE_PWM_HPP
-#define LLIB_DUE_PWM_HPP
+#ifndef LLIB_SAM3X8E_PWM_HPP
+#define LLIB_SAM3X8E_PWM_HPP
 
 #include <math.hpp>
 
 #include "peripheral.hpp"
 
-namespace llib::due {
+namespace llib::sam3x8e {
     namespace detail{
         // master clock of the sam3x8e
         constexpr static uint32_t variant_mck = CHIP_FREQ_CPU_MAX;
@@ -17,26 +17,10 @@ namespace llib::due {
         static inline uint16_t available_clocks[clock_amount] = {};
     }
 
-    template<typename Pin, uint32_t PWM_channel = Pin::pwm_channel>
+    template<typename Pin>
     class pin_pwm {
     private:
-        template<typename PPin>
-        static void _set_pio_b_peripheral() {
-            pins::port<typename Pin::port>->PIO_IDR = pins::mask<Pin>;
-            uint32_t t = pins::port<typename Pin::port>->PIO_ABSR;
-
-            // Change pio multiplexer to pio b
-            pins::port<typename Pin::port>->PIO_ABSR = (pins::mask<Pin> | t);
-
-            // Disable interrupts on the pin(s)
-            pins::port<typename Pin::port>->PIO_IDR = pins::mask<Pin>;
-
-            // disable pull ups
-            pins::port<typename Pin::port>->PIO_PUDR = pins::mask<Pin>;
-
-            // remove pin from pio controller
-            pins::port<typename Pin::port>->PIO_PDR = pins::mask<Pin>;
-        }
+        using pwm = typename Pin::pwm;
 
         static uint8_t _check_clocks(uint16_t div) {
             uint8_t unused_clocks = 0;
@@ -84,7 +68,7 @@ namespace llib::due {
             // get the nearest master clock frequency
             if (frequency > detail::variant_mck) {
                 // set master clock as clock
-                PWM->PWM_CH_NUM[PWM_channel].PWM_CMR = PWM_CMR_CPRE_MCK;
+                PWM->PWM_CH_NUM[pwm::id].PWM_CMR = PWM_CMR_CPRE_MCK;
             }
 
             uint32_t divider;
@@ -101,7 +85,7 @@ namespace llib::due {
 
             if (_is_divider(divider & 0xFF)) {
                 // no extra clock needed so dont use one
-                PWM->PWM_CH_NUM[PWM_channel].PWM_CMR = log2(divider & 0xFF);
+                PWM->PWM_CH_NUM[pwm::id].PWM_CMR = log2(divider & 0xFF);
                 return;
             }
 
@@ -110,19 +94,19 @@ namespace llib::due {
             if (c_id) {
                 _setup_clock(c_id - 1, divider);
                 // change clock of channel to new clock
-                PWM->PWM_CH_NUM[PWM_channel].PWM_CMR = PWM_CMR_CPRE_CLKA + (c_id - 1);
+                PWM->PWM_CH_NUM[pwm::id].PWM_CMR = PWM_CMR_CPRE_CLKA + (c_id - 1);
                 return;
             } else {
                 // no unused clocks left so change to a mck divider only
                 for (uint8_t i = 0; i < 11; i++) {
                     // try to get a divider that is below the requested frequency
                     if (uint32_t(pow(2, i)) < frequency) {
-                        PWM->PWM_CH_NUM[PWM_channel].PWM_CMR = i;
+                        PWM->PWM_CH_NUM[pwm::id].PWM_CMR = i;
                         return;
                     }
                 }
                 // set the lowest frequency possible
-                PWM->PWM_CH_NUM[PWM_channel].PWM_CMR = PWM_CMR_CPRE_MCK_DIV_1024;
+                PWM->PWM_CH_NUM[pwm::id].PWM_CMR = PWM_CMR_CPRE_MCK_DIV_1024;
             }
         }
 
@@ -139,36 +123,36 @@ namespace llib::due {
             PWM->PWM_WPCR = PWM_WPCR_WPKEY(0x50574D) | 0xFC;
 
             // change pio multiplexer
-            _set_pio_b_peripheral<Pin>();
+            set_peripheral<Pin, pwm::periph>();
 
             // only setup the channel when channel is not initilized yet
-            if (!(PWM->PWM_ENA & (1 << PWM_channel))) {
+            if (!(PWM->PWM_ENA & (1 << pwm::id))) {
                 // set clock to pwm
                 _set_frequency<frequency * 0xFF>();
 
                 // write to cprd register since channel is still off
-                PWM->PWM_CH_NUM[PWM_channel].PWM_CPRD = 0xFF;
+                PWM->PWM_CH_NUM[pwm::id].PWM_CPRD = 0xFF;
 
                 // write duty cycle to cdty register
-                PWM->PWM_CH_NUM[PWM_channel].PWM_CDTY = dutycycle;
+                PWM->PWM_CH_NUM[pwm::id].PWM_CDTY = dutycycle;
 
                 // enable channel
-                PWM->PWM_ENA = (1 << PWM_channel);
+                PWM->PWM_ENA = (1 << pwm::id);
             }
 
             // set dutycycle in update register
-            PWM->PWM_CH_NUM[PWM_channel].PWM_CDTYUPD = dutycycle;
+            PWM->PWM_CH_NUM[pwm::id].PWM_CDTYUPD = dutycycle;
         }
 
         template<uint8_t dutycycle>
         constexpr static void set() {
-            PWM->PWM_CH_NUM[PWM_channel].PWM_CDTYUPD = dutycycle;
+            PWM->PWM_CH_NUM[pwm::id].PWM_CDTYUPD = dutycycle;
         }
 
         constexpr static void set(const uint8_t dutycycle) {
-            PWM->PWM_CH_NUM[PWM_channel].PWM_CDTYUPD = dutycycle;
+            PWM->PWM_CH_NUM[pwm::id].PWM_CDTYUPD = dutycycle;
         }
     };
 }
 
-#endif //LLIB_DUE_PWM_HPP
+#endif //LLIB_SAM3X8E_PWM_HPP

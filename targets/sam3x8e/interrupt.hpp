@@ -1,12 +1,11 @@
-#ifndef LLIB_DUE_INTERRUPT_HPP
-#define LLIB_DUE_INTERRUPT_HPP
+#ifndef LLIB_SAM3X8E_INTERRUPT_HPP
+#define LLIB_SAM3X8E_INTERRUPT_HPP
 
 #include <util.hpp>
 #include "base.hpp"
 #include "pins.hpp"
-#include "stream.hpp"
 
-namespace llib::due {
+namespace llib::sam3x8e {
     enum class interrupt {
         CHANGE,
         LOW,
@@ -85,16 +84,19 @@ namespace llib::due {
 
         template<typename Handler>
         constexpr void _handle_isr(uint32_t status_register, uint32_t interrupt_mask) {
+            // Reverse the bit order for the count trailing zero's.
+            status_register = __RBIT(status_register & interrupt_mask);
+
             uint8_t trailing_zeros = 0;
 
-            while ((trailing_zeros = __CLZ(__RBIT(status_register & interrupt_mask))) < 32) {
+            while ((trailing_zeros = __CLZ(status_register)) < 32) {
                 auto bit = static_cast<uint8_t>(trailing_zeros);
 
-                if (llib::due::_callbacks<Handler>::callbacks[bit] != nullptr) {
-                    llib::due::_callbacks<Handler>::callbacks[bit]();
+                if (llib::sam3x8e::_callbacks<Handler>::callbacks[bit] != nullptr) {
+                    llib::sam3x8e::_callbacks<Handler>::callbacks[bit]();
                 }
 
-                status_register = status_register & ~(1 << bit);
+                status_register &= ~(1 << (31 - bit));
             }
         }
 
@@ -108,7 +110,7 @@ namespace llib::due {
                 auto bit = static_cast<uint8_t>(trailing_zeros);
 
                 // Set the function on the positions of the bits in the mask
-                llib::due::_callbacks<Handler>::callbacks[bit] = func;
+                llib::sam3x8e::_callbacks<Handler>::callbacks[bit] = func;
 
                 mask &= ~(1 << bit);
             }
@@ -167,7 +169,7 @@ namespace llib::due {
 
             // Todo: Change to check if the interrupt mask register is set
             for (auto i = 0; i < 32; i++) {
-                if (llib::due::_callbacks<Handler>::callbacks[i] != nullptr) {
+                if (llib::sam3x8e::_callbacks<Handler>::callbacks[i] != nullptr) {
                     return;
                 }
             }
@@ -216,4 +218,4 @@ void __PIOC_Handler();
 void __PIOD_Handler();
 }
 
-#endif //LLIB_DUE_INTERRUPT_HPP
+#endif //LLIB_SAM3X8E_INTERRUPT_HPP

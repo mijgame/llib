@@ -1,9 +1,9 @@
-#ifndef LLIB_DUE_PIO_HPP
-#define LLIB_DUE_PIO_HPP
+#ifndef LLIB_SAM3X8E_PIO_HPP
+#define LLIB_SAM3X8E_PIO_HPP
 
-#include "base.hpp"
+#include <base.hpp>
 
-namespace llib::due {
+namespace llib::sam3x8e {
     struct pioa {
         constexpr static uint32_t instance_id = ID_PIOA;
         constexpr static uint32_t irqn = static_cast<uint32_t>(PIOA_IRQn);
@@ -27,6 +27,8 @@ namespace llib::due {
     struct pio_periph_a {};
 
     struct pio_periph_b {};
+
+    struct pio_periph_none {};
 
     /**
     * Enable the clock on the peripheral.
@@ -71,4 +73,4 @@ namespace llib::due {
     }
 }
 
-#endif //LLIB_DUE_PIO_HPP
+#endif //LLIB_SAM3X8E_PIO_HPP

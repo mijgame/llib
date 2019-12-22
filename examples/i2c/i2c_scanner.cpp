@@ -4,7 +4,7 @@
 #include <wait.hpp>
 #include <twi.hpp>
 
-using namespace llib::due;
+using namespace llib::sam3x8e;
 
 int main() {
     // Kill the watchdog

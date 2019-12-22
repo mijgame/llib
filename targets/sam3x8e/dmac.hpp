@@ -1,10 +1,10 @@
-#ifndef LLIB_DUE_DMAC_HPP
-#define LLIB_DUE_DMAC_HPP
+#ifndef LLIB_SAM3X8E_DMAC_HPP
+#define LLIB_SAM3X8E_DMAC_HPP
 
 #include "pio.hpp"
 #include "interrupt.hpp"
 
-namespace llib::due {
+namespace llib::sam3x8e {
     namespace dma {
         enum class mode{
             MEM_TO_MEM = 0b000,
@@ -134,11 +134,11 @@ namespace llib::due {
 
 extern "C" {
 void __DMAC_Handler(){
-    llib::due::_handle_isr<llib::due::dma::controller>(
+    llib::sam3x8e::_handle_isr<llib::sam3x8e::dma::controller>(
         DMAC->DMAC_EBCISR,
         DMAC->DMAC_EBCIMR
     );
 }    
 }
 
-#endif //LLIB_DUE_DMAC_HPP
+#endif //LLIB_SAM3X8E_DMAC_HPP

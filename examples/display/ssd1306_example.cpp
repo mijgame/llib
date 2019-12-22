@@ -6,7 +6,7 @@ int main() {
     // Disable the watchdog timer.
     llib::target::watchdog::disable();
 
-    using namespace llib::due;
+    using namespace llib::sam3x8e;
 
     // The i2c bus with the given configuration is a
     // type, not an instance.

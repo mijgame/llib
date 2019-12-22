@@ -7,9 +7,9 @@
 
 // TODO: switch targets
 namespace llib {
-    namespace due {
+    namespace sam3x8e {
         namespace pins {}
-    }
+    }    
 
     namespace teensy {
         namespace pins {}

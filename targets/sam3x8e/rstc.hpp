@@ -1,10 +1,10 @@
-#ifndef LLIB_DUE_RSTC_HPP
-#define LLIB_DUE_RSTC_HPP
+#ifndef LLIB_SAM3X8E_RSTC_HPP
+#define LLIB_SAM3X8E_RSTC_HPP
 
 #include <cstdint>
 #include "base.hpp"
 
-namespace llib::due {
+namespace llib::sam3x8e {
     class rst_controller {
         private:
             constexpr static uint32_t key = RSTC_CR_KEY_PASSWD;
@@ -39,4 +39,4 @@ namespace llib::due {
     };
 }
 
-#endif //LLIB_DUE_RSTC_HPP
+#endif //LLIB_SAM3X8E_RSTC_HPP
