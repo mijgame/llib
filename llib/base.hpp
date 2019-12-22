@@ -3,7 +3,7 @@
 
 #define register
 
-// #include "sam.h"
+#include "device_include.hpp"
 
 // TODO: switch targets
 namespace llib {
