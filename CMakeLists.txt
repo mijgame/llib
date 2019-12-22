@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 # Include the target we want to compile for
-include("./Platform/arduino_due.cmake")
+include("./Platform/mcb2130.cmake")
 
 # Use the toolchain of cmake to include the correct compiler stuff
 set(CMAKE_TOOLCHAIN_FILE "./Platform/toolchain-arm-eabi.cmake")
