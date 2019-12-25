@@ -11,7 +11,7 @@ namespace llib {
         namespace pins {}
     }    
 
-    namespace teensy {
+    namespace imx1062 {
         namespace pins {}
     }
 

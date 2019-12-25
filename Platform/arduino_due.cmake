@@ -1,14 +1,14 @@
 # Targets
-set(TARGET_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/targets/due")
-set(CHIP_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/targets/sam3x8e")
+set(TARGET_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/targets/boards/due")
+set(CHIP_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/targets/chips/sam3x8e")
 
 # Target specific sources
-set(TARGET_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targets/sam3x8e/wait.cpp"
+set(TARGET_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targets/chips/sam3x8e/wait.cpp"
         boot/sam3x8e/startup.c
-        targets/sam3x8e/startup.c
-        targets/sam3x8e/stream_target.cpp
-        targets/sam3x8e/tc_interrupt.cpp
-        targets/sam3x8e/interrupt.cpp
+        targets/chips/sam3x8e/startup.c
+        targets/chips/sam3x8e/stream_target.cpp
+        targets/chips/sam3x8e/tc_interrupt.cpp
+        targets/chips/sam3x8e/interrupt.cpp
 )
 
 # Vendor specific includes

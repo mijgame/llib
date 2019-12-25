@@ -1,7 +1,7 @@
 #ifndef LLIB_DUE_PINS_HPP
 #define LLIB_DUE_PINS_HPP
 
-#include <sam3x8e/pins.hpp>
+#include <chips/sam3x8e/pins.hpp>
 
 namespace llib::due::pins {
     // using the sam3x8e pins
