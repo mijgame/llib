@@ -15,6 +15,10 @@ namespace llib {
         namespace pins {}
     }
 
+    namespace lpc2138 {
+        namespace pins {}
+    }
+
     namespace tests {
         namespace pins {}
     }
