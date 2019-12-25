@@ -9,6 +9,7 @@ set(TARGET_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targets/chips/sam3x8e/wait.cpp"
         targets/chips/sam3x8e/stream_target.cpp
         targets/chips/sam3x8e/tc_interrupt.cpp
         targets/chips/sam3x8e/interrupt.cpp
+        targets/chips/sam3x8e/uotghs.cpp
 )
 
 # Vendor specific includes
