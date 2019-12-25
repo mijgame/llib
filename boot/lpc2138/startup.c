@@ -1,8 +1,5 @@
 #include <limits.h>
 #include <stdlib.h>
-#define register
-
-#include <device_include.hpp>
 
 /*
  * We gave 'weak' attribute, so these functions can be aliased into a single

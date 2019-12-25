@@ -72,6 +72,7 @@ include_directories(PRIVATE ${BRIGAND_INCLUDE})
 include_directories(PRIVATE ${TARGET_INCLUDE})
 include_directories(PRIVATE ${CHIP_INCLUDE})
 include_directories(PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/llib)
-include_directories(PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/targets)
+include_directories(PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/targets/chips)
+include_directories(PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/targets/boards)
 include_directories(PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

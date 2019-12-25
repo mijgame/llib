@@ -7,3 +7,5 @@
   \return             number of leading zeros in value
  */
 #define __CLZ             (uint8_t)__builtin_clz
+
+#include "lpc2138.hpp"
