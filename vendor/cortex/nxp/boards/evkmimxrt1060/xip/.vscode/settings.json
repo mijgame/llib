@@ -1,7 +1,0 @@
-{
-    "files.associations": {
-        "evkmimxrt1060_flexspi_nor_config.h": "c",
-        "stdbool.h": "c",
-        "stdint.h": "c"
-    }
-}
