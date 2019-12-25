@@ -57,7 +57,7 @@ add_executable(llib ${BOOT_SOURCES} ${LLIB_HEADERS} ${TARGET_INCLUDE} ${TARGET_S
 # Custom commands for processing the build binary and show some statistics and debug info 
 add_custom_command(TARGET llib POST_BUILD COMMAND ${CMAKE_OBJCOPY} ARGS -O binary -R .bss -R .stack llib llib.bin)
 add_custom_command(TARGET llib POST_BUILD COMMAND ${CMAKE_OBJDUMP} ARGS -S llib > llib.lss)
-add_custom_command(TARGET llib POST_BUILD COMMAND ${CMAKE_OBSIZE} ARGS -A llib ${SIZE_OUTPUT})
+add_custom_command(TARGET llib POST_BUILD COMMAND ${CMAKE_OBSIZE} ARGS -A llib -x)
 
 # Disable Boost support for Brigand
 add_compile_definitions(BRIGAND_NO_BOOST_SUPPORT)
