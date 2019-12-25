@@ -3,7 +3,8 @@
 
 #define register
 
-// #include "sam.h"
+#include <cstdint>
+#include "device_include.hpp"
 
 // TODO: switch targets
 namespace llib {
@@ -12,6 +13,10 @@ namespace llib {
     }    
 
     namespace teensy {
+        namespace pins {}
+    }
+
+    namespace lpc2138 {
         namespace pins {}
     }
 
