@@ -1,7 +1,7 @@
 #ifndef LLIB_SAM3X8E_DACC_HPP
 #define LLIB_SAM3X8E_DACC_HPP
 
-#include "pins.hpp"
+#include "ppins.hpp"
 #include "peripheral.hpp"
 
 namespace llib::sam3x8e {

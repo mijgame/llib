@@ -20,3 +20,4 @@ set(LINKERSCRIPT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/boot/lpc2138/linkerscript.ld"
 set(TARGET_CPU_FLAGS "-Os -mcpu=arm7tdmi-s -march=armv4t -mthumb") #
 
 set(LLIB_TARGET "lpc2138")
+set(LLIB_BOARD "mcb2130")

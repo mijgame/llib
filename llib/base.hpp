@@ -8,23 +8,31 @@
 // TODO: switch targets
 namespace llib {
     namespace sam3x8e {
-        namespace pins {}
+        namespace due {
+            namespace pins {}
+        }
     }    
 
     namespace imx1062 {
-        namespace pins {}
+        namespace teensy_4 {
+            namespace pins {}
+        }
     }
 
     namespace lpc2138 {
-        namespace pins {}
+        namespace mcb2130 {
+            namespace pins {}
+        }
     }
 
     namespace tests {
-        namespace pins {}
+        namespace tests {
+            namespace pins {}
+        }
     }
 
     namespace target = LLIB_TARGET;
-    namespace pins = target::pins;
+    namespace pins = target::LLIB_BOARD::pins;
 }
 
 #endif //LLIB_BASE_HPP

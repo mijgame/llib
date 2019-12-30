@@ -13,7 +13,7 @@ namespace llib::lpc2138::pins {
     struct p0 {
         using port = pio1;
         constexpr static uint32_t number = 16;
-    };
+    };                    
 
     template<typename Pin>
     constexpr uint32_t mask = 1U << Pin::number;

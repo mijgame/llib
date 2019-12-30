@@ -2,7 +2,7 @@
 #define LLIB_SAM3X8E_UART_HPP
 
 #include "peripheral.hpp"
-#include "pins.hpp"
+#include "ppins.hpp"
 #include "pio.hpp"
 
 namespace llib::sam3x8e {

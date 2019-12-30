@@ -2,7 +2,7 @@
 #define LLIB_SAM3X8E_TWI_HPP
 
 #include <transaction.hpp>
-#include "pins.hpp"
+#include "ppins.hpp"
 #include "peripheral.hpp"
 #include "wait.hpp"
 #include "error.hpp"

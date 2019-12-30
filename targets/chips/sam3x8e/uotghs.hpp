@@ -5,7 +5,7 @@
 
 #include <usb/usb_protocol.hpp>
 
-#include "pins.hpp"
+#include "ppins.hpp"
 #include "peripheral.hpp"
 
 namespace llib::sam3x8e::usb {
@@ -189,7 +189,6 @@ namespace llib::sam3x8e::usb {
 
                 return _otg_ram + (_otg_ram_size * Endpoint);
             }            
->>>>>>> master:targets/due/uotghs.hpp
 
         public:
             constexpr static uint32_t instance_id = ID_UOTGHS;

@@ -2,7 +2,7 @@
 #define LLIB_SAM3X8E_SPI_HPP
 
 #include "base.hpp"
-#include "pins.hpp"
+#include "ppins.hpp"
 #include "peripheral.hpp"
 #include "error.hpp"
 #include <type_traits>

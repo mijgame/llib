@@ -3,7 +3,7 @@
 
 #include <util.hpp>
 #include "base.hpp"
-#include "pins.hpp"
+#include "ppins.hpp"
 
 namespace llib::sam3x8e {
     enum class interrupt {

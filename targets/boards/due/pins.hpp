@@ -1,9 +1,9 @@
 #ifndef LLIB_DUE_PINS_HPP
 #define LLIB_DUE_PINS_HPP
 
-#include <chips/sam3x8e/pins.hpp>
+#include <sam3x8e/ppins.hpp>
 
-namespace llib::due::pins {
+namespace llib::sam3x8e::due::pins {
     // using the sam3x8e pins
     using d0 = sam3x8e::pins::p27;
     using d1 = sam3x8e::pins::p2;
@@ -98,6 +98,6 @@ namespace llib::due::pins {
     using cs3 = sam3x8e::pins::p92;
     using otg_vbof = sam3x8e::pins::p128;
     using otg_id = sam3x8e::pins::p129;
-} // namespace llib::due
+} // namespace llib::sam3x8e::due
 
 #endif //LLIB_DUE_PINS_HPP
