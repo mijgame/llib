@@ -11,6 +11,10 @@ namespace llib {
         namespace due {
             namespace pins {}
         }
+
+        namespace due_core {
+            namespace pins {}
+        }
     }    
 
     namespace imx1062 {
