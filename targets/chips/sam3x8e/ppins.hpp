@@ -537,7 +537,7 @@ namespace llib::sam3x8e::pins {
 
         // multiplexed io
         using tc = detail::tc::tc<2, detail::tc::mode::TCLK, pio_periph_a>;
-        using ebi = detail::ebi::ebi<detail::ebi::mode::NCS0, pio_periph_b>;
+        using ebi = detail::ebi::ebi<detail::ebi::mode::NCS1, pio_periph_b>;
 
         // extra functions
         using wkup = detail::wkup::wkup<3, pio_periph_none>;
