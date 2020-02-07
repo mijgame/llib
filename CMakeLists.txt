@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 # Include the target we want to compile for
-include("./Platform/mcb2130.cmake")
+include("./Platform/due_core.cmake")
 
 # Use the toolchain of cmake to include the correct compiler stuff
 set(CMAKE_TOOLCHAIN_FILE "./Platform/toolchain-arm-eabi.cmake")
@@ -65,6 +65,8 @@ add_compile_definitions(BRIGAND_NO_BOOST_SUPPORT)
 # Libraries to link for all targets
 link_libraries(llib "m")
 link_libraries(llib "gcc")
+
+target_compile_options(llib PUBLIC -fstack-usage)
 
 # Include directories for all targets
 include_directories(PRIVATE ${VENDOR_INCLUDE})
