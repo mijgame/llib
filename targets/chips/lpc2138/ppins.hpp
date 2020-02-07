@@ -70,14 +70,14 @@ namespace llib::lpc2138::pins {
 
     struct p11 {
         using port = pio0;
-        constexpr static uint32_t number = 26;
+        constexpr static uint32_t number = 27;
 
         // AD0.5
     };
 
     struct p12 {
-        using port = pio0;
-        constexpr static uint32_t number = 27;
+        using port = pio1;
+        constexpr static uint32_t number = 17;
 
         // AD0.0/CAP0.1/MAT0.1
     };
@@ -387,7 +387,7 @@ namespace llib::lpc2138::pins {
     struct p61 {
         // XTAL2
     };
-    
+
     struct p62 {
         // XTAL1
     };
