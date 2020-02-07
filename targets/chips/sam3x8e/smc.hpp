@@ -24,6 +24,23 @@ namespace llib::sam3x8e {
             using a2 = pins::p135;
             using a3 = pins::p136;
             using a4 = pins::p137;
+            using a5 = pins::p138;
+            using a6 = pins::p139;
+            using a7 = pins::p102;
+            using a8 = pins::p103;
+            using a9 = pins::p13;
+            using a10 = pins::p14;
+            using a11 = pins::p15;
+            using a12 = pins::p16;
+            using a13 = pins::p17;
+            using a14 = pins::p18;
+            using a15 = pins::p19;
+            using a16 = pins::p20;
+            using a17 = pins::p108;
+            using a18 = pins::p109;
+            using a19 = pins::p110;
+            using a20 = pins::p21;
+            using a21 = pins::p22;
 
             // data lines
             using d0 = pins::p59;
@@ -34,6 +51,15 @@ namespace llib::sam3x8e {
             using d5 = pins::p65;
             using d6 = pins::p66;
             using d7 = pins::p67;
+            
+            using d8 = pins::p117;
+            using d9 = pins::p93;
+            using d10 = pins::p94;
+            using d11 = pins::p95;
+            using d12 = pins::p96;
+            using d13 = pins::p97;
+            using d14 = pins::p98;
+            using d15 = pins::p99;
 
             // other signal lines
             using lbs = pins::p132;
@@ -41,16 +67,12 @@ namespace llib::sam3x8e {
             using oe = pins::p112;
             using we = pins::p100;
 
-            // Give a compile time error when the pin is
-            // not a Chip select pin
-            static_assert(static_cast<uint32_t>(Cs::ebi::type) <= 
-                static_cast<uint32_t>(detail::ebi::mode::NCS3));
-
-            // chip select lines
-            // using ncs0 = sam3x8e::pins::p82;
-            // using ncs1 = sam3x8e::pins::p26;
-            // using ncs2 = sam3x8e::pins::p143;
-            // using ncs3 = sam3x8e::pins::p68;
+            // check if the pin is a chip select pin.
+            // the sam3x8e only supports 4 chip selects.
+            static_assert(
+                detail::ebi::mode::NCS0 >= Cs::ebi::type && 
+                Cs::ebi::type <= detail::ebi::mode::NCS3
+            );
 
             // remove NCS0 from our type to get the chip select number.
             constexpr static uint32_t cs_number = static_cast<uint32_t>(Cs::ebi::type) - 
@@ -70,6 +92,23 @@ namespace llib::sam3x8e {
                 set_peripheral<a2, a2::address_bus::periph>();
                 set_peripheral<a3, a3::address_bus::periph>();
                 set_peripheral<a4, a4::address_bus::periph>();
+                set_peripheral<a5, a5::address_bus::periph>();
+                set_peripheral<a6, a6::address_bus::periph>();
+                set_peripheral<a7, a7::address_bus::periph>();
+                set_peripheral<a8, a8::address_bus::periph>();
+                set_peripheral<a9, a9::address_bus::periph>();
+                set_peripheral<a10, a10::address_bus::periph>();
+                set_peripheral<a11, a11::address_bus::periph>();
+                set_peripheral<a12, a12::address_bus::periph>();
+                set_peripheral<a13, a13::address_bus::periph>();
+                set_peripheral<a14, a14::address_bus::periph>();
+                set_peripheral<a15, a15::address_bus::periph>();
+                set_peripheral<a16, a16::address_bus::periph>();
+                set_peripheral<a17, a17::address_bus::periph>();
+                set_peripheral<a18, a18::address_bus::periph>();
+                set_peripheral<a19, a19::address_bus::periph>();
+                set_peripheral<a20, a20::address_bus::periph>();
+                set_peripheral<a21, a21::address_bus::periph>();
 
                 set_peripheral<d0, d0::data_bus::periph>();
                 set_peripheral<d1, d1::data_bus::periph>();
@@ -79,6 +118,14 @@ namespace llib::sam3x8e {
                 set_peripheral<d5, d5::data_bus::periph>();
                 set_peripheral<d6, d6::data_bus::periph>();
                 set_peripheral<d7, d7::data_bus::periph>();
+                set_peripheral<d8, d8::data_bus::periph>();
+                set_peripheral<d9, d9::data_bus::periph>();
+                set_peripheral<d10, d10::data_bus::periph>();
+                set_peripheral<d11, d11::data_bus::periph>();
+                set_peripheral<d12, d12::data_bus::periph>();
+                set_peripheral<d13, d13::data_bus::periph>();
+                set_peripheral<d14, d14::data_bus::periph>();
+                set_peripheral<d15, d15::data_bus::periph>();
 
                 set_peripheral<lbs, lbs::ebi::periph>();
                 set_peripheral<ubs, ubs::ebi::periph>();
