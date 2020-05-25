@@ -2,7 +2,7 @@
 #include <pins.hpp>
 #include <wait.hpp>
 
-using namespace llib::due;
+using namespace llib::sam3x8e;
 
 int main(){
     // kill the watchdog

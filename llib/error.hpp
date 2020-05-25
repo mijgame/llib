@@ -1,9 +1,9 @@
 #ifndef LLIB_ERROR_HPP
 #define LLIB_ERROR_HPP
 
+#ifndef LLIB_DISABLE_MESSAGES
 #include "stream.hpp"
 
-#ifndef LLIB_DISABLE_MESSAGES
 #define LLIB_WARNING(message) {           \
     ::llib::cout << "WARNING ("           \
                  << __FILE__ << ':'       \

@@ -300,6 +300,7 @@ typedef struct {
 #define   UOTGHS_DEVEPTCFG_EPSIZE_256_BYTE (0x5u << 4) /**< \brief (UOTGHS_DEVEPTCFG[10]) 256 bytes */
 #define   UOTGHS_DEVEPTCFG_EPSIZE_512_BYTE (0x6u << 4) /**< \brief (UOTGHS_DEVEPTCFG[10]) 512 bytes */
 #define   UOTGHS_DEVEPTCFG_EPSIZE_1024_BYTE (0x7u << 4) /**< \brief (UOTGHS_DEVEPTCFG[10]) 1024 bytes */
+#define UOTGHS_DEVEPTCFG_EPDIR_Pos 8
 #define UOTGHS_DEVEPTCFG_EPDIR (0x1u << 8) /**< \brief (UOTGHS_DEVEPTCFG[10]) Endpoint Direction */
 #define   UOTGHS_DEVEPTCFG_EPDIR_OUT (0x0u << 8) /**< \brief (UOTGHS_DEVEPTCFG[10]) The endpoint direction is OUT. */
 #define   UOTGHS_DEVEPTCFG_EPDIR_IN (0x1u << 8) /**< \brief (UOTGHS_DEVEPTCFG[10]) The endpoint direction is IN (nor for control endpoints). */
